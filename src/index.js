@@ -20,7 +20,7 @@ mongoose.connect(process.env.MONGO_URL, { useNewUrlParser: true }, () => {
 // Middleware
 app.use(express.json());
 app.use(helmet());
-app.use(morgan());
+app.use(morgan("common"));
 
 app.use("/api/users", userRoute);
 app.use("/api/auth", authRoute);
