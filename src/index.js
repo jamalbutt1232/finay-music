@@ -1,5 +1,3 @@
-// 45:00
-// Postman not working properly
 const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
@@ -10,12 +8,16 @@ const morgan = require("morgan");
 const userRoute = require("./routes/users");
 const authRoute = require("./routes/auth");
 const postRoute = require("./routes/posts");
-// jamal
+
 dotenv.config();
 
-mongoose.connect(process.env.MONGO_URL, { useNewUrlParser: true }, () => {
-  console.log("Connected to Mongo");
-});
+mongoose.connect(
+  "mongodb+srv://admin123:admin123@cluster0.npo42.mongodb.net/Cluster0?retryWrites=true&w=majority",
+  { useNewUrlParser: true },
+  () => {
+    console.log("Connected to Mongo");
+  }
+);
 
 // Middleware
 app.use(express.json());
