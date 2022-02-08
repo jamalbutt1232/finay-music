@@ -10,7 +10,7 @@ const morgan = require("morgan");
 const userRoute = require("./routes/users");
 const authRoute = require("./routes/auth");
 const postRoute = require("./routes/posts");
-
+// jamal
 dotenv.config();
 
 mongoose.connect(process.env.MONGO_URL, { useNewUrlParser: true }, () => {
