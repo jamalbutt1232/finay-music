@@ -15,9 +15,18 @@ const register = async (req, res) => {
     });
     // save user and responsd
     const user = await newUser.save();
-    res.status(200).send("User Created Successfully");
+    const result = {
+      status_code: 200,
+      status_msg: "User successfully registered",
+      data: user,
+    };
+    res.status(200).send(result);
   } catch (err) {
-    res.status(500).json(err);
+    const result = {
+      status_code: 500,
+      status_msg: `This user is already registered with ${req.body.email} e-mail`,
+    };
+    res.status(500).send(result);
   }
 };
 
@@ -26,20 +35,40 @@ const login = async (req, res) => {
     const user = await User.findOne({
       email: req.body.email,
     });
-    !user && res.status(404).send("User not found");
+    const notFresult = {
+      status_code: 404,
+      status_msg: "User not found",
+    };
+    !user && res.status(404).send(notFresult);
 
     const validPassword = await bcrypt.compare(
       req.body.password,
       user.password
     );
-    console.log("here");
+    const Incorrectresult = {
+      status_code: 400,
+      status_msg: "Password Incorrect",
+    };
+    !validPassword && res.status(400).send(Incorrectresult);
 
-    !validPassword && res.status(400).send("Password Incorrect");
-    const token = jwt.sign({ _id: user._id }, process.env.TOKEN_SECRET);
-    res.header("auth-token", token).send(token);
-    // res.status(200).json(user);
+    const auth_token = jwt.sign({ _id: user._id }, "adasddad3rerfsdsfd");
+    // res.header("auth-token", token).send(token);
+
+    // token field, message and status code
+    const result = {
+      token: auth_token,
+      status_code: 200,
+      status_msg: "User logged in successfully",
+    };
+
+    res.status(200).send(result);
   } catch (err) {
-    res.status(500).json(err);
+    const result = {
+      status_code: 500,
+      status_msg: err,
+    };
+
+    res.status(500).send(result);
   }
 };
 
