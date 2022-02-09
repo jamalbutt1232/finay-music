@@ -1,7 +1,7 @@
 const User = require("../models/User");
 const router = require("express").Router();
 const bcrypt = require("bcrypt");
-const verifyToken = require("./privateRoute");
+const verifyToken = require("../private/privateRoute");
 
 // update user
 router.put("/:id", verifyToken, async (req, res) => {
@@ -124,6 +124,15 @@ router.put("/:id/unfollow", verifyToken, async (req, res) => {
     const user = await User.findById(req.params.id);
     const { password, updatedAt, ...other } = user._doc;
     res.status(200).json(other);
+  } catch (err) {
+    return res.status(500).json(err);
+  }
+});
+// get all users list
+router.get("/timeline/allusers", async (req, res) => {
+  try {
+    const user = await User.find();
+    res.status(200).json(user);
   } catch (err) {
     return res.status(500).json(err);
   }
