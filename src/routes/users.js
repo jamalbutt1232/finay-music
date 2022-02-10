@@ -5,14 +5,16 @@ const {
   followUser,
   unfollowUser,
   allUser,
+  currentUser,
 } = require("../controller/users");
 const router = require("express").Router();
 const verifyToken = require("../private/privateRoute");
 
-router.put("/:id", updateUser);
+router.put("/updateuser", verifyToken, updateUser);
 router.delete("/:id", deleteUser);
-router.get("/:id", singleUser);
-router.put("/:id/follow", followUser);
+router.get("/singleuser", verifyToken, singleUser);
+router.put("/follow", verifyToken, followUser);
+router.get("/currentuser", verifyToken, currentUser);
 router.put("/:id/unfollow", unfollowUser);
-router.get("/timeline/allusers", allUser);
+router.get("/timeline/allusers", verifyToken, allUser);
 module.exports = router;

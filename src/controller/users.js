@@ -2,24 +2,35 @@ const User = require("../models/User");
 const router = require("express").Router();
 const bcrypt = require("bcrypt");
 
+// GET USER ID
+const getUserID = (req) => {
+  return req.user._id;
+};
+// const geUserObj = (id) => {
+//   const user = User.findById({ _id: id });
+//   return user;
+// };
+
 // update user
 const updateUser = async (req, res) => {
-  if (req.body.userId === req.params.id || req.body.isAdmin) {
-    if (req.body.password) {
-      try {
-        const salt = await bcrypt.genSalt(10);
-        req.body.password = await bcrypt.hash(req.body.password, salt);
-      } catch (err) {
-        return res.status(500).json(err);
-      }
-    }
+  const userID = getUserID(req);
+  if (userID || req.body.isAdmin) {
     try {
-      const user = await User.findByIdAndUpdate(req.params.id, {
+      const user = await User.findByIdAndUpdate(userID, {
         $set: req.body,
       });
-      res.status(200).json("Account has been updated");
+      const result = {
+        status_code: 200,
+        status_msg: `Account has been updated`,
+        data: user,
+      };
+      res.status(200).send(result);
     } catch (err) {
-      return res.status(500).json(err);
+      const result = {
+        status_code: 500,
+        status_msg: `Something went wrong`,
+      };
+      return res.status(500).send(result);
     }
   } else {
     return res.status(403).json("You can update only your account");
@@ -27,68 +38,100 @@ const updateUser = async (req, res) => {
 };
 // delete user
 const deleteUser = async (req, res) => {
-  if (req.body.userId === req.params.id || req.body.isAdmin) {
-    if (req.body.password) {
-      try {
-        const salt = await bcrypt.genSalt(10);
-        req.body.password = await bcrypt.hash(req.body.password, salt);
-      } catch (err) {
-        return res.status(500).json(err);
-      }
-    }
+  const userID = req.user._id;
+  if (userID || req.body.isAdmin) {
+    // if (req.body.password) {
+    //   try {
+    //     const salt = await bcrypt.genSalt(10);
+    //     req.body.password = await bcrypt.hash(req.body.password, salt);
+    //   } catch (err) {
+    //     return res.status(500).json(err);
+    //   }
+    // }
     try {
-      const user = await User.findByIdAndDelete(req.params.id);
-      res.status(200).json("Account has been deleted");
+      const user = await User.findByIdAndDelete(userID);
+      const result = {
+        status_code: 200,
+        status_msg: `Account has been deleted`,
+        data: user,
+      };
+      res.status(200).send(result);
     } catch (err) {
-      return res.status(500).json(err);
+      const result = {
+        status_code: 200,
+        status_msg: err,
+      };
+      return res.status(200).send(result);
     }
   } else {
-    return res.status(403).json("You can delete  only your account");
+    return res.status(403).json("You can delete only your account");
   }
 };
-// get a user
+// get a signle user based on click
 const singleUser = async (req, res) => {
   try {
-    const user = await User.findById(req.params.id);
+    console.log("here");
+    const user = await User.findById(req.body.id);
     const { password, updatedAt, ...other } = user._doc;
-    res.status(200).json(other);
+    console.log("here");
+    const result = {
+      status_code: 200,
+      status_msg: `You successfuly fetched user information`,
+      data: other,
+    };
+    res.status(200).send(result);
   } catch (err) {
-    return res.status(500).json(err);
+    const result = {
+      status_code: 500,
+      status_msg: `You could not fetch user information`,
+    };
+    return res.status(500).send(result);
   }
 };
 // follow user
 const followUser = async (req, res) => {
-  if (req.body.userId !== req.params.id) {
+  const userID = getUserID(req);
+  if (userID !== req.body.id) {
     try {
-      const user = await User.findById(req.params.id);
-      const currentUser = await User.findById(req.body.userId);
-      if (!user.followers.includes(req.body.userId)) {
+      const user = await User.findById(req.body.id);
+      const currentUser = await User.findById(userID);
+      if (!user.followers.includes(userID)) {
         await user.updateOne({
           $push: {
-            followers: req.body.userId,
+            followers: userID,
           },
         });
         await currentUser.updateOne({
           $push: {
-            followings: req.params.id,
+            followings: req.body.id,
           },
         });
-        res.status(200).json("You now follow user");
+        const result = {
+          status_code: 200,
+          status_msg: `You now follow user`,
+          data: user,
+        };
+        res.status(200).send(result);
       } else {
-        res.status(403).json("You already follow");
+        const result = {
+          status_code: 403,
+          status_msg: `You already followed the user`,
+        };
+        res.status(403).send(result);
       }
     } catch (err) {
-      res.status(500).json(err);
+      const result = {
+        status_code: 500,
+        status_msg: `Something went wrong`,
+      };
+      res.status(500).send(result);
     }
   } else {
-    res.status(403).json("You cant follow yousrself");
-  }
-  try {
-    const user = await User.findById(req.params.id);
-    const { password, updatedAt, ...other } = user._doc;
-    res.status(200).json(other);
-  } catch (err) {
-    return res.status(500).json(err);
+    const result = {
+      status_code: 403,
+      status_msg: `You cant follow yourself`,
+    };
+    res.status(403).send(result);
   }
 };
 
@@ -129,15 +172,47 @@ const unfollowUser = async (req, res) => {
 };
 // get all users list
 const allUser = async (req, res) => {
+  const userID = getUserID(req);
+
   try {
-    const user = await User.find();
-    res.status(200).json(user);
+    // Get all users except of you
+    const user = await User.find({ _id: { $ne: userID } });
+    const result = {
+      status_code: 200,
+      status_msg: `All users successfully fetched`,
+      data: user,
+    };
+    res.status(200).send(result);
   } catch (err) {
-    return res.status(500).json(err);
+    const result = {
+      status_code: 200,
+      status_msg: `Something went wrong`,
+    };
+    return res.status(500).send(result);
   }
 };
-// get logged in user details
-// router
+
+// get current user info
+const currentUser = async (req, res) => {
+  const userID = getUserID(req);
+  try {
+    const user = await User.findById(userID);
+    const { password, updatedAt, ...other } = user._doc;
+    const result = {
+      status_code: 200,
+      status_msg: `You successfuly fetched user information`,
+      data: other,
+    };
+    res.status(200).send(result);
+    // res.status(200).json(other);
+  } catch (err) {
+    const result = {
+      status_code: 500,
+      status_msg: `You could not fetch user information`,
+    };
+    return res.status(500).send(result);
+  }
+};
 
 module.exports = {
   updateUser,
@@ -146,4 +221,5 @@ module.exports = {
   followUser,
   unfollowUser,
   allUser,
+  currentUser,
 };
