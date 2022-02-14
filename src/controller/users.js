@@ -6,10 +6,6 @@ const bcrypt = require("bcrypt");
 const getUserID = (req) => {
   return req.user._id;
 };
-// const geUserObj = (id) => {
-//   const user = User.findById({ _id: id });
-//   return user;
-// };
 
 // update user
 const updateUser = async (req, res) => {
@@ -135,7 +131,7 @@ const followUser = async (req, res) => {
   }
 };
 
-// unfollow user
+// unfollow user currently
 const unfollowUser = async (req, res) => {
   if (req.body.userId !== req.params.id) {
     try {
@@ -212,8 +208,42 @@ const currentUser = async (req, res) => {
     };
     return res.status(500).send(result);
   }
-};
+};sea
 
+// get a single searched user
+const search = async (req, res) => {
+  const userID = getUserID(req);
+  const searchedName = req.body.name;
+  try {
+    const user = await User.find({
+      // not search for our id
+      _id: { $ne: userID },
+      // search for name and shd be case insensitive
+      name: { $regex: searchedName, $options: "i" },
+    });
+
+    if (user.length != 0) {
+      const result = {
+        status_code: 200,
+        status_msg: `Successfuly fetched users`,
+        data: user,
+      };
+      res.status(200).send(result);
+    } else {
+      const result = {
+        status_code: 404,
+        status_msg: `User not found`,
+      };
+      res.status(404).send(result);
+    }
+  } catch (err) {
+    const result = {
+      status_code: 500,
+      status_msg: `Something went wrong`,
+    };
+    return res.status(500).send(result);
+  }
+};
 module.exports = {
   updateUser,
   deleteUser,
@@ -222,4 +252,5 @@ module.exports = {
   unfollowUser,
   allUser,
   currentUser,
+  search,
 };

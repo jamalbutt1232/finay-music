@@ -6,6 +6,7 @@ const {
   unfollowUser,
   allUser,
   currentUser,
+  search,
 } = require("../controller/users");
 const router = require("express").Router();
 const verifyToken = require("../private/privateRoute");
@@ -17,4 +18,5 @@ router.put("/follow", verifyToken, followUser);
 router.get("/currentuser", verifyToken, currentUser);
 router.put("/:id/unfollow", unfollowUser);
 router.get("/timeline/allusers", verifyToken, allUser);
+router.get("/search", verifyToken, search);
 module.exports = router;
