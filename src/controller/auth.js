@@ -4,6 +4,17 @@ const jwt = require("jsonwebtoken");
 
 const register = async (req, res) => {
   try {
+    // Check if a user already exists
+    await User.findOne({ email: req.body.email }).then((user) => {
+      if (user) {
+        const result = {
+          status_code: 500,
+          status_msg: `This user is already registered with ${req.body.email} e-mail`,
+        };
+        res.status(500).send(result);
+      }
+    });
+
     if (req.body.password === req.body.confirmpassword) {
       //   generate new password
       const salt = await bcrypt.genSalt(10);
@@ -31,7 +42,7 @@ const register = async (req, res) => {
   } catch (err) {
     const result = {
       status_code: 500,
-      status_msg: `This user is already registered with ${req.body.email} e-mail`,
+      status_msg: "Something went wrong",
     };
     res.status(500).send(result);
   }
