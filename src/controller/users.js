@@ -208,7 +208,7 @@ const currentUser = async (req, res) => {
     };
     return res.status(500).send(result);
   }
-};sea
+};
 
 // get a single searched user
 const search = async (req, res) => {
