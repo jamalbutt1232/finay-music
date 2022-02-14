@@ -131,7 +131,7 @@ const followUser = async (req, res) => {
   }
 };
 
-// unfollow user currently
+// unfollow user currently 
 const unfollowUser = async (req, res) => {
   if (req.body.userId !== req.params.id) {
     try {
@@ -188,7 +188,7 @@ const allUser = async (req, res) => {
   }
 };
 
-// get current user info
+// get current user info              
 const currentUser = async (req, res) => {
   const userID = getUserID(req);
   try {
@@ -208,7 +208,7 @@ const currentUser = async (req, res) => {
     };
     return res.status(500).send(result);
   }
-};sea
+};
 
 // get a single searched user
 const search = async (req, res) => {

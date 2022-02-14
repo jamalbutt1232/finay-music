@@ -57,29 +57,33 @@ const login = async (req, res) => {
       status_code: 404,
       status_msg: "User not found",
     };
-    !user && res.status(404).send(userNotFound);
+    if (!user) {
+      res.status(404).send(userNotFound);
+    } else {
+      const validPassword = await bcrypt.compare(
+        req.body.password,
+        user.password
+      );
+      const incorrectPassword = {
+        status_code: 400,
+        status_msg: "Password Incorrect",
+      };
+      if (!validPassword) {
+        res.status(400).send(incorrectPassword);
+      } else {
+        const auth_token = jwt.sign({ _id: user._id }, "adasddad3rerfsdsfd");
+        // res.header("auth-token", token).send(token);
 
-    const validPassword = await bcrypt.compare(
-      req.body.password,
-      user.password
-    );
-    const incorrectPassword = {
-      status_code: 400,
-      status_msg: "Password Incorrect",
-    };
-    !validPassword && res.status(400).send(incorrectPassword);
+        // token field, message and status code
+        const result = {
+          token: auth_token,
+          status_code: 200,
+          status_msg: "User logged in successfully",
+        };
 
-    const auth_token = jwt.sign({ _id: user._id }, "adasddad3rerfsdsfd");
-    // res.header("auth-token", token).send(token);
-
-    // token field, message and status code
-    const result = {
-      token: auth_token,
-      status_code: 200,
-      status_msg: "User logged in successfully",
-    };
-
-    res.status(200).send(result);
+        res.status(200).send(result);
+      }
+    }
   } catch (err) {
     const result = {
       status_code: 500,
