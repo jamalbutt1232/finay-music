@@ -11,13 +11,9 @@ const postRoute = require("./routes/posts");
 
 dotenv.config();
 
-mongoose.connect(
-  "mongodb+srv://admin123:admin123@cluster0.npo42.mongodb.net/Cluster0?retryWrites=true&w=majority",
-  { useNewUrlParser: true },
-  () => {
-    console.log("Connected to Mongo");
-  }
-);
+mongoose.connect(`${process.env.MONGO_URL}`, { useNewUrlParser: true }, () => {
+  console.log("Connected to Mongo");
+});
 
 // Middleware
 app.use(express.json());

@@ -39,11 +39,12 @@ const register = async (req, res) => {
       }
     }
   } catch (err) {
-    const result = {
-      status_code: 500,
-      status_msg: "Something went wrong",
-    };
-    res.status(500).send(result);
+    console.log("SIGNUP ERROR", err);
+    // const result = {
+    //   status_code: 500,
+    //   status_msg: `This user is already registered with ${req.body.email} e-mail`,
+    // };
+    return res.status(500).send("UNKNOWN ERROR");
   }
 };
 
@@ -89,7 +90,7 @@ const login = async (req, res) => {
       status_msg: "Something went wrong",
     };
 
-    res.status(500).send(result);
+    return res.status(500).send(result);
   }
 };
 

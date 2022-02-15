@@ -53,6 +53,17 @@ const UserSchema = new mongoose.Schema(
       type: Array,
       default: [],
     },
+    isOnline: {
+      type: Boolean,
+      default: false,
+    },
+    location:{
+      type: Object,
+      default: undefined
+    },
+    lastOnlineTimestamp:{
+      type:String,
+    }
   },
   { timestamps: true }
 );
