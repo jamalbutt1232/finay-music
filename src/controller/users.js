@@ -171,15 +171,32 @@ const unfollowUser = async (req, res) => {
               followings: req.body.id,
             },
           });
-          res.status(200).json("You now unfollow user");
+          const result = {
+            status_code: 200,
+            status_msg: `You now unfollow user`,
+            data: user,
+          };
+          res.status(200).send(result);
         } else {
-          res.status(403).json("You already unfollow");
+          const result = {
+            status_code: 403,
+            status_msg: `You already unfollow user`,
+          };
+          res.status(403).send(result);
         }
       } catch (err) {
-        res.status(500).json(err);
+        const result = {
+          status_code: 500,
+          status_msg: `Something went wrong`,
+        };
+        res.status(500).json(result);
       }
     } else {
-      res.status(403).json("You cant unfollow yousrself");
+      const result = {
+        status_code: 403,
+        status_msg: `You cant unfollow yousrself`,
+      };
+      res.status(403).json(result);
     }
   }
 };
