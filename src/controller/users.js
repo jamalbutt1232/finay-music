@@ -202,23 +202,31 @@ const unfollowUser = async (req, res) => {
 };
 // get all users list
 const allUser = async (req, res) => {
-  const userID = getUserID(req);
+  const userID = getUserID(req, res);
+  if (userID !== undefined) {
+    try {
+      // getting followings list so they can be excluded
+      let followingsList = await User.find({ _id: userID });
+      followingsList = followingsList[0].followings;
+      followingsList[followingsList.length] = userID;
 
-  try {
-    // Get all users except of you
-    const user = await User.find({ _id: { $ne: userID } });
-    const result = {
-      status_code: 200,
-      status_msg: `All users successfully fetched`,
-      data: user,
-    };
-    res.status(200).send(result);
-  } catch (err) {
-    const result = {
-      status_code: 200,
-      status_msg: `Something went wrong`,
-    };
-    return res.status(500).send(result);
+      // Get all users except of you and the one you followed
+      const user = await User.find({
+        _id: { $nin: followingsList },
+      });
+      const result = {
+        status_code: 200,
+        status_msg: `All users successfully fetched`,
+        data: user,
+      };
+      res.status(200).send(result);
+    } catch (err) {
+      const result = {
+        status_code: 500,
+        status_msg: `Something went wrong : ${err}`,
+      };
+      return res.status(500).send(result);
+    }
   }
 };
 
