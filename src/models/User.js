@@ -21,7 +21,11 @@ const UserSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
-    coverPicture: {
+    personalSite: {
+      type: String,
+      default: "",
+    },
+    customURL: {
       type: String,
       default: "",
     },
@@ -37,21 +41,17 @@ const UserSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    desc: {
+    bio: {
       type: String,
-      max: 50,
+      max: 300,
     },
-    city: {
+    experience: {
       type: String,
-      max: 50,
+      max: 100,
     },
-    from: {
-      type: String,
-      max: 50,
-    },
-    relationship: {
-      type: Number,
-      enum: [1, 2, 3],
+    socialMediaLinks: {
+      type: Array,
+      default: [],
     },
   },
   { timestamps: true }
