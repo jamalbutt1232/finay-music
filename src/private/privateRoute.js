@@ -1,15 +1,13 @@
-const jwt = require("jsonwebtoken");
-
 module.exports = function (req, res, next) {
-  const token = req.headers["authorization"];
-  if (!token) {
-    return res.status(401).send("Access denied");
-  }
-  try {
-    const verified = jwt.verify(token, "adasddad3rerfsdsfd");
-    req.user = verified;
+  // console.log(req.headers["authorization"]);
+  const bearerHeader = req.headers["authorization"];
+  if (typeof bearerHeader !== "undefined") {
+    const bearer = bearerHeader.split(" ");
+    const bearerToken = bearer[1];
+    req.token = bearerToken;
+
     next();
-  } catch (err) {
-    res.status(400).send("Invalid token");
+  } else {
+    res.status(400).send("No token exist");
   }
 };
