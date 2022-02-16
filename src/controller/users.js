@@ -85,7 +85,7 @@ const singleUser = async (req, res) => {
   const userID = getUserID(req, res);
   if (userID !== undefined) {
     try {
-      const user = await User.findById(req.body.id);
+      const user = await User.findById(req.params.id);
       const { password, updatedAt, ...other } = user._doc;
 
       const result = {
