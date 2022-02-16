@@ -13,7 +13,7 @@ const verifyToken = require("../private/privateRoute");
 
 router.put("/updateuser", verifyToken, updateUser);
 router.delete("/:id", deleteUser);
-router.get("/singleuser", verifyToken, singleUser);
+router.get("/singleuser/:id", verifyToken, singleUser);
 router.put("/follow", verifyToken, followUser);
 router.put("/unfollow", verifyToken, unfollowUser);
 router.get("/currentuser", verifyToken, currentUser);
