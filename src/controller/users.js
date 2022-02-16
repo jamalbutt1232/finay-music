@@ -297,6 +297,75 @@ const search = async (req, res) => {
     }
   }
 };
+
+// get all followers
+const getFollowers = async (req, res) => {
+  const userID = getUserID(req, res);
+  if (userID !== undefined) {
+    try {
+      // getting followers list so they can be excluded
+      let followersList = await User.find({ _id: userID });
+      followersList = followersList[0].followers;
+
+      let usersList = await User.find({ _id: { $in: followersList } });
+      if (usersList.length != 0) {
+        const result = {
+          status_code: 200,
+          status_msg: `All followers fetched successfully`,
+          data: usersList,
+        };
+        res.status(200).send(result);
+      } else {
+        const result = {
+          status_code: 404,
+          status_msg: `No followers found`,
+        };
+        res.status(404).send(result);
+      }
+    } catch (err) {
+      const result = {
+        status_code: 500,
+        status_msg: `Something went wrong : ${err}`,
+      };
+      return res.status(500).send(result);
+    }
+  }
+};
+
+// get all followings
+const getFollowings = async (req, res) => {
+  const userID = getUserID(req, res);
+  if (userID !== undefined) {
+    try {
+      // getting followings list so they can be excluded
+      let followingsList = await User.find({ _id: userID });
+      followingsList = followingsList[0].followings;
+
+      let usersList = await User.find({ _id: { $in: followingsList } });
+      if (usersList.length != 0) {
+        const result = {
+          status_code: 200,
+          status_msg: `All followings fetched successfully`,
+          data: usersList,
+        };
+        res.status(200).send(result);
+      } else {
+        const result = {
+          status_code: 404,
+          status_msg: `No followings found`,
+        };
+        res.status(404).send(result);
+      }
+    } catch (err) {
+      const result = {
+        status_code: 500,
+        status_msg: `Something went wrong : ${err}`,
+      };
+      return res.status(500).send(result);
+    }
+  }
+};
+
 module.exports = {
   updateUser,
   deleteUser,
@@ -306,4 +375,6 @@ module.exports = {
   allUser,
   currentUser,
   search,
+  getFollowers,
+  getFollowings,
 };
