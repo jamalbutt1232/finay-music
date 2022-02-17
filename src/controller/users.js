@@ -300,10 +300,11 @@ const currentUser = async (req, res) => {
 };
 
 // get a single searched user
+// http://localhost:8800/api/users/search?name=kin
 const search = async (req, res) => {
   const userID = getUserID(req, res);
   if (userID !== undefined) {
-    const searchedName = req.body.name;
+    const searchedName = req.query.name;
     try {
       const user = await User.find({
         // not search for our id
