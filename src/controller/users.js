@@ -2,6 +2,19 @@ const User = require("../models/User");
 const router = require("express").Router();
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+var multer = require("multer");
+
+// upload img
+// var storage = multer.diskStorage({
+//   destination: (req, file, cb) => {
+//     cb(null, "uploads");
+//   },
+//   filename: (req, file, cb) => {
+//     cb(null, file.fieldname + "-" + Date.now());
+//   },
+// });
+
+// var upload = multer({ storage: storage });
 
 // GET USER ID
 const getUserID = (req, res) => {
@@ -19,6 +32,29 @@ const getUserID = (req, res) => {
   });
   return uid;
 };
+
+//.. upload img
+// app.post("/", upload.single("image"), (req, res, next) => {
+//   var obj = {
+//     name: req.body.name,
+//     desc: req.body.desc,
+//     img: {
+//       data: fs.readFileSync(
+//         path.join(__dirname + "/uploads/" + req.file.filename)
+//       ),
+//       contentType: "image/png",
+//     },
+//   };
+//   imgModel.create(obj, (err, item) => {
+//     if (err) {
+//       console.log(err);
+//     } else {
+//       // item.save();
+//       res.redirect("/");
+//     }
+//   });
+// });
+//..
 
 // update user
 const updateUser = async (req, res) => {
@@ -40,7 +76,7 @@ const updateUser = async (req, res) => {
           status_code: 500,
           status_msg: `Something went wrong`,
         };
-        return res.status(500).send(result);
+        return res.status(500).send(result, err);
       }
     } else {
       return res.status(403).json("You can update only your account");
@@ -85,7 +121,9 @@ const singleUser = async (req, res) => {
   const userID = getUserID(req, res);
   if (userID !== undefined) {
     try {
+      console.log("here ", req.params.id);
       const user = await User.findById(req.params.id);
+      console.log(user);
       const { password, updatedAt, ...other } = user._doc;
 
       const result = {
@@ -262,10 +300,11 @@ const currentUser = async (req, res) => {
 };
 
 // get a single searched user
+// http://localhost:8800/api/users/search?name=kin
 const search = async (req, res) => {
   const userID = getUserID(req, res);
   if (userID !== undefined) {
-    const searchedName = req.body.name;
+    const searchedName = req.query.name;
     try {
       const user = await User.find({
         // not search for our id

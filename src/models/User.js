@@ -13,6 +13,10 @@ const UserSchema = new mongoose.Schema(
       required: true,
       min: 6,
     },
+    img: {
+      data: Buffer,
+      contentType: String,
+    },
     name: {
       type: String,
       default: "",
@@ -59,13 +63,13 @@ const UserSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    location:{
+    location: {
       type: Object,
-      default: undefined
+      default: undefined,
     },
-    lastOnlineTimestamp:{
-      type:String,
-    }
+    lastOnlineTimestamp: {
+      type: String,
+    },
   },
   { timestamps: true }
 );

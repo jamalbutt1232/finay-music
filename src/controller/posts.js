@@ -1,27 +1,49 @@
 const Post = require("../models/Post");
 const User = require("../models/User");
 const verifyToken = require("../private/privateRoute");
+const jwt = require("jsonwebtoken");
 
-// const get_user = async (req, res) => {
-//   try {
-//     const user = await User.findById({
-//         _id :
-//     })
-//     res.status(200).json(savedPost);
-//   } catch (err) {
-//     res.status(500).json(err);
-//   }
-// };
+// GET USER ID
+const getUserID = (req, res) => {
+  let uid = undefined;
+  jwt.verify(req.token, "adasddad3rerfsdsfd", function (err, data) {
+    if (err) {
+      const result = {
+        status_code: 403,
+        status_msg: `Invalid token`,
+      };
+      res.status(403).send(result);
+    } else {
+      uid = data._id;
+    }
+  });
+  return uid;
+};
 
-// error is cmg cause we dont have userid now. so just populate userid from req object
-// create a post
 const create_a_post = async (req, res) => {
-  const newPost = new Post(req.body);
-  try {
-    const savedPost = await newPost.save();
-    res.status(200).json(savedPost);
-  } catch (err) {
-    res.status(500).json(err);
+  const userID = getUserID(req, res);
+
+  if (userID !== undefined) {
+    const newPost = new Post(req.body);
+    newPost.userId = userID;
+    try {
+      const savedPost = await newPost.save();
+
+      const result = {
+        status_code: 200,
+        status_msg: `Post has been created`,
+        data: savedPost,
+      };
+
+      res.status(200).json(result);
+    } catch (err) {
+      const result = {
+        status_code: 500,
+        status_msg: `Something went wrong`,
+      };
+
+      res.status(500).json(result);
+    }
   }
 };
 //update a post
