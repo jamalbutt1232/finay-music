@@ -9,7 +9,7 @@ const {
 } = require("../controller/posts");
 const verifyToken = require("../private/privateRoute");
 
-router.post("/", create_a_post);
+router.post("/", verifyToken, create_a_post);
 router.put("/:id", updatePost);
 router.delete("/:id", deletePost);
 router.put("/:id/like", likePost);
