@@ -8,7 +8,12 @@ router.post("/", async (req, res) => {
 
   try {
     const savedMessage = await newMessage.save();
-    res.status(200).json(savedMessage);
+    const result = {
+      status_code: 200,
+      status_msg: `All messages fetched successfully`,
+      data: savedMessage,
+    };
+    res.status(200).json(result);
   } catch (err) {
     res.status(500).json(err);
   }
@@ -21,7 +26,12 @@ router.get("/:conversationId", async (req, res) => {
     const messages = await Message.find({
       conversationId: req.params.conversationId,
     });
-    res.status(200).json(messages);
+    const result = {
+      status_code: 200,
+      status_msg: `All messages fetched successfully`,
+      data: messages,
+    };
+    res.status(200).json(result);
   } catch (err) {
     res.status(500).json(err);
   }
