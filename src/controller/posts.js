@@ -14,7 +14,7 @@ const verifyToken = require("../private/privateRoute");
 // };
 
 // error is cmg cause we dont have userid now. so just populate userid from req object
-//create a post
+// create a post
 const create_a_post = async (req, res) => {
   const newPost = new Post(req.body);
   try {
