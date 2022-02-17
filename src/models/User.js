@@ -48,10 +48,12 @@ const UserSchema = new mongoose.Schema(
     bio: {
       type: String,
       max: 300,
+      default: "",
     },
     experience: {
       type: String,
       max: 100,
+      default: "",
     },
     socialMediaLinks: {
       type: Array,
