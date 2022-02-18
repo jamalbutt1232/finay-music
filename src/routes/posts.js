@@ -10,10 +10,10 @@ const {
 const verifyToken = require("../private/privateRoute");
 
 router.post("/", verifyToken, create_a_post);
-router.put("/:id", updatePost);
-router.delete("/:id", deletePost);
-router.put("/:id/like", likePost);
+router.put("/updatepost", verifyToken, updatePost);
+router.delete("/deletepost", verifyToken, deletePost);
+router.put("/like", verifyToken, likePost);
 router.get("/timeline/all", verifyToken, allPost);
-router.get("/:id", singlePost);
+router.get("/singlepost", verifyToken, singlePost);
 
 module.exports = router;
