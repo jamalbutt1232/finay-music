@@ -8,6 +8,11 @@ const morgan = require("morgan");
 const userRoute = require("./routes/users");
 const authRoute = require("./routes/auth");
 const postRoute = require("./routes/posts");
+const crypto = require("crypto");
+const multer = require("multer");
+const GridFsStorage = require("multer-gridfs-storage");
+const Grid = require("gridfs-stream");
+const methodOverride = require("method-override");
 
 dotenv.config();
 
@@ -33,6 +38,18 @@ app.use(morgan("common"));
 app.use("/api/users", userRoute);
 app.use("/api/auth", authRoute);
 app.use("/api/posts", postRoute);
+
+////////////////////////////////////////
+
+const conn = mongoose.createConnection(
+  "mongodb+srv://admin123:admin123@cluster0.npo42.mongodb.net/Cluster0?retryWrites=true&w=majority"
+);
+///////////////////////////
+// conn.once("open", () => {
+// gfs = Grid(conn.db,mongoose.mong);
+// });
+
+/////////////////////////////////////////////////////////////////////
 
 app.listen(8800, () => {
   console.log("Backend server started");

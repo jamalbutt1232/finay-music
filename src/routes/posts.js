@@ -13,7 +13,7 @@ router.post("/", verifyToken, create_a_post);
 router.put("/:id", updatePost);
 router.delete("/:id", deletePost);
 router.put("/:id/like", likePost);
-router.get("/timeline/all", allPost);
+router.get("/timeline/all", verifyToken, allPost);
 router.get("/:id", singlePost);
 
 module.exports = router;
