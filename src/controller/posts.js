@@ -161,13 +161,29 @@ const allPost = async (req, res) => {
           return Post.find({ userId: friendId });
         })
       );
+      let friendDetails = {
+        user_name: "",
+        user_email: "",
+        user_img: "",
+      };
+      var newo;
+      for (i = 0; i < friendPosts[0].length; i++) {
+        const friendID = friendPosts[0][i].userId;
+        const friendData = await User.findById(friendID);
+
+        friendDetails.user_name = friendData.name;
+        friendDetails.user_email = friendData.email;
+        friendDetails.user_img = friendData.img;
+
+        friendPosts[0][i] = { ...friendPosts[0][i]._doc, ...friendDetails };
+      }
+
       let allposts = userPosts.concat(...friendPosts);
-      // allposts =
+
       allposts = allposts.sort(function (a, b) {
         return new Date(a.updatedAt) - new Date(b.updatedAt);
       });
 
-      // console.log(" allposts :", allposts);
       const result = {
         status_code: 200,
         status_msg: `Post has been created`,
