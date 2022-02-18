@@ -92,9 +92,10 @@ const likePost = async (req, res) => {
 
 //get all timeline post
 const allPost = async (req, res) => {
+  const userID = getUserID(req, res);
   try {
     //   using promise here
-    const currentUser = await User.findById(req.body.userId);
+    const currentUser = await User.findById(userID);
 
     const userPosts = await Post.find({ userId: currentUser._id });
     const friendPosts = await Promise.all(
