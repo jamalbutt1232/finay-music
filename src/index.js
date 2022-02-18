@@ -34,9 +34,9 @@ app.use("/api/messages", messageRoute);
 
 ////////////////////////////////////////
 
-const conn = mongoose.createConnection(
-  "mongodb+srv://admin123:admin123@cluster0.npo42.mongodb.net/Cluster0?retryWrites=true&w=majority"
-);
+// const conn = mongoose.createConnection(
+//   `${process.env.MONGO_URL}`
+// );
 ///////////////////////////
 // conn.once("open", () => {
 // gfs = Grid(conn.db,mongoose.mong);
