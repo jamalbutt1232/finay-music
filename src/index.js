@@ -13,23 +13,14 @@ const multer = require("multer");
 const GridFsStorage = require("multer-gridfs-storage");
 const Grid = require("gridfs-stream");
 const methodOverride = require("method-override");
+const conversationRoute = require("./routes/conversations");
+const messageRoute = require("./routes/messages");
 
 dotenv.config();
 
-// mongoose.connect(
-//   "mongodb+srv://admin1234:admin1234@cluster0.npo42.mongodb.net/Cluster0?retryWrites=true&w=majority",
-//   { useNewUrlParser: true },
-//   () => {
-//     console.log("Connected to Mongo");
-//   }
-// );
-mongoose.connect(
-  "mongodb+srv://admin123:admin123@cluster0.npo42.mongodb.net/Cluster0?retryWrites=true&w=majority",
-  { useNewUrlParser: true },
-  () => {
-    console.log("Connected to Mongo");
-  }
-);
+mongoose.connect(`${process.env.MONGO_URL}`, { useNewUrlParser: true }, () => {
+  console.log("Connected to Mongo");
+});
 // Middleware
 app.use(express.json());
 app.use(helmet());
@@ -38,6 +29,8 @@ app.use(morgan("common"));
 app.use("/api/users", userRoute);
 app.use("/api/auth", authRoute);
 app.use("/api/posts", postRoute);
+app.use("/api/conversations", conversationRoute);
+app.use("/api/messages", messageRoute);
 
 ////////////////////////////////////////
 
