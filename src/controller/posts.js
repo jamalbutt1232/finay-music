@@ -1,6 +1,5 @@
 const Post = require("../models/Post");
 const User = require("../models/User");
-const verifyToken = require("../private/privateRoute");
 const jwt = require("jsonwebtoken");
 
 // GET USER ID
@@ -90,23 +89,46 @@ const likePost = async (req, res) => {
   }
 };
 
+// In get all posts api, instead of userID send user object
+// with (id,name, email, picture).
+// Send these posts in asc order of created time
+
 //get all timeline post
 const allPost = async (req, res) => {
   const userID = getUserID(req, res);
-  try {
-    //   using promise here
-    const currentUser = await User.findById(userID);
+  if (userID !== undefined) {
+    try {
+      //   using promise here
+      const currentUser = await User.findById(userID);
+      const userPosts = await Post.find({ userId: userID });
+      const friendPosts = await Promise.all(
+        currentUser.followings.map((friendId) => {
+          return Post.find({ userId: friendId });
+        })
+      );
+      let allposts = userPosts.concat(...friendPosts);
+      // allposts =
+      allposts = allposts.sort(function (a, b) {
+        return new Date(a.updatedAt) - new Date(b.updatedAt);
+      });
+      console.log(allposts);
 
-    const userPosts = await Post.find({ userId: currentUser._id });
-    const friendPosts = await Promise.all(
-      currentUser.followings.map((friendId) => {
-        return Post.find({ userId: friendId });
-      })
-    );
-    res.json(userPosts.concat(...friendPosts));
-    // res.status(200).json(currentUser);
-  } catch (err) {
-    res.status(500).json(err);
+      // console.log(" allposts :", allposts);
+      const result = {
+        status_code: 200,
+        status_msg: `Post has been created`,
+        data: allposts,
+      };
+
+      res.status(200).json(result);
+    } catch (err) {
+      const result = {
+        status_code: 500,
+        status_msg: `Something went wrong: ${err}`,
+      };
+
+      res.status(500).json(result);
+    }
   }
 };
 //get a post
