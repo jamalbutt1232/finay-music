@@ -168,7 +168,7 @@ const allPost = async (req, res) => {
       var userPosts = await Post.find({ userId: userID });
       var list_of_posts = [];
       userPosts.forEach((myPost) => {
-        myPost = { ...myPost._doc, ...myDetails };
+        myPost = { ...myPost._doc, user: myDetails };
         list_of_posts.push(myPost);
       });
 
@@ -191,7 +191,7 @@ const allPost = async (req, res) => {
         friendDetails.user_email = friendData.email;
         friendDetails.user_img = friendData.profilePicture;
 
-        friendPosts[0][i] = { ...friendPosts[0][i]._doc, ...friendDetails };
+        friendPosts[0][i] = { ...friendPosts[0][i]._doc, user: friendDetails };
       }
 
       let allposts = list_of_posts.concat(...friendPosts);
