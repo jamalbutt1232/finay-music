@@ -18,9 +18,13 @@ const messageRoute = require("./routes/messages");
 
 dotenv.config();
 
-mongoose.connect(`${process.env.MONGO_URL}`, { useNewUrlParser: true }, () => {
-  console.log("Connected to Mongo");
-});
+mongoose.connect(
+  `${process.env.MONGO_URL}`,
+  { useNewUrlParser: true },
+  () => {
+    console.log("Connected to Mongo");
+  }
+);
 // Middleware
 app.use(express.json());
 app.use(helmet());
