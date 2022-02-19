@@ -280,13 +280,14 @@ const singleuserpost = async (req, res) => {
         user_email: "",
         user_img: "",
       };
-      const currentUser = await User.findById(userID);
+      const uid = req.params.id;
+      const currentUser = await User.findById(uid);
       myDetails = {
         user_name: currentUser.name,
         user_email: currentUser.email,
         user_img: currentUser.profilePicture,
       };
-      var userPosts = await Post.find({ userId: userID });
+      var userPosts = await Post.find({ userId: uid });
       var list_of_posts = [];
       userPosts.forEach((myPost) => {
         myPost = { ...myPost._doc, user: myDetails };
@@ -306,7 +307,7 @@ const singleuserpost = async (req, res) => {
 
       allposts.forEach((post) => {
         if (post.likes.length != 0) {
-          if (post.likes.includes(userID)) {
+          if (post.likes.includes(uid)) {
             post = { ...post, ...likedPost };
           } else {
             post = { ...post, ...dislikedPost };
