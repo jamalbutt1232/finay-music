@@ -6,6 +6,7 @@ const {
   likePost,
   allPost,
   singlePost,
+  singleuserpost,
 } = require("../controller/posts");
 const verifyToken = require("../private/privateRoute");
 
@@ -15,5 +16,6 @@ router.delete("/deletepost", verifyToken, deletePost);
 router.put("/like", verifyToken, likePost);
 router.get("/timeline/all", verifyToken, allPost);
 router.get("/singlepost", verifyToken, singlePost);
+router.get("/singleuserpost", verifyToken, singleuserpost);
 
 module.exports = router;
