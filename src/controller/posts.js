@@ -269,6 +269,81 @@ const singlePost = async (req, res) => {
   }
 };
 
+//get all timeline post
+const singleuserpost = async (req, res) => {
+  const userID = getUserID(req, res);
+  if (userID !== undefined) {
+    try {
+      //   using promise here
+      let myDetails = {
+        user_name: "",
+        user_email: "",
+        user_img: "",
+      };
+      const currentUser = await User.findById(userID);
+      myDetails = {
+        user_name: currentUser.name,
+        user_email: currentUser.email,
+        user_img: currentUser.profilePicture,
+      };
+      var userPosts = await Post.find({ userId: userID });
+      var list_of_posts = [];
+      userPosts.forEach((myPost) => {
+        myPost = { ...myPost._doc, user: myDetails };
+        list_of_posts.push(myPost);
+      });
+      allposts = list_of_posts;
+      allposts = allposts.sort(function (a, b) {
+        return new Date(a.updatedAt) - new Date(b.updatedAt);
+      });
+      var feed_posts = [];
+      let likedPost = {
+        likedPost: true,
+      };
+      let dislikedPost = {
+        likedPost: false,
+      };
+
+      allposts.forEach((post) => {
+        if (post.likes.length != 0) {
+          if (post.likes.includes(userID)) {
+            post = { ...post, ...likedPost };
+          } else {
+            post = { ...post, ...dislikedPost };
+          }
+        } else {
+          post = { ...post, ...dislikedPost };
+        }
+        feed_posts.push(post);
+      });
+
+      if (allposts.length != 0) {
+        const result = {
+          status_code: 200,
+          status_msg: `Posts fetched`,
+          data: feed_posts,
+        };
+
+        res.status(200).json(result);
+      } else {
+        const result = {
+          status_code: 404,
+          status_msg: `No posts for user found`,
+        };
+
+        res.status(404).json(result);
+      }
+    } catch (err) {
+      const result = {
+        status_code: 500,
+        status_msg: `Something went wrong: ${err}`,
+      };
+
+      res.status(500).json(result);
+    }
+  }
+};
+
 module.exports = {
   create_a_post,
   updatePost,
@@ -276,4 +351,5 @@ module.exports = {
   likePost,
   allPost,
   singlePost,
+  singleuserpost,
 };
