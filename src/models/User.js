@@ -13,10 +13,7 @@ const UserSchema = new mongoose.Schema(
       required: true,
       min: 6,
     },
-    img: {
-      data: Buffer,
-      contentType: String,
-    },
+
     name: {
       type: String,
       default: "",
