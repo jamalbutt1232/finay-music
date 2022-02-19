@@ -16,6 +16,6 @@ router.delete("/deletepost", verifyToken, deletePost);
 router.put("/like", verifyToken, likePost);
 router.get("/timeline/all", verifyToken, allPost);
 router.get("/singlepost", verifyToken, singlePost);
-router.get("/singleuserpost", verifyToken, singleuserpost);
+router.get("/singleuserpost/:id", verifyToken, singleuserpost);
 
 module.exports = router;
