@@ -299,7 +299,7 @@ const getFollowers = async (req, res) => {
   if (userID !== undefined) {
     try {
       // getting followers list so they can be excluded
-      let followersList = await User.find({ _id: userID });
+      let followersList = await User.find({ _id: req.params.id });
       followersList = followersList[0].followers;
 
       let usersList = await User.find({ _id: { $in: followersList } });
@@ -333,7 +333,7 @@ const getFollowings = async (req, res) => {
   if (userID !== undefined) {
     try {
       // getting followings list so they can be excluded
-      let followingsList = await User.find({ _id: userID });
+      let followingsList = await User.find({ _id: req.params.id });
       followingsList = followingsList[0].followings;
 
       let usersList = await User.find({ _id: { $in: followingsList } });
