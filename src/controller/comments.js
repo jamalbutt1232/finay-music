@@ -56,39 +56,40 @@ const getAllComments = async (req, res) => {
       });
 
       ////////////////////
+
+      const commentUsers = await Promise.all(
+        allcomments.map((friendId) => {
+          return User.find({ _id: friendId.userId });
+        })
+      );
+
       let userDetails = {
         user_name: "",
         user_email: "",
         user_img: "",
       };
 
-      const friendPosts = await Promise.all(
-        allcomments.map((friendId) => {
-          return User.find({ _id: friendId.userId });
-        })
-      );
-      let friendDetails = {
-        user_name: "",
-        user_email: "",
-        user_img: "",
-      };
-      console.log("friendPosts[0].length :", friendPosts[0].length);
-      for (i = 0; i < friendPosts[0].length; i++) {
-        const friendID = friendPosts[0][i].userId;
-        const friendData = await User.findById(friendID);
+      for (i = 0; i < commentUsers.length; i++) {
+        userDetails.user_name = commentUsers[0][0].name;
+        userDetails.user_email = commentUsers[0][0].email;
+        userDetails.user_img = commentUsers[0][0].img;
 
-        friendDetails.user_name = friendData.name;
-        friendDetails.user_email = friendData.email;
-        friendDetails.user_img = friendData.profilePicture;
+        commentUsers[i] = { userDetails };
 
-        friendPosts[0][i] = { ...friendPosts[0][i]._doc, user: friendDetails };
+        // console.log("11111111111111111111111111", userDetails[i].user_name);
       }
+      console.log(commentUsers);
+      for (i = 0; i < commentUsers.length; i++) {
+        commentUsers[i] = { ...commentUsers[i], comment: allcomments[i] };
+        // console.log("        commentUsers[i] :", commentUsers[i]);
+        // console.log("commentUsers[i]  :", allcomments[i]);
+      }
+      //   console.log("commentUsers  : ", commentUsers);
+      //   let allposts = list_of_posts.concat(...commentUsers);
 
-      let allposts = list_of_posts.concat(...friendPosts);
-
-      allposts = allposts.sort(function (a, b) {
-        return new Date(a.updatedAt) - new Date(b.updatedAt);
-      });
+      //   allposts = allposts.sort(function (a, b) {
+      //     return new Date(a.updatedAt) - new Date(b.updatedAt);
+      //   });
       //   allcomments.map((uid) => {
       //     const comment_user = User.findById(uid.userId);
       //     console.log("uid : ", uid);
@@ -115,7 +116,7 @@ const getAllComments = async (req, res) => {
       const result = {
         status_code: 200,
         status_msg: `Comment has been created`,
-        data: allcomments,
+        data: commentUsers,
       };
 
       res.status(200).json(result);

@@ -21,6 +21,6 @@ router.put("/unfollow", verifyToken, unfollowUser);
 router.get("/currentuser", verifyToken, currentUser);
 router.get("/timeline/allusers", verifyToken, allUser);
 router.get("/search", verifyToken, search);
-router.get("/getfollowers", verifyToken, getFollowers);
-router.get("/getfollowings", verifyToken, getFollowings);
+router.get("/getfollowers/:id", verifyToken, getFollowers);
+router.get("/getfollowings/:id", verifyToken, getFollowings);
 module.exports = router;
