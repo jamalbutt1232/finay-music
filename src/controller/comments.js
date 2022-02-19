@@ -62,11 +62,37 @@ const getAllComments = async (req, res) => {
         user_img: "",
       };
 
-      allcomments.map((uid) => {
-        const comment_user = User.findById(uid.userId);
-        console.log("uid : ", comment_user);
-        // break;
+      const friendPosts = await Promise.all(
+        allcomments.map((friendId) => {
+          return User.find({ _id: friendId.userId });
+        })
+      );
+      let friendDetails = {
+        user_name: "",
+        user_email: "",
+        user_img: "",
+      };
+      console.log("friendPosts[0].length :", friendPosts[0].length);
+      for (i = 0; i < friendPosts[0].length; i++) {
+        const friendID = friendPosts[0][i].userId;
+        const friendData = await User.findById(friendID);
+
+        friendDetails.user_name = friendData.name;
+        friendDetails.user_email = friendData.email;
+        friendDetails.user_img = friendData.profilePicture;
+
+        friendPosts[0][i] = { ...friendPosts[0][i]._doc, user: friendDetails };
+      }
+
+      let allposts = list_of_posts.concat(...friendPosts);
+
+      allposts = allposts.sort(function (a, b) {
+        return new Date(a.updatedAt) - new Date(b.updatedAt);
       });
+      //   allcomments.map((uid) => {
+      //     const comment_user = User.findById(uid.userId);
+      //     console.log("uid : ", uid);
+      //   });
 
       //   for (i = 0; i < userComments[0].length; i++) {
       //     const friendID = userComments[0][i].userId;
