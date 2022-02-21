@@ -9,12 +9,14 @@ const {
   search,
   getFollowers,
   getFollowings,
+  deActive,
+  deActiveStatus,
 } = require("../controller/users");
 const router = require("express").Router();
 const verifyToken = require("../private/privateRoute");
 
 router.put("/updateuser", verifyToken, updateUser);
-router.delete("/:id", deleteUser);
+// router.delete("/:id", deleteUser);
 router.get("/singleuser/:id", verifyToken, singleUser);
 router.put("/follow", verifyToken, followUser);
 router.put("/unfollow", verifyToken, unfollowUser);
@@ -23,4 +25,7 @@ router.get("/timeline/allusers", verifyToken, allUser);
 router.get("/search", verifyToken, search);
 router.get("/getfollowers/:id", verifyToken, getFollowers);
 router.get("/getfollowings/:id", verifyToken, getFollowings);
+router.put("/deactive", verifyToken, deActive);
+router.get("/deactivestatus", verifyToken, deActiveStatus);
+
 module.exports = router;

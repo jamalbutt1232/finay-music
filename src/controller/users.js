@@ -21,30 +21,50 @@ const getUserID = (req, res) => {
   return uid;
 };
 
+// Get user de active status
+const deActiveStatusInner = async (uid) => {
+  try {
+    const user = await User.findById(uid);
+    const status = user.deactive;
+    return status;
+  } catch (err) {
+    return `deActiveStatusInner Issue : ${err}`;
+  }
+};
+
 // update user
 const updateUser = async (req, res) => {
   const userID = getUserID(req, res);
   if (userID !== undefined) {
-    if (userID || req.body.isAdmin) {
-      try {
-        const user = await User.findByIdAndUpdate(userID, {
-          $set: req.body,
-        });
-        const result = {
-          status_code: 200,
-          status_msg: `Account has been updated`,
-          data: user,
-        };
-        res.status(200).send(result);
-      } catch (err) {
-        const result = {
-          status_code: 500,
-          status_msg: `Something went wrong`,
-        };
-        return res.status(500).send(result, err);
+    const deactive = await deActiveStatusInner(userID);
+    if (!deactive) {
+      if (userID || req.body.isAdmin) {
+        try {
+          const user = await User.findByIdAndUpdate(userID, {
+            $set: req.body,
+          });
+          const result = {
+            status_code: 200,
+            status_msg: `Account has been updated`,
+            data: user,
+          };
+          res.status(200).send(result);
+        } catch (err) {
+          const result = {
+            status_code: 500,
+            status_msg: `Something went wrong`,
+          };
+          return res.status(500).send(result, err);
+        }
+      } else {
+        return res.status(403).json("You can update only your account");
       }
     } else {
-      return res.status(403).json("You can update only your account");
+      const result = {
+        status_code: 403,
+        status_msg: `Please active your account`,
+      };
+      return res.status(403).send(result);
     }
   }
 };
@@ -77,23 +97,32 @@ const deleteUser = async (req, res) => {
 const singleUser = async (req, res) => {
   const userID = getUserID(req, res);
   if (userID !== undefined) {
-    try {
-      const user = await User.findById(req.params.id);
-      console.log(user);
-      const { password, updatedAt, ...other } = user._doc;
+    const deactive = await deActiveStatusInner(userID);
+    if (!deactive) {
+      try {
+        const user = await User.findById(req.params.id);
+        console.log(user);
+        const { password, updatedAt, ...other } = user._doc;
 
+        const result = {
+          status_code: 200,
+          status_msg: `You successfuly fetched user information`,
+          data: other,
+        };
+        res.status(200).send(result);
+      } catch (err) {
+        const result = {
+          status_code: 500,
+          status_msg: `You could not fetch user information`,
+        };
+        return res.status(500).send(result);
+      }
+    } else {
       const result = {
-        status_code: 200,
-        status_msg: `You successfuly fetched user information`,
-        data: other,
+        status_code: 403,
+        status_msg: `Please active your account`,
       };
-      res.status(200).send(result);
-    } catch (err) {
-      const result = {
-        status_code: 500,
-        status_msg: `You could not fetch user information`,
-      };
-      return res.status(500).send(result);
+      return res.status(403).send(result);
     }
   }
 };
@@ -101,47 +130,56 @@ const singleUser = async (req, res) => {
 const followUser = async (req, res) => {
   const userID = getUserID(req, res);
   if (userID !== undefined) {
-    if (userID !== req.body.id) {
-      try {
-        const user = await User.findById(req.body.id);
-        const currentUser = await User.findById(userID);
-        if (!user.followers.includes(userID)) {
-          await user.updateOne({
-            $push: {
-              followers: userID,
-            },
-          });
-          await currentUser.updateOne({
-            $push: {
-              followings: req.body.id,
-            },
-          });
+    const deactive = await deActiveStatusInner(userID);
+    if (!deactive) {
+      if (userID !== req.body.id) {
+        try {
+          const user = await User.findById(req.body.id);
+          const currentUser = await User.findById(userID);
+          if (!user.followers.includes(userID)) {
+            await user.updateOne({
+              $push: {
+                followers: userID,
+              },
+            });
+            await currentUser.updateOne({
+              $push: {
+                followings: req.body.id,
+              },
+            });
+            const result = {
+              status_code: 200,
+              status_msg: `You now follow user`,
+              data: user,
+            };
+            res.status(200).send(result);
+          } else {
+            const result = {
+              status_code: 403,
+              status_msg: `You already followed the user`,
+            };
+            res.status(403).send(result);
+          }
+        } catch (err) {
           const result = {
-            status_code: 200,
-            status_msg: `You now follow user`,
-            data: user,
+            status_code: 500,
+            status_msg: `Something went wrong`,
           };
-          res.status(200).send(result);
-        } else {
-          const result = {
-            status_code: 403,
-            status_msg: `You already followed the user`,
-          };
-          res.status(403).send(result);
+          res.status(500).send(result);
         }
-      } catch (err) {
+      } else {
         const result = {
-          status_code: 500,
-          status_msg: `Something went wrong`,
+          status_code: 403,
+          status_msg: `You cant follow yourself`,
         };
-        res.status(500).send(result);
+        res.status(403).send(result);
       }
     } else {
       const result = {
         status_code: 403,
-        status_msg: `You cant follow yourself`,
+        status_msg: `Please active your account`,
       };
-      res.status(403).send(result);
+      return res.status(403).send(result);
     }
   }
 };
@@ -150,47 +188,56 @@ const followUser = async (req, res) => {
 const unfollowUser = async (req, res) => {
   const userID = getUserID(req, res);
   if (userID !== undefined) {
-    if (userID !== req.body.id) {
-      try {
-        const currentUser = await User.findById(userID);
-        const user = await User.findById(req.body.id);
-        if (user.followers.includes(userID)) {
-          await user.updateOne({
-            $pull: {
-              followers: userID,
-            },
-          });
-          await currentUser.updateOne({
-            $pull: {
-              followings: req.body.id,
-            },
-          });
+    const deactive = await deActiveStatusInner(userID);
+    if (!deactive) {
+      if (userID !== req.body.id) {
+        try {
+          const currentUser = await User.findById(userID);
+          const user = await User.findById(req.body.id);
+          if (user.followers.includes(userID)) {
+            await user.updateOne({
+              $pull: {
+                followers: userID,
+              },
+            });
+            await currentUser.updateOne({
+              $pull: {
+                followings: req.body.id,
+              },
+            });
+            const result = {
+              status_code: 200,
+              status_msg: `You now unfollow user`,
+              data: user,
+            };
+            res.status(200).send(result);
+          } else {
+            const result = {
+              status_code: 403,
+              status_msg: `You already unfollow user`,
+            };
+            res.status(403).send(result);
+          }
+        } catch (err) {
           const result = {
-            status_code: 200,
-            status_msg: `You now unfollow user`,
-            data: user,
+            status_code: 500,
+            status_msg: `Something went wrong`,
           };
-          res.status(200).send(result);
-        } else {
-          const result = {
-            status_code: 403,
-            status_msg: `You already unfollow user`,
-          };
-          res.status(403).send(result);
+          res.status(500).json(result);
         }
-      } catch (err) {
+      } else {
         const result = {
-          status_code: 500,
-          status_msg: `Something went wrong`,
+          status_code: 403,
+          status_msg: `You cant unfollow yousrself`,
         };
-        res.status(500).json(result);
+        res.status(403).json(result);
       }
     } else {
       const result = {
         status_code: 403,
-        status_msg: `You cant unfollow yousrself`,
+        status_msg: `Please active your account`,
       };
-      res.status(403).json(result);
+      return res.status(403).send(result);
     }
   }
 };
@@ -198,28 +245,37 @@ const unfollowUser = async (req, res) => {
 const allUser = async (req, res) => {
   const userID = getUserID(req, res);
   if (userID !== undefined) {
-    try {
-      // getting followings list so they can be excluded
-      let followingsList = await User.find({ _id: userID });
-      followingsList = followingsList[0].followings;
-      followingsList[followingsList.length] = userID;
+    const deactive = await deActiveStatusInner(userID);
+    if (!deactive) {
+      try {
+        // getting followings list so they can be excluded
+        let followingsList = await User.find({ _id: userID });
+        followingsList = followingsList[0].followings;
+        followingsList[followingsList.length] = userID;
 
-      // Get all users except of you and the one you followed
-      const user = await User.find({
-        _id: { $nin: followingsList },
-      });
+        // Get all users except of you and the one you followed
+        const user = await User.find({
+          _id: { $nin: followingsList },
+        });
+        const result = {
+          status_code: 200,
+          status_msg: `All users successfully fetched`,
+          data: user,
+        };
+        res.status(200).send(result);
+      } catch (err) {
+        const result = {
+          status_code: 500,
+          status_msg: `Something went wrong : ${err}`,
+        };
+        return res.status(500).send(result);
+      }
+    } else {
       const result = {
-        status_code: 200,
-        status_msg: `All users successfully fetched`,
-        data: user,
+        status_code: 403,
+        status_msg: `Please active your account`,
       };
-      res.status(200).send(result);
-    } catch (err) {
-      const result = {
-        status_code: 500,
-        status_msg: `Something went wrong : ${err}`,
-      };
-      return res.status(500).send(result);
+      return res.status(403).send(result);
     }
   }
 };
@@ -228,29 +284,31 @@ const allUser = async (req, res) => {
 const currentUser = async (req, res) => {
   const userID = getUserID(req, res);
   if (userID !== undefined) {
-    if (userID === undefined) {
+    const deactive = await deActiveStatusInner(userID);
+    if (!deactive) {
+      try {
+        const user = await User.findById(userID);
+        const { password, updatedAt, ...other } = user._doc;
+        const result = {
+          status_code: 200,
+          status_msg: `You successfuly fetched user information`,
+          data: other,
+        };
+        res.status(200).send(result);
+        // res.status(200).json(other);
+      } catch (err) {
+        const result = {
+          status_code: 500,
+          status_msg: `You could not fetch user information`,
+        };
+        return res.status(500).send(result);
+      }
+    } else {
       const result = {
         status_code: 403,
-        status_msg: `Invalid token`,
+        status_msg: `Please active your account`,
       };
-      res.status(403).send(result);
-    }
-    try {
-      const user = await User.findById(userID);
-      const { password, updatedAt, ...other } = user._doc;
-      const result = {
-        status_code: 200,
-        status_msg: `You successfuly fetched user information`,
-        data: other,
-      };
-      res.status(200).send(result);
-      // res.status(200).json(other);
-    } catch (err) {
-      const result = {
-        status_code: 500,
-        status_msg: `You could not fetch user information`,
-      };
-      return res.status(500).send(result);
+      return res.status(403).send(result);
     }
   }
 };
@@ -260,29 +318,147 @@ const currentUser = async (req, res) => {
 const search = async (req, res) => {
   const userID = getUserID(req, res);
   if (userID !== undefined) {
-    const searchedName = req.query.name;
-    try {
-      const user = await User.find({
-        // not search for our id
-        _id: { $ne: userID },
-        // search for name and shd be case insensitive
-        name: { $regex: searchedName, $options: "i" },
-      });
+    const deactive = await deActiveStatusInner(userID);
+    if (!deactive) {
+      const searchedName = req.query.name;
+      try {
+        const user = await User.find({
+          // not search for our id
+          _id: { $ne: userID },
+          // search for name and shd be case insensitive
+          name: { $regex: searchedName, $options: "i" },
+        });
 
-      if (user.length != 0) {
+        if (user.length != 0) {
+          const result = {
+            status_code: 200,
+            status_msg: `Successfuly fetched users`,
+            data: user,
+          };
+          res.status(200).send(result);
+        } else {
+          const result = {
+            status_code: 404,
+            status_msg: `User not found`,
+          };
+          res.status(404).send(result);
+        }
+      } catch (err) {
         const result = {
-          status_code: 200,
-          status_msg: `Successfuly fetched users`,
-          data: user,
+          status_code: 500,
+          status_msg: `Something went wrong`,
         };
-        res.status(200).send(result);
-      } else {
-        const result = {
-          status_code: 404,
-          status_msg: `User not found`,
-        };
-        res.status(404).send(result);
+        return res.status(500).send(result);
       }
+    } else {
+      const result = {
+        status_code: 403,
+        status_msg: `Please active your account`,
+      };
+      return res.status(403).send(result);
+    }
+  }
+};
+
+// get all followers
+const getFollowers = async (req, res) => {
+  const userID = getUserID(req, res);
+  if (userID !== undefined) {
+    const deactive = await deActiveStatusInner(userID);
+    if (!deactive) {
+      try {
+        // getting followers list so they can be excluded
+        let followersList = await User.find({ _id: req.params.id });
+        followersList = followersList[0].followers;
+
+        let usersList = await User.find({ _id: { $in: followersList } });
+        if (usersList.length != 0) {
+          const result = {
+            status_code: 200,
+            status_msg: `All followers fetched successfully`,
+            data: usersList,
+          };
+          res.status(200).send(result);
+        } else {
+          const result = {
+            status_code: 404,
+            status_msg: `No followers found`,
+          };
+          res.status(404).send(result);
+        }
+      } catch (err) {
+        const result = {
+          status_code: 500,
+          status_msg: `Something went wrong : ${err}`,
+        };
+        return res.status(500).send(result);
+      }
+    } else {
+      const result = {
+        status_code: 403,
+        status_msg: `Please active your account`,
+      };
+      return res.status(403).send(result);
+    }
+  }
+};
+
+// get all followings
+const getFollowings = async (req, res) => {
+  const userID = getUserID(req, res);
+  if (userID !== undefined) {
+    const deactive = await deActiveStatusInner(userID);
+    if (!deactive) {
+      try {
+        // getting followings list so they can be excluded
+        let followingsList = await User.find({ _id: req.params.id });
+        followingsList = followingsList[0].followings;
+
+        let usersList = await User.find({ _id: { $in: followingsList } });
+        if (usersList.length != 0) {
+          const result = {
+            status_code: 200,
+            status_msg: `All followings fetched successfully`,
+            data: usersList,
+          };
+          res.status(200).send(result);
+        } else {
+          const result = {
+            status_code: 404,
+            status_msg: `No followings found`,
+          };
+          res.status(404).send(result);
+        }
+      } catch (err) {
+        const result = {
+          status_code: 500,
+          status_msg: `Something went wrong : ${err}`,
+        };
+        return res.status(500).send(result);
+      }
+    } else {
+      const result = {
+        status_code: 403,
+        status_msg: `Please active your account`,
+      };
+      return res.status(403).send(result);
+    }
+  }
+};
+
+const deActive = async (req, res) => {
+  const userID = getUserID(req, res);
+  if (userID !== undefined) {
+    try {
+      const user = await User.findByIdAndUpdate(userID, {
+        deactive: true,
+      });
+      const result = {
+        status_code: 200,
+        status_msg: `You have successfully deactivated your account`,
+        data: user,
+      };
+      res.status(200).send(result);
     } catch (err) {
       const result = {
         status_code: 500,
@@ -293,70 +469,34 @@ const search = async (req, res) => {
   }
 };
 
-// get all followers
-const getFollowers = async (req, res) => {
+const deActiveStatus = async (req, res) => {
   const userID = getUserID(req, res);
   if (userID !== undefined) {
-    try {
-      // getting followers list so they can be excluded
-      let followersList = await User.find({ _id: req.params.id });
-      followersList = followersList[0].followers;
+    const deactive = await deActiveStatusInner(userID);
+    console.log("deactive   : :", deactive);
+    if (!deactive) {
+      try {
+        const user = await User.findById(userID);
 
-      let usersList = await User.find({ _id: { $in: followersList } });
-      if (usersList.length != 0) {
         const result = {
           status_code: 200,
-          status_msg: `All followers fetched successfully`,
-          data: usersList,
+          status_msg: `You have successfully fetched account's status`,
+          data: user.deactive,
         };
         res.status(200).send(result);
-      } else {
+      } catch (err) {
         const result = {
-          status_code: 404,
-          status_msg: `No followers found`,
+          status_code: 500,
+          status_msg: `Something went wrong`,
         };
-        res.status(404).send(result);
+        return res.status(500).send(result);
       }
-    } catch (err) {
+    } else {
       const result = {
-        status_code: 500,
-        status_msg: `Something went wrong : ${err}`,
+        status_code: 403,
+        status_msg: `Please active your account`,
       };
-      return res.status(500).send(result);
-    }
-  }
-};
-
-// get all followings
-const getFollowings = async (req, res) => {
-  const userID = getUserID(req, res);
-  if (userID !== undefined) {
-    try {
-      // getting followings list so they can be excluded
-      let followingsList = await User.find({ _id: req.params.id });
-      followingsList = followingsList[0].followings;
-
-      let usersList = await User.find({ _id: { $in: followingsList } });
-      if (usersList.length != 0) {
-        const result = {
-          status_code: 200,
-          status_msg: `All followings fetched successfully`,
-          data: usersList,
-        };
-        res.status(200).send(result);
-      } else {
-        const result = {
-          status_code: 404,
-          status_msg: `No followings found`,
-        };
-        res.status(404).send(result);
-      }
-    } catch (err) {
-      const result = {
-        status_code: 500,
-        status_msg: `Something went wrong : ${err}`,
-      };
-      return res.status(500).send(result);
+      return res.status(403).send(result);
     }
   }
 };
@@ -372,4 +512,6 @@ module.exports = {
   search,
   getFollowers,
   getFollowings,
+  deActive,
+  deActiveStatus,
 };
