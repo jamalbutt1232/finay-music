@@ -64,6 +64,10 @@ const UserSchema = new mongoose.Schema(
       type: Object,
       default: undefined,
     },
+    deactive: {
+      type: Boolean,
+      default: false,
+    },
     lastOnlineTimestamp: {
       type: String,
     },

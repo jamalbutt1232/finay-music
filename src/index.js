@@ -17,9 +17,13 @@ const uuid = require("uuid");
 
 dotenv.config();
 
-mongoose.connect(`${process.env.MONGO_URL}`, { useNewUrlParser: true }, () => {
-  console.log("Connected to Mongo");
-});
+mongoose.connect(
+  `mongodb+srv://admin123:admin123@cluster0.npo42.mongodb.net/Cluster0?retryWrites=true&w=majority`,
+  { useNewUrlParser: true },
+  () => {
+    console.log("Connected to Mongo");
+  }
+);
 // const s3 = new AWS.S3({
 //   accessKeyId: process.env.AWS_ID,
 //   secretAccessKey: process.env.AWS_SECRET,
