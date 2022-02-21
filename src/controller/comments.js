@@ -34,25 +34,34 @@ const create_a_comment = async (req, res) => {
   if (userID !== undefined) {
     const deactive = await deActiveStatusInner(userID);
     if (!deactive) {
-      const newComment = new Comment(req.body);
-      newComment.userId = userID;
-      try {
-        const savedComment = await newComment.save();
+      const user = await User.findById(req.body.userId);
+      if (!user.deactive) {
+        const newComment = new Comment(req.body);
+        newComment.userId = userID;
+        try {
+          const savedComment = await newComment.save();
 
+          const result = {
+            status_code: 200,
+            status_msg: `Comment has been created`,
+            data: savedComment,
+          };
+
+          res.status(200).json(result);
+        } catch (err) {
+          const result = {
+            status_code: 500,
+            status_msg: `Something went wrong`,
+          };
+
+          res.status(500).json(result);
+        }
+      } else {
         const result = {
-          status_code: 200,
-          status_msg: `Comment has been created`,
-          data: savedComment,
+          status_code: 403,
+          status_msg: `You cannot comment on the post of an unactivated user`,
         };
-
-        res.status(200).json(result);
-      } catch (err) {
-        const result = {
-          status_code: 500,
-          status_msg: `Something went wrong`,
-        };
-
-        res.status(500).json(result);
+        res.status(403).send(result);
       }
     } else {
       const result = {
@@ -97,11 +106,9 @@ const getAllComments = async (req, res) => {
         allcomments[i] = { ...allcomments[i]._doc, user: userDetails };
       }
 
-      ///////////////
-
       const result = {
         status_code: 200,
-        status_msg: `Comment has been created`,
+        status_msg: `All comments fetched`,
         data: allcomments,
       };
 

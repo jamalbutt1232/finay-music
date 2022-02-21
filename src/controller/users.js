@@ -135,28 +135,36 @@ const followUser = async (req, res) => {
       if (userID !== req.body.id) {
         try {
           const user = await User.findById(req.body.id);
-          const currentUser = await User.findById(userID);
-          if (!user.followers.includes(userID)) {
-            await user.updateOne({
-              $push: {
-                followers: userID,
-              },
-            });
-            await currentUser.updateOne({
-              $push: {
-                followings: req.body.id,
-              },
-            });
-            const result = {
-              status_code: 200,
-              status_msg: `You now follow user`,
-              data: user,
-            };
-            res.status(200).send(result);
+          if (!user.deactive) {
+            const currentUser = await User.findById(userID);
+            if (!user.followers.includes(userID)) {
+              await user.updateOne({
+                $push: {
+                  followers: userID,
+                },
+              });
+              await currentUser.updateOne({
+                $push: {
+                  followings: req.body.id,
+                },
+              });
+              const result = {
+                status_code: 200,
+                status_msg: `You now follow user`,
+                data: user,
+              };
+              res.status(200).send(result);
+            } else {
+              const result = {
+                status_code: 403,
+                status_msg: `You already followed the user`,
+              };
+              res.status(403).send(result);
+            }
           } else {
             const result = {
               status_code: 403,
-              status_msg: `You already followed the user`,
+              status_msg: `You cannot follow an unactivated use`,
             };
             res.status(403).send(result);
           }
@@ -194,29 +202,32 @@ const unfollowUser = async (req, res) => {
         try {
           const currentUser = await User.findById(userID);
           const user = await User.findById(req.body.id);
-          if (user.followers.includes(userID)) {
-            await user.updateOne({
-              $pull: {
-                followers: userID,
-              },
-            });
-            await currentUser.updateOne({
-              $pull: {
-                followings: req.body.id,
-              },
-            });
-            const result = {
-              status_code: 200,
-              status_msg: `You now unfollow user`,
-              data: user,
-            };
-            res.status(200).send(result);
+          if (!user.deactive) {
+            if (user.followers.includes(userID)) {
+              await user.updateOne({
+                $pull: {
+                  followers: userID,
+                },
+              });
+              await currentUser.updateOne({
+                $pull: {
+                  followings: req.body.id,
+                },
+              });
+              const result = {
+                status_code: 200,
+                status_msg: `You now unfollow user`,
+                data: user,
+              };
+              res.status(200).send(result);
+            } else {
+              const result = {
+                status_code: 403,
+                status_msg: `You already unfollow user`,
+              };
+              res.status(403).send(result);
+            }
           } else {
-            const result = {
-              status_code: 403,
-              status_msg: `You already unfollow user`,
-            };
-            res.status(403).send(result);
           }
         } catch (err) {
           const result = {
@@ -327,6 +338,9 @@ const search = async (req, res) => {
           _id: { $ne: userID },
           // search for name and shd be case insensitive
           name: { $regex: searchedName, $options: "i" },
+          deactive: {
+            $ne: true,
+          },
         });
 
         if (user.length != 0) {

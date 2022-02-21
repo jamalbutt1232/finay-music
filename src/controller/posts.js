@@ -160,22 +160,31 @@ const likePost = async (req, res) => {
     if (!deactive) {
       try {
         const post = await Post.findById(req.body.id);
-        if (!post.likes.includes(userID)) {
-          await post.updateOne({ $push: { likes: userID } });
-          const result = {
-            status_code: 200,
-            status_msg: `Post has been liked`,
-            data: post,
-          };
-          res.status(200).json(result);
+        const user = await deActiveStatusInner(post.userId);
+        if (!user.deactive) {
+          if (!post.likes.includes(userID)) {
+            await post.updateOne({ $push: { likes: userID } });
+            const result = {
+              status_code: 200,
+              status_msg: `Post has been liked`,
+              data: post,
+            };
+            res.status(200).json(result);
+          } else {
+            await post.updateOne({ $pull: { likes: userID } });
+            const result = {
+              status_code: 200,
+              status_msg: `Post has been disliked`,
+              data: post,
+            };
+            res.status(200).json(result);
+          }
         } else {
-          await post.updateOne({ $pull: { likes: userID } });
           const result = {
-            status_code: 200,
-            status_msg: `Post has been disliked`,
-            data: post,
+            status_code: 403,
+            status_msg: `You cannot like the post of an unactivated user`,
           };
-          res.status(200).json(result);
+          res.status(403).send(result);
         }
       } catch (err) {
         const result = {
@@ -235,15 +244,16 @@ const allPost = async (req, res) => {
         for (i = 0; i < friendPosts[0].length; i++) {
           const friendID = friendPosts[0][i].userId;
           const friendData = await User.findById(friendID);
+          if (!friendData.deactive) {
+            friendDetails.user_name = friendData.name;
+            friendDetails.user_email = friendData.email;
+            friendDetails.user_img = friendData.profilePicture;
 
-          friendDetails.user_name = friendData.name;
-          friendDetails.user_email = friendData.email;
-          friendDetails.user_img = friendData.profilePicture;
-
-          friendPosts[0][i] = {
-            ...friendPosts[0][i]._doc,
-            user: friendDetails,
-          };
+            friendPosts[0][i] = {
+              ...friendPosts[0][i]._doc,
+              user: friendDetails,
+            };
+          }
         }
 
         let allposts = list_of_posts.concat(...friendPosts);
