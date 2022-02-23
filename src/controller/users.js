@@ -462,15 +462,46 @@ const getFollowings = async (req, res) => {
 
 const deActive = async (req, res) => {
   const userID = getUserID(req, res);
+
   if (userID !== undefined) {
     try {
-      const user = await User.findByIdAndUpdate(userID, {
-        deactive: true,
+      let deactive = false;
+      User.findById(userID, function (err, user) {
+        user.deactive = !user.deactive;
+        deactive = !user.deactive;
+        user.save(function (err) {
+          if (err) {
+            console.error("ERROR!");
+          }
+        });
       });
+
       const result = {
         status_code: 200,
-        status_msg: `You have successfully deactivated your account`,
-        data: user,
+        status_msg: `You have successfully chnage deactivation status of your account`,
+        data: deactive,
+      };
+      res.status(200).send(result);
+    } catch (err) {
+      const result = {
+        status_code: 500,
+        status_msg: `Something went wrong : ${err}`,
+      };
+      return res.status(500).send(result);
+    }
+  }
+};
+
+const deActiveStatus = async (req, res) => {
+  const userID = getUserID(req, res);
+  if (userID !== undefined) {
+    try {
+      const user = await User.findById(userID);
+
+      const result = {
+        status_code: 200,
+        status_msg: `You have successfully fetched account's status`,
+        data: user.deactive,
       };
       res.status(200).send(result);
     } catch (err) {
@@ -483,21 +514,30 @@ const deActive = async (req, res) => {
   }
 };
 
-const deActiveStatus = async (req, res) => {
+const active2f = async (req, res) => {
   const userID = getUserID(req, res);
   if (userID !== undefined) {
     const deactive = await deActiveStatusInner(userID);
-    console.log("deactive   : :", deactive);
+    let twofactor = false;
     if (!deactive) {
       try {
-        const user = await User.findById(userID);
-
-        const result = {
-          status_code: 200,
-          status_msg: `You have successfully fetched account's status`,
-          data: user.deactive,
-        };
-        res.status(200).send(result);
+        User.findById(userID, async function (err, user) {
+          user.twofactor = !user.twofactor;
+          twofactor = !user.twofactor;
+          user.save(function (err) {
+            if (err) {
+              console.error("ERROR!");
+            } else {
+              console.log("no error brah");
+            }
+          });
+          const result = {
+            status_code: 200,
+            status_msg: `You have successfully changed your two factor authentication status`,
+            data: twofactor,
+          };
+          res.status(200).send(result);
+        });
       } catch (err) {
         const result = {
           status_code: 500,
@@ -528,4 +568,5 @@ module.exports = {
   getFollowings,
   deActive,
   deActiveStatus,
+  active2f,
 };
