@@ -68,6 +68,10 @@ const UserSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    twofactor: {
+      type: Boolean,
+      default: false,
+    },
     lastOnlineTimestamp: {
       type: String,
     },
