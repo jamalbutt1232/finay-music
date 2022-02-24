@@ -12,6 +12,7 @@ const {
   deActive,
   deActiveStatus,
   active2f,
+  sendSMS,
 } = require("../controller/users");
 const router = require("express").Router();
 const verifyToken = require("../private/privateRoute");
@@ -29,5 +30,5 @@ router.get("/getfollowings/:id", verifyToken, getFollowings);
 router.put("/deactive", verifyToken, deActive);
 router.get("/deactivestatus", verifyToken, deActiveStatus);
 router.put("/twofactor", verifyToken, active2f);
-
+router.get("/sendsms", verifyToken, sendSMS);
 module.exports = router;

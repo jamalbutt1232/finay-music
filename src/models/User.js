@@ -13,7 +13,6 @@ const UserSchema = new mongoose.Schema(
       required: true,
       min: 6,
     },
-
     name: {
       type: String,
       default: "",
@@ -45,6 +44,10 @@ const UserSchema = new mongoose.Schema(
     bio: {
       type: String,
       max: 300,
+      default: "",
+    },
+    number: {
+      type: String,
       default: "",
     },
     experience: {

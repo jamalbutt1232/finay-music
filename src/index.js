@@ -17,34 +17,6 @@ const uuid = require("uuid");
 
 dotenv.config();
 
-var accountSid = "AC29e6dec481584aad3c5be4cf93d0f0fa"; // Your Account SID from www.twilio.com/console
-var authToken = "1a96b8b3f5e20bfe0aa1d1fab308d78d"; // Your Auth Token from www.twilio.com/console
-
-const client = require("twilio")(accountSid, authToken, {
-  lazyLoading: true,
-});
-// sendMessage();
-let v;
-function sendMessage() {
-  client.messages
-    .create({ body: "123451", from: "13516668982", to: "+923224948730" })
-    .then((message) => {
-      v = message.sid;
-      console.log(" message.sid :", message.sid);
-    });
-}
-verify();
-function verify() {
-  // client.verify
-  //   .services(v)
-  //   .verificationChecks.create({ to: "+923224948730", code: "123451" })
-  //   .then((verification_check) =>
-  //     console.log("verification_check.status : ", verification_check)
-  //   );
-  client.verify.services
-    .create({ friendlyName: "My First Verify Service" })
-    .then((service) => console.log(service.sid));
-}
 mongoose.connect(
   `${process.env.MONGO_URL}`,
   { useNewUrlParser: true },

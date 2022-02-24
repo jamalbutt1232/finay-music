@@ -31,40 +31,30 @@ const deActiveStatusInner = async (uid) => {
     return `deActiveStatusInner Issue : ${err}`;
   }
 };
-
 // update user
 const updateUser = async (req, res) => {
   const userID = getUserID(req, res);
   if (userID !== undefined) {
-    const deactive = await deActiveStatusInner(userID);
-    if (!deactive) {
-      if (userID || req.body.isAdmin) {
-        try {
-          const user = await User.findByIdAndUpdate(userID, {
-            $set: req.body,
-          });
-          const result = {
-            status_code: 200,
-            status_msg: `Account has been updated`,
-            data: user,
-          };
-          res.status(200).send(result);
-        } catch (err) {
-          const result = {
-            status_code: 500,
-            status_msg: `Something went wrong`,
-          };
-          return res.status(500).send(result, err);
-        }
-      } else {
-        return res.status(403).json("You can update only your account");
+    if (userID || req.body.isAdmin) {
+      try {
+        const user = await User.findByIdAndUpdate(userID, {
+          $set: req.body,
+        });
+        const result = {
+          status_code: 200,
+          status_msg: `Account has been updated`,
+          data: user,
+        };
+        res.status(200).send(result);
+      } catch (err) {
+        const result = {
+          status_code: 500,
+          status_msg: `Something went wrong`,
+        };
+        return res.status(500).send(result, err);
       }
     } else {
-      const result = {
-        status_code: 403,
-        status_msg: `Please active your account`,
-      };
-      return res.status(403).send(result);
+      return res.status(403).json("You can update only your account");
     }
   }
 };
@@ -191,7 +181,6 @@ const followUser = async (req, res) => {
     }
   }
 };
-
 // unfollow user currently
 const unfollowUser = async (req, res) => {
   const userID = getUserID(req, res);
@@ -295,31 +284,22 @@ const allUser = async (req, res) => {
 const currentUser = async (req, res) => {
   const userID = getUserID(req, res);
   if (userID !== undefined) {
-    const deactive = await deActiveStatusInner(userID);
-    if (!deactive) {
-      try {
-        const user = await User.findById(userID);
-        const { password, updatedAt, ...other } = user._doc;
-        const result = {
-          status_code: 200,
-          status_msg: `You successfuly fetched user information`,
-          data: other,
-        };
-        res.status(200).send(result);
-        // res.status(200).json(other);
-      } catch (err) {
-        const result = {
-          status_code: 500,
-          status_msg: `You could not fetch user information`,
-        };
-        return res.status(500).send(result);
-      }
-    } else {
+    try {
+      const user = await User.findById(userID);
+      const { password, updatedAt, ...other } = user._doc;
       const result = {
-        status_code: 403,
-        status_msg: `Please active your account`,
+        status_code: 200,
+        status_msg: `You successfuly fetched user information`,
+        data: other,
       };
-      return res.status(403).send(result);
+      res.status(200).send(result);
+      // res.status(200).json(other);
+    } catch (err) {
+      const result = {
+        status_code: 500,
+        status_msg: `You could not fetch user information`,
+      };
+      return res.status(500).send(result);
     }
   }
 };
@@ -555,6 +535,29 @@ const active2f = async (req, res) => {
   }
 };
 
+const sendSMS = async (req, res) => {
+  var accountSid = "AC29e6dec481584aad3c5be4cf93d0f0fa"; // Your Account SID from www.twilio.com/console
+  var authToken = "1a96b8b3f5e20bfe0aa1d1fab308d78d"; // Your Auth Token from www.twilio.com/console
+  const sender = "13516668982";
+  const client = require("twilio")(accountSid, authToken);
+
+  min = 2000;
+  max = 9000;
+
+  const random_sequence = Math.floor(Math.random() * (max - min) + min);
+  client.messages
+    .create({ body: random_sequence, from: sender, to: req.body.number })
+    .then((message) => {
+      console.log(message);
+    });
+
+  const result = {
+    status_code: 200,
+    status_msg: `Please check code`,
+    data: `Message sent : ${random_sequence}`,
+  };
+  return res.status(200).send(result);
+};
 module.exports = {
   updateUser,
   deleteUser,
@@ -569,4 +572,5 @@ module.exports = {
   deActive,
   deActiveStatus,
   active2f,
+  sendSMS,
 };
