@@ -52,9 +52,17 @@ const UserSchema = new mongoose.Schema(
       max: 100,
       default: "",
     },
-    socialMediaLinks: {
-      type: Array,
-      default: [],
+    facebook: {
+      type: String,
+      default: "",
+    },
+    instagram: {
+      type: String,
+      default: "",
+    },
+    twitter: {
+      type: String,
+      default: "",
     },
     isOnline: {
       type: Boolean,
