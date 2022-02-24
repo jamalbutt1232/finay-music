@@ -18,7 +18,7 @@ const uuid = require("uuid");
 dotenv.config();
 
 mongoose.connect(
-  `mongodb+srv://admin123:admin123@cluster0.npo42.mongodb.net/Cluster0?retryWrites=true&w=majority`,
+  `${process.env.MONGO_URL}`,
   { useNewUrlParser: true },
   () => {
     console.log("Connected to Mongo");

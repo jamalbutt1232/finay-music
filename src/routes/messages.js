@@ -20,12 +20,12 @@ router.post("/", async (req, res) => {
 });
 
 //get
-//.sort({ createdAt: -1 })
+//
 router.get("/:conversationId", async (req, res) => {
   try {
     const messages = await Message.find({
       conversationId: req.params.conversationId,
-    });
+    }).sort({ createdAt: -1 });
     const result = {
       status_code: 200,
       status_msg: `All messages fetched successfully`,
