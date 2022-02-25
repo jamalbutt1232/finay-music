@@ -9,11 +9,13 @@ const userRoute = require("./routes/users");
 const authRoute = require("./routes/auth");
 const postRoute = require("./routes/posts");
 const commentRoute = require("./routes/comments");
+const otpRoute = require("./routes/otp");
+
 const AWS = require("aws-sdk");
 const multer = require("multer");
 const conversationRoute = require("./routes/conversations");
 const messageRoute = require("./routes/messages");
-const uuid = require("uuid");
+const { v4: uuidv4 } = require("uuid");
 
 dotenv.config();
 
@@ -24,10 +26,7 @@ mongoose.connect(
     console.log("Connected to Mongo");
   }
 );
-// const s3 = new AWS.S3({
-//   accessKeyId: process.env.AWS_ID,
-//   secretAccessKey: process.env.AWS_SECRET,
-// });
+
 // Middleware
 app.use(express.json());
 app.use(helmet());
@@ -39,46 +38,44 @@ app.use("/api/posts", postRoute);
 app.use("/api/conversations", conversationRoute);
 app.use("/api/messages", messageRoute);
 app.use("/api/comments", commentRoute);
+app.use("/api/otp", otpRoute);
 
 ////////////////////////////////////////
-// // Mongo URI
-// const mongoURI =
-//   "mongodb+srv://admin123:admin123@cluster0.npo42.mongodb.net/Cluster0?retryWrites=true&w=majority";
 
-// AWS_ID = "";
-// AWS_SECRET = "";
-// AWS_BUCKET_NAME = "";
+AWS_ID = "AKIA2RROVPBDGISDLEY7";
+AWS_SECRET = "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";
+AWS_BUCKET_NAME = "finay-music-bucket";
+const s3 = new AWS.S3({
+  accessKeyId: AWS_ID,
+  secretAccessKey: AWS_SECRET,
+});
 
-// const storage = multer.memoryStorage({
-//   destination: function (req, file, callback) {
-//     callback(null, "");
-//   },
-// });
+const storage = multer.memoryStorage({
+  destination: function (req, file, callback) {
+    callback(null, "");
+  },
+});
 
-// const upload = multer({ storage }).single("image");
+const upload = multer({ storage }).single("image");
 
-// app.post("/upload", upload, (req, res) => {
-//   console.log(req.file);
-//   res.send({
-//     message: "filer",
-//   });
-//   // let myFile = req.file.originalname.split(".");
-//   // const fileType = myFile[myFile.length - 1];
+app.post("/upload", upload, (req, res) => {
+  let myFile = req.file.originalname.split(".");
+  const fileType = myFile[myFile.length - 1];
 
-//   // const params = {
-//   //   Bucket: process.env.AWS_BUCKET_NAME,
-//   //   Key: `${uuid()}.${fileType}`,
-//   //   Body: req.file.buffer,
-//   // };
+  const params = {
+    Bucket: AWS_BUCKET_NAME,
+    Key: `${uuidv4()}.${fileType}`,
+    Body: req.file.buffer,
+  };
 
-//   // s3.upload(params, (error, data) => {
-//   //   if (error) {
-//   //     res.status(500).send(error);
-//   //   }
+  s3.upload(params, (error, data) => {
+    if (error) {
+      res.status(500).send(error);
+    }
 
-//   //   res.status(200).send(data);
-//   // });
-// });
+    res.status(200).send(data);
+  });
+});
 
 /////////////////////////////////////////////////////////////////////
 

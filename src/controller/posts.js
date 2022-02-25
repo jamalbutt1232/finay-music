@@ -1,6 +1,19 @@
 const Post = require("../models/Post");
 const User = require("../models/User");
 const jwt = require("jsonwebtoken");
+const AWS = require("aws-sdk");
+const multer = require("multer");
+const { v4: uuidv4 } = require("uuid");
+
+const storage = multer.memoryStorage({
+  destination: function (req, file, callback) {
+    callback(null, "");
+  },
+});
+const image_upload = multer({ storage }).single("image");
+const video_upload = multer({ storage }).single("video");
+const audio_upload = multer({ storage }).single("audio");
+const doc_upload = multer({ storage }).single("doc");
 
 // GET USER ID
 const getUserID = (req, res) => {
@@ -30,31 +43,121 @@ const deActiveStatusInner = async (uid) => {
   }
 };
 
+// const create_a_post = async (req, res) => {
+//   const userID = getUserID(req, res);
+
+//   if (userID !== undefined) {
+//     const deactive = await deActiveStatusInner(userID);
+//     if (!deactive) {
+//       const newPost = new Post(req.body);
+//       newPost.userId = userID;
+//       try {
+//         const savedPost = await newPost.save();
+
+//         const result = {
+//           status_code: 200,
+//           status_msg: `Post has been created`,
+//           data: savedPost,
+//         };
+
+//         res.status(200).json(result);
+//       } catch (err) {
+//         const result = {
+//           status_code: 500,
+//           status_msg: `Something went wrong`,
+//         };
+
+//         res.status(500).json(result);
+//       }
+//     } else {
+//       const result = {
+//         status_code: 403,
+//         status_msg: `Please active your account`,
+//       };
+//       return res.status(403).send(result);
+//     }
+//   }
+// };
 const create_a_post = async (req, res) => {
   const userID = getUserID(req, res);
 
   if (userID !== undefined) {
     const deactive = await deActiveStatusInner(userID);
     if (!deactive) {
-      const newPost = new Post(req.body);
-      newPost.userId = userID;
-      try {
-        const savedPost = await newPost.save();
+      ///////////////////////////////////////////////////////////////////
+      AWS_ID = "AKIA2RROVPBDGISDLEY7";
+      AWS_SECRET = "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";
+      AWS_BUCKET_NAME = "finay-music-bucket";
+      const s3 = new AWS.S3({
+        accessKeyId: AWS_ID,
+        secretAccessKey: AWS_SECRET,
+      });
+      var public_link = "";
+      if (req.file) {
+        let myFile = req.file.originalname.split(".");
+        const fileType = myFile[myFile.length - 1];
 
-        const result = {
-          status_code: 200,
-          status_msg: `Post has been created`,
-          data: savedPost,
+        const params = {
+          Bucket: AWS_BUCKET_NAME,
+          Key: `${uuidv4()}.${fileType}`,
+          Body: req.file.buffer,
         };
 
-        res.status(200).json(result);
-      } catch (err) {
-        const result = {
-          status_code: 500,
-          status_msg: `Something went wrong`,
-        };
+        s3.upload(params, async (error, data) => {
+          if (error) {
+            res.status(500).send(error);
+          } else {
+            public_link = data.Location;
+            const newPost = new Post(req.body);
+            newPost.userId = userID;
+            newPost.file = public_link;
+            console.log("here 1");
 
-        res.status(500).json(result);
+            try {
+              console.log("here 2");
+              const savedPost = await newPost.save();
+
+              const result = {
+                status_code: 200,
+                status_msg: `Post has been created`,
+                data: savedPost,
+              };
+
+              res.status(200).json(result);
+            } catch (err) {
+              const result = {
+                status_code: 500,
+                status_msg: `Something went wrong`,
+              };
+
+              res.status(500).json(result);
+            }
+          }
+        });
+        // console.log("public_link  :", public_link);
+      } else {
+        console.log("here 3");
+        const newPost = new Post(req.body);
+        newPost.userId = userID;
+
+        try {
+          const savedPost = await newPost.save();
+
+          const result = {
+            status_code: 200,
+            status_msg: `Post has been created`,
+            data: savedPost,
+          };
+
+          res.status(200).json(result);
+        } catch (err) {
+          const result = {
+            status_code: 500,
+            status_msg: `Something went wrong`,
+          };
+
+          res.status(500).json(result);
+        }
       }
     } else {
       const result = {
@@ -62,9 +165,12 @@ const create_a_post = async (req, res) => {
         status_msg: `Please active your account`,
       };
       return res.status(403).send(result);
+
+      ///////////////////////////////////////////////////////////////////
     }
   }
 };
+
 //update a post
 const updatePost = async (req, res) => {
   const userID = getUserID(req, res);
@@ -440,4 +546,5 @@ module.exports = {
   allPost,
   singlePost,
   singleuserpost,
+  // create_a_post_v2,
 };
