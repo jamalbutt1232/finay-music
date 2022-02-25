@@ -40,6 +40,27 @@ app.use("/api/messages", messageRoute);
 app.use("/api/comments", commentRoute);
 app.use("/api/otp", otpRoute);
 
+// Notification API
+const notification_options = {
+  priority: "high",
+  timeToLive: 60 * 60 * 24,
+};
+app.post("/api/firebase/notification", (req, res) => {
+  const registrationToken = req.body.registrationToken;
+  const message = req.body.message;
+  const options = notification_options;
+
+  admin
+    .messaging()
+    .sendToDevice(registrationToken, message, options)
+    .then((response) => {
+      res.status(200).send("Notification sent successfully");
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+});
+
 ////////////////////////////////////////
 
 AWS_ID = "AKIA2RROVPBDGISDLEY7";
@@ -95,7 +116,6 @@ io.on("connection", (socket) => {
   console.log("Connected to socket.io");
   socket.on("setup", (userData) => {
     socket.join(userData._id);
-    console.log(userData._id);
     socket.emit("connected");
   });
 

@@ -55,9 +55,17 @@ const UserSchema = new mongoose.Schema(
       max: 100,
       default: "",
     },
-    socialMediaLinks: {
-      type: Array,
-      default: [],
+    facebook: {
+      type: String,
+      default: "",
+    },
+    instagram: {
+      type: String,
+      default: "",
+    },
+    twitter: {
+      type: String,
+      default: "",
     },
     isOnline: {
       type: Boolean,
@@ -77,6 +85,12 @@ const UserSchema = new mongoose.Schema(
     },
     lastOnlineTimestamp: {
       type: String,
+    },
+    pushToken: {
+      type: String,
+    },
+    badgeCount: {
+      type: Number,
     },
   },
   { timestamps: true }
