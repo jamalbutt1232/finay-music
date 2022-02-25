@@ -14,16 +14,13 @@ const multer = require("multer");
 const conversationRoute = require("./routes/conversations");
 const messageRoute = require("./routes/messages");
 const uuid = require("uuid");
+const {admin} = require("./firebase/firebaseConfig")
 
 dotenv.config();
 
-mongoose.connect(
-  `${process.env.MONGO_URL}`,
-  { useNewUrlParser: true },
-  () => {
-    console.log("Connected to Mongo");
-  }
-);
+mongoose.connect(`${process.env.MONGO_URL}`, { useNewUrlParser: true }, () => {
+  console.log("Connected to Mongo");
+});
 // const s3 = new AWS.S3({
 //   accessKeyId: process.env.AWS_ID,
 //   secretAccessKey: process.env.AWS_SECRET,
@@ -39,6 +36,27 @@ app.use("/api/posts", postRoute);
 app.use("/api/conversations", conversationRoute);
 app.use("/api/messages", messageRoute);
 app.use("/api/comments", commentRoute);
+
+// Notification API
+const notification_options = {
+  priority: "high",
+  timeToLive: 60 * 60 * 24,
+};
+app.post("/api/firebase/notification", (req, res) => {
+  const registrationToken = req.body.registrationToken;
+  const message = req.body.message;
+  const options = notification_options;
+
+  admin
+    .messaging()
+    .sendToDevice(registrationToken, message, options)
+    .then((response) => {
+      res.status(200).send("Notification sent successfully");
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+});
 
 ////////////////////////////////////////
 // // Mongo URI
@@ -98,7 +116,6 @@ io.on("connection", (socket) => {
   console.log("Connected to socket.io");
   socket.on("setup", (userData) => {
     socket.join(userData._id);
-    console.log(userData._id);
     socket.emit("connected");
   });
 

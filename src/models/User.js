@@ -86,6 +86,12 @@ const UserSchema = new mongoose.Schema(
     lastOnlineTimestamp: {
       type: String,
     },
+    pushToken: {
+      type: String,
+    },
+    badgeCount: {
+      type: Number,
+    },
   },
   { timestamps: true }
 );
