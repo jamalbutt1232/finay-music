@@ -7,10 +7,23 @@ const {
   allPost,
   singlePost,
   singleuserpost,
+  create_a_post_v2,
 } = require("../controller/posts");
 const verifyToken = require("../private/privateRoute");
 
-router.post("/", verifyToken, create_a_post);
+const AWS = require("aws-sdk");
+const multer = require("multer");
+const { v4: uuidv4 } = require("uuid");
+
+const storage = multer.memoryStorage({
+  destination: function (req, file, callback) {
+    callback(null, "");
+  },
+});
+const file_upload = multer({ storage }).single("file");
+
+router.post("/", verifyToken, file_upload, create_a_post);
+// router.post("/createpost", verifyToken, file_upload, create_a_post_v2);
 router.put("/updatepost", verifyToken, updatePost);
 router.delete("/deletepost", verifyToken, deletePost);
 router.put("/like", verifyToken, likePost);

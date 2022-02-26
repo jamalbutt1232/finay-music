@@ -3,6 +3,7 @@ const router = require("express").Router();
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 var multer = require("multer");
+const OTP = require("../models/OTP");
 
 // GET USER ID
 const getUserID = (req, res) => {
@@ -556,7 +557,11 @@ const sendSMS = async (req, res) => {
     status_msg: `Please check code`,
     data: `Message sent : ${random_sequence}`,
   };
-  return res.status(200).send(result);
+
+  const newOTP = new OTP(req.body);
+
+  await newOTP.save();
+  return;
 };
 module.exports = {
   updateUser,
