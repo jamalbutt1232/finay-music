@@ -11,7 +11,6 @@ const postRoute = require("./routes/posts");
 const commentRoute = require("./routes/comments");
 const otpRoute = require("./routes/otp");
 
-
 const multer = require("multer");
 const conversationRoute = require("./routes/conversations");
 const messageRoute = require("./routes/messages");
@@ -37,6 +36,9 @@ app.use("/api/messages", messageRoute);
 app.use("/api/comments", commentRoute);
 app.use("/api/otp", otpRoute);
 
+app.get("/", (req, res) => {
+  res.json("hi");
+});
 // Notification API
 const notification_options = {
   priority: "high",
@@ -57,8 +59,8 @@ app.post("/api/firebase/notification", (req, res) => {
       console.log(error);
     });
 });
-
-const server = app.listen(8800, () => {
+const PORT = process.env.PORT || 8800;
+const server = app.listen(PORT, () => {
   console.log("Backend server started");
 });
 
