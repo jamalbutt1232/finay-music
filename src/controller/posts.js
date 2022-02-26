@@ -2,7 +2,7 @@ const Post = require("../models/Post");
 const User = require("../models/User");
 const jwt = require("jsonwebtoken");
 const AWS = require("aws-sdk");
-const multer = require("multer");
+
 const { v4: uuidv4 } = require("uuid");
 const path = require("path");
 require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
