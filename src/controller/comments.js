@@ -1,11 +1,13 @@
 const Comment = require("../models/Comment");
 const User = require("../models/User");
 const jwt = require("jsonwebtoken");
+const path = require("path");
+require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
 
 // GET USER ID
 const getUserID = (req, res) => {
   let uid = undefined;
-  jwt.verify(req.token, "adasddad3rerfsdsfd", function (err, data) {
+  jwt.verify(req.token, process.env.TOKEN_SECRET, function (err, data) {
     if (err) {
       const result = {
         status_code: 403,

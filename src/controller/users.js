@@ -1,14 +1,14 @@
 const User = require("../models/User");
-const router = require("express").Router();
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
-var multer = require("multer");
-const OTP = require("../models/OTP");
 
+const jwt = require("jsonwebtoken");
+
+const OTP = require("../models/OTP");
+const path = require("path");
+require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
 // GET USER ID
 const getUserID = (req, res) => {
   let uid = undefined;
-  jwt.verify(req.token, "adasddad3rerfsdsfd", function (err, data) {
+  jwt.verify(req.token, process.env.TOKEN_SECRET, function (err, data) {
     if (err) {
       const result = {
         status_code: 403,
