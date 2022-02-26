@@ -1,14 +1,14 @@
 const User = require("../models/User");
-const router = require("express").Router();
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
-var multer = require("multer");
-const OTP = require("../models/OTP");
 
+const jwt = require("jsonwebtoken");
+
+const OTP = require("../models/OTP");
+const path = require("path");
+require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
 // GET USER ID
 const getUserID = (req, res) => {
   let uid = undefined;
-  jwt.verify(req.token, "adasddad3rerfsdsfd", function (err, data) {
+  jwt.verify(req.token, process.env.TOKEN_SECRET, function (err, data) {
     if (err) {
       const result = {
         status_code: 403,
@@ -537,31 +537,96 @@ const active2f = async (req, res) => {
 };
 
 const sendSMS = async (req, res) => {
-  var accountSid = "AC29e6dec481584aad3c5be4cf93d0f0fa"; // Your Account SID from www.twilio.com/console
-  var authToken = "1a96b8b3f5e20bfe0aa1d1fab308d78d"; // Your Auth Token from www.twilio.com/console
-  const sender = "13516668982";
-  const client = require("twilio")(accountSid, authToken);
+  const userID = getUserID(req, res);
+  if (userID !== undefined) {
+    const deactive = await deActiveStatusInner(userID);
+    if (!deactive) {
+      var otpExist = await OTP.find({ userId: userID });
+      console.log("otpExist  :", otpExist);
+      if (otpExist.length == 0) {
+        var accountSid = "AC29e6dec481584aad3c5be4cf93d0f0fa"; // Your Account SID from www.twilio.com/console
+        var authToken = "1a96b8b3f5e20bfe0aa1d1fab308d78d"; // Your Auth Token from www.twilio.com/console
+        const sender = "13516668982";
+        const client = require("twilio")(accountSid, authToken);
 
-  min = 2000;
-  max = 9000;
+        min = 2000;
+        max = 9000;
 
-  const random_sequence = Math.floor(Math.random() * (max - min) + min);
-  client.messages
-    .create({ body: random_sequence, from: sender, to: req.body.number })
-    .then((message) => {
-      console.log(message);
-    });
+        try {
+          const random_sequence = Math.floor(Math.random() * (max - min) + min);
+          client.messages
+            .create({
+              body: random_sequence,
+              from: sender,
+              to: req.body.number,
+            })
+            .then((message) => {
+              console.log(message);
+            });
 
-  const result = {
-    status_code: 200,
-    status_msg: `Please check code`,
-    data: `Message sent : ${random_sequence}`,
-  };
+          const newOTP = new OTP(req.body);
+          newOTP.code = random_sequence;
+          newOTP.userId = userID;
+          await newOTP.save();
+          const result = {
+            status_code: 200,
+            status_msg: `Please check code`,
+            data: `Message sent : ${random_sequence}`,
+          };
+          return res.status(200).json(result);
+        } catch (err) {
+          const result = {
+            status_code: 500,
+            status_msg: `Something went wrong : ${err}`,
+          };
+          return res.status(500).json(result);
+        }
+      } else {
+        const result = {
+          status_code: 404,
+          status_msg: `A code was already sent to you. Wait for 2 minutes to send another one`,
+        };
+        return res.status(404).json(result);
+      }
+    }
+  }
+};
 
-  const newOTP = new OTP(req.body);
-
-  await newOTP.save();
-  return;
+const verifySMS = async (req, res) => {
+  const userID = getUserID(req, res);
+  if (userID !== undefined) {
+    const deactive = await deActiveStatusInner(userID);
+    if (!deactive) {
+      try {
+        let otp = await OTP.find({ userId: userID, code: req.params.code });
+        if (otp.length != 0) {
+          const result = {
+            status_code: 200,
+            status_msg: `Successfully verified`,
+          };
+          return res.status(200).json(result);
+        } else {
+          const result = {
+            status_code: 404,
+            status_msg: `Incorrect verification`,
+          };
+          return res.status(404).json(result);
+        }
+      } catch (err) {
+        const result = {
+          status_code: 500,
+          status_msg: `Something went wrong`,
+        };
+        return res.status(500).json(result);
+      }
+    } else {
+      const result = {
+        status_code: 403,
+        status_msg: `Please active your account`,
+      };
+      return res.status(403).send(result);
+    }
+  }
 };
 module.exports = {
   updateUser,
@@ -578,4 +643,5 @@ module.exports = {
   deActiveStatus,
   active2f,
   sendSMS,
+  verifySMS,
 };

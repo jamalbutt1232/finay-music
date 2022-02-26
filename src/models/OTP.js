@@ -2,10 +2,10 @@ const mongoose = require("mongoose");
 
 const OTPSchema = new mongoose.Schema({
   type: Date,
-  expiresInAMin: {
+  createdAt: {
     type: Date,
     default: Date.now,
-    expires: 1,
+    expires: "2m",
   },
   code: {
     type: String,

@@ -1,5 +1,4 @@
 module.exports = function (req, res, next) {
-  // console.log(req.headers["authorization"]);
   const bearerHeader = req.headers["authorization"];
   if (typeof bearerHeader !== "undefined") {
     const bearer = bearerHeader.split(" ");

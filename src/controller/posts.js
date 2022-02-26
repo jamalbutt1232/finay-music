@@ -4,21 +4,13 @@ const jwt = require("jsonwebtoken");
 const AWS = require("aws-sdk");
 const multer = require("multer");
 const { v4: uuidv4 } = require("uuid");
-
-const storage = multer.memoryStorage({
-  destination: function (req, file, callback) {
-    callback(null, "");
-  },
-});
-const image_upload = multer({ storage }).single("image");
-const video_upload = multer({ storage }).single("video");
-const audio_upload = multer({ storage }).single("audio");
-const doc_upload = multer({ storage }).single("doc");
+const path = require("path");
+require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
 
 // GET USER ID
 const getUserID = (req, res) => {
   let uid = undefined;
-  jwt.verify(req.token, "adasddad3rerfsdsfd", function (err, data) {
+  jwt.verify(req.token, process.env.TOKEN_SECRET, function (err, data) {
     if (err) {
       const result = {
         status_code: 403,
@@ -85,9 +77,10 @@ const uploadPost = async (req, res) => {
     const deactive = await deActiveStatusInner(userID);
     if (!deactive) {
       ///////////////////////////////////////////////////////////////////
-      AWS_ID = "AKIA2RROVPBDGISDLEY7";
-      AWS_SECRET = "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";
-      AWS_BUCKET_NAME = "finay-music-bucket";
+
+      AWS_ID = process.env.AWS_ID;
+      AWS_SECRET = process.env.AWS_SECRET;
+      AWS_BUCKET_NAME = process.env.AWS_BUCKET_NAME;
       const s3 = new AWS.S3({
         accessKeyId: AWS_ID,
         secretAccessKey: AWS_SECRET,
