@@ -18,8 +18,8 @@ const messageRoute = require("./routes/messages");
 const { v4: uuidv4 } = require("uuid");
 
 const path = require("path");
-require("dotenv").config({ path: path.resolve(__dirname, "./.env") });
-
+require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
+// console.log(process.env.MONGO_URL);
 mongoose.connect(`${process.env.MONGO_URL}`, { useNewUrlParser: true }, () => {
   console.log("Connected to Mongo");
 });

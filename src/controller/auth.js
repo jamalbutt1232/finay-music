@@ -2,8 +2,9 @@ const User = require("../models/User");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const path = require("path");
-require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
+require("dotenv").config({ path: path.resolve(__dirname, "../../.env") });
 
+console.log("process.env.TOKEN_SECRET", process.env.TOKEN_SECRET);
 const register = async (req, res) => {
   try {
     // Check if a user already exists
