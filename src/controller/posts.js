@@ -81,7 +81,6 @@ const create_a_post = async (req, res) => {
 
 const uploadPost = async (req, res) => {
   const userID = getUserID(req, res);
-
   if (userID !== undefined) {
     const deactive = await deActiveStatusInner(userID);
     if (!deactive) {
@@ -127,6 +126,14 @@ const uploadPost = async (req, res) => {
         }
 
         // console.log("public_link  :", public_link);
+      } else {
+        console.log("ERROR HERE");
+        const result = {
+          status_code: 500,
+          status_msg: `Something went wrong`,
+        };
+
+        res.status(500).json(result);
       }
     } else {
       const result = {
