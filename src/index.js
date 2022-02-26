@@ -20,7 +20,7 @@ const { v4: uuidv4 } = require("uuid");
 const path = require("path");
 require("dotenv").config({ path: path.resolve(__dirname, "./.env") });
 
-mongoose.connect(process.env.MONGO_URL, { useNewUrlParser: true }, () => {
+mongoose.connect(`${process.env.MONGO_URL}`, { useNewUrlParser: true }, () => {
   console.log("Connected to Mongo");
 });
 
