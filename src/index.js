@@ -36,6 +36,9 @@ app.use("/api/messages", messageRoute);
 app.use("/api/comments", commentRoute);
 app.use("/api/otp", otpRoute);
 
+app.get("/", (req, res) => {
+  res.json("hi");
+});
 // Notification API
 const notification_options = {
   priority: "high",
