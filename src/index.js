@@ -56,8 +56,8 @@ app.post("/api/firebase/notification", (req, res) => {
       console.log(error);
     });
 });
-console.log("process.env.PORT :", process.env.PORT);
-const server = app.listen(process.env.PORT || 8800, () => {
+const PORT = process.env.PORT || 8800;
+const server = app.listen(PORT, () => {
   console.log("Backend server started");
 });
 
