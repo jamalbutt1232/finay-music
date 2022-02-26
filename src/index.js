@@ -11,7 +11,6 @@ const postRoute = require("./routes/posts");
 const commentRoute = require("./routes/comments");
 const otpRoute = require("./routes/otp");
 
-
 const multer = require("multer");
 const conversationRoute = require("./routes/conversations");
 const messageRoute = require("./routes/messages");
@@ -58,7 +57,7 @@ app.post("/api/firebase/notification", (req, res) => {
     });
 });
 
-const server = app.listen(8800, () => {
+const server = app.listen(process.env.PORT || 8800, () => {
   console.log("Backend server started");
 });
 
