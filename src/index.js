@@ -11,21 +11,18 @@ const postRoute = require("./routes/posts");
 const commentRoute = require("./routes/comments");
 const otpRoute = require("./routes/otp");
 
-const AWS = require("aws-sdk");
+
 const multer = require("multer");
 const conversationRoute = require("./routes/conversations");
 const messageRoute = require("./routes/messages");
 const { v4: uuidv4 } = require("uuid");
 
-dotenv.config();
+const path = require("path");
+require("dotenv").config({ path: path.resolve(__dirname, "./.env") });
 
-mongoose.connect(
-  `mongodb+srv://admin123:admin123@cluster0.npo42.mongodb.net/Cluster0?retryWrites=true&w=majority`,
-  { useNewUrlParser: true },
-  () => {
-    console.log("Connected to Mongo");
-  }
-);
+mongoose.connect(process.env.MONGO_URL, { useNewUrlParser: true }, () => {
+  console.log("Connected to Mongo");
+});
 
 // Middleware
 app.use(express.json());
@@ -60,45 +57,6 @@ app.post("/api/firebase/notification", (req, res) => {
       console.log(error);
     });
 });
-
-////////////////////////////////////////
-
-AWS_ID = "AKIA2RROVPBDGISDLEY7";
-AWS_SECRET = "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";
-AWS_BUCKET_NAME = "finay-music-bucket";
-const s3 = new AWS.S3({
-  accessKeyId: AWS_ID,
-  secretAccessKey: AWS_SECRET,
-});
-
-const storage = multer.memoryStorage({
-  destination: function (req, file, callback) {
-    callback(null, "");
-  },
-});
-
-const upload = multer({ storage }).single("image");
-
-app.post("/upload", upload, (req, res) => {
-  let myFile = req.file.originalname.split(".");
-  const fileType = myFile[myFile.length - 1];
-
-  const params = {
-    Bucket: AWS_BUCKET_NAME,
-    Key: `${uuidv4()}.${fileType}`,
-    Body: req.file.buffer,
-  };
-
-  s3.upload(params, (error, data) => {
-    if (error) {
-      res.status(500).send(error);
-    }
-
-    res.status(200).send(data);
-  });
-});
-
-/////////////////////////////////////////////////////////////////////
 
 const server = app.listen(8800, () => {
   console.log("Backend server started");
