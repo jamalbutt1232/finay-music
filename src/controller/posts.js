@@ -43,42 +43,43 @@ const deActiveStatusInner = async (uid) => {
   }
 };
 
-// const create_a_post = async (req, res) => {
-//   const userID = getUserID(req, res);
-
-//   if (userID !== undefined) {
-//     const deactive = await deActiveStatusInner(userID);
-//     if (!deactive) {
-//       const newPost = new Post(req.body);
-//       newPost.userId = userID;
-//       try {
-//         const savedPost = await newPost.save();
-
-//         const result = {
-//           status_code: 200,
-//           status_msg: `Post has been created`,
-//           data: savedPost,
-//         };
-
-//         res.status(200).json(result);
-//       } catch (err) {
-//         const result = {
-//           status_code: 500,
-//           status_msg: `Something went wrong`,
-//         };
-
-//         res.status(500).json(result);
-//       }
-//     } else {
-//       const result = {
-//         status_code: 403,
-//         status_msg: `Please active your account`,
-//       };
-//       return res.status(403).send(result);
-//     }
-//   }
-// };
 const create_a_post = async (req, res) => {
+  const userID = getUserID(req, res);
+
+  if (userID !== undefined) {
+    const deactive = await deActiveStatusInner(userID);
+    if (!deactive) {
+      const newPost = new Post(req.body);
+      newPost.userId = userID;
+      try {
+        const savedPost = await newPost.save();
+
+        const result = {
+          status_code: 200,
+          status_msg: `Post has been created`,
+          data: savedPost,
+        };
+
+        res.status(200).json(result);
+      } catch (err) {
+        const result = {
+          status_code: 500,
+          status_msg: `Something went wrong`,
+        };
+
+        res.status(500).json(result);
+      }
+    } else {
+      const result = {
+        status_code: 403,
+        status_msg: `Please active your account`,
+      };
+      return res.status(403).send(result);
+    }
+  }
+};
+
+const uploadPost = async (req, res) => {
   const userID = getUserID(req, res);
 
   if (userID !== undefined) {
@@ -92,64 +93,30 @@ const create_a_post = async (req, res) => {
         accessKeyId: AWS_ID,
         secretAccessKey: AWS_SECRET,
       });
-      var public_link = "";
       if (req.file) {
-        let myFile = req.file.originalname.split(".");
-        const fileType = myFile[myFile.length - 1];
+        try {
+          let myFile = req.file.originalname.split(".");
+          const fileType = myFile[myFile.length - 1];
 
-        const params = {
-          Bucket: AWS_BUCKET_NAME,
-          Key: `${uuidv4()}.${fileType}`,
-          Body: req.file.buffer,
-        };
+          const params = {
+            Bucket: AWS_BUCKET_NAME,
+            Key: `${uuidv4()}.${fileType}`,
+            Body: req.file.buffer,
+          };
 
-        s3.upload(params, async (error, data) => {
-          if (error) {
-            res.status(500).send(error);
-          } else {
-            public_link = data.Location;
-            const newPost = new Post(req.body);
-            newPost.userId = userID;
-            newPost.file = public_link;
-            console.log("here 1");
-
-            try {
-              console.log("here 2");
-              const savedPost = await newPost.save();
-
+          s3.upload(params, async (error, location) => {
+            if (error) {
+              res.status(500).send(error);
+            } else {
               const result = {
                 status_code: 200,
-                status_msg: `Post has been created`,
-                data: savedPost,
+                status_msg: `File has been uploaded on s3`,
+                data: location,
               };
 
               res.status(200).json(result);
-            } catch (err) {
-              const result = {
-                status_code: 500,
-                status_msg: `Something went wrong`,
-              };
-
-              res.status(500).json(result);
             }
-          }
-        });
-        // console.log("public_link  :", public_link);
-      } else {
-        console.log("here 3");
-        const newPost = new Post(req.body);
-        newPost.userId = userID;
-
-        try {
-          const savedPost = await newPost.save();
-
-          const result = {
-            status_code: 200,
-            status_msg: `Post has been created`,
-            data: savedPost,
-          };
-
-          res.status(200).json(result);
+          });
         } catch (err) {
           const result = {
             status_code: 500,
@@ -158,6 +125,8 @@ const create_a_post = async (req, res) => {
 
           res.status(500).json(result);
         }
+
+        // console.log("public_link  :", public_link);
       }
     } else {
       const result = {
@@ -546,5 +515,5 @@ module.exports = {
   allPost,
   singlePost,
   singleuserpost,
-  // create_a_post_v2,
+  uploadPost,
 };
