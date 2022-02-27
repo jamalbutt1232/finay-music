@@ -28,7 +28,7 @@ router.get("/:userId", async (req, res) => {
   try {
     const conversation = await Conversation.find({
       members: { $in: [req.params.userId] },
-    });
+    }).sort({ updatedAt: -1 });
     const result = {
       status_code: 200,
       status_msg: `All conversations fetched successfully`,
@@ -47,7 +47,12 @@ router.get("/find/:firstUserId/:secondUserId", async (req, res) => {
     const conversation = await Conversation.findOne({
       members: { $all: [req.params.firstUserId, req.params.secondUserId] },
     });
-    res.status(200).json(conversation)
+    const result = {
+      status_code: 200,
+      status_msg: `Conversation fetched successfully`,
+      data: conversation ?? {},
+    };
+    res.status(200).json(result)
   } catch (err) {
     res.status(500).json(err);
   }
