@@ -11,15 +11,13 @@ const postRoute = require("./routes/posts");
 const commentRoute = require("./routes/comments");
 const otpRoute = require("./routes/otp");
 
-const multer = require("multer");
 const conversationRoute = require("./routes/conversations");
 const messageRoute = require("./routes/messages");
-const { v4: uuidv4 } = require("uuid");
+const calendarRoute = require("./routes/calendar");
 
-const path = require("path");
-require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
-// console.log(process.env.MONGO_URL);
-mongoose.connect(`${process.env.MONGO_URL}`, { useNewUrlParser: true }, () => {
+const ENV = require("./env");
+console.log("MONGO : ", ENV.MONGO_URL);
+mongoose.connect(`${ENV.MONGO_URL}`, { useNewUrlParser: true }, () => {
   console.log("Connected to Mongo");
 });
 
@@ -35,6 +33,7 @@ app.use("/api/conversations", conversationRoute);
 app.use("/api/messages", messageRoute);
 app.use("/api/comments", commentRoute);
 app.use("/api/otp", otpRoute);
+app.use("/api/calendar", calendarRoute);
 
 app.get("/", (req, res) => {
   res.json("hi");
@@ -59,7 +58,7 @@ app.post("/api/firebase/notification", (req, res) => {
       console.log(error);
     });
 });
-const PORT = process.env.PORT || 8800;
+const PORT = ENV.PORT || 8800;
 const server = app.listen(PORT, () => {
   console.log("Backend server started");
 });
