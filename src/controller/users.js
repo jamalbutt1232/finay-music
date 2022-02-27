@@ -4,7 +4,7 @@ const jwt = require("jsonwebtoken");
 
 const OTP = require("../models/OTP");
 const ENV = require("../env");
-
+const sendNotification = require("../firebase/notification");
 // GET USER ID
 const getUserID = (req, res) => {
   let uid = undefined;
@@ -141,6 +141,14 @@ const followUser = async (req, res) => {
                   followings: req.body.id,
                 },
               });
+              const pushToken = user.pushToken;
+              const message_notification = {
+                notification: {
+                  title: "Test",
+                  body: "Testing",
+                },
+              };
+              sendNotification(pushToken, message_notification);
               const result = {
                 status_code: 200,
                 status_msg: `You now follow user`,
