@@ -1,10 +1,8 @@
 const User = require("../models/User");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const path = require("path");
-require("dotenv").config({ path: path.resolve(__dirname, "../../.env") });
+const ENV = require("../env");
 
-console.log("process.env.TOKEN_SECRET", process.env.TOKEN_SECRET);
 const register = async (req, res) => {
   try {
     // Check if a user already exists
@@ -74,10 +72,7 @@ const login = async (req, res) => {
       if (!validPassword) {
         res.status(400).send(incorrectPassword);
       } else {
-        const auth_token = jwt.sign(
-          { _id: user._id },
-          process.env.TOKEN_SECRET
-        );
+        const auth_token = jwt.sign({ _id: user._id }, ENV.TOKEN_SECRET);
         // res.header("auth-token", token).send(token);
 
         // token field, message and status code
