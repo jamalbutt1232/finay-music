@@ -1,12 +1,11 @@
 const User = require("../models/User");
 const OTP = require("../models/OTP");
-const path = require("path");
-require("dotenv").config({ path: path.resolve(__dirname, "../../.env") });
+const ENV = require("../env");
 
 // GET USER ID
 const getUserID = (req, res) => {
   let uid = undefined;
-  jwt.verify(req.token, process.env.TOKEN_SECRET, function (err, data) {
+  jwt.verify(req.token, ENV.TOKEN_SECRET, function (err, data) {
     if (err) {
       const result = {
         status_code: 403,

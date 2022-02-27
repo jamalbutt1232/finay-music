@@ -4,13 +4,12 @@ const jwt = require("jsonwebtoken");
 const AWS = require("aws-sdk");
 
 const { v4: uuidv4 } = require("uuid");
-const path = require("path");
-require("dotenv").config({ path: path.resolve(__dirname, "../../.env") });
+const ENV = require("../env");
 
 // GET USER ID
 const getUserID = (req, res) => {
   let uid = undefined;
-  jwt.verify(req.token, process.env.TOKEN_SECRET, function (err, data) {
+  jwt.verify(req.token, ENV.TOKEN_SECRET, function (err, data) {
     if (err) {
       const result = {
         status_code: 403,
@@ -78,9 +77,9 @@ const uploadPost = async (req, res) => {
     if (!deactive) {
       ///////////////////////////////////////////////////////////////////
 
-      AWS_ID = process.env.AWS_ID;
-      AWS_SECRET = process.env.AWS_SECRET;
-      AWS_BUCKET_NAME = process.env.AWS_BUCKET_NAME;
+      AWS_ID = ENV.AWS_ID;
+      AWS_SECRET = ENV.AWS_SECRET;
+      AWS_BUCKET_NAME = ENV.AWS_BUCKET_NAME;
       const s3 = new AWS.S3({
         accessKeyId: AWS_ID,
         secretAccessKey: AWS_SECRET,
