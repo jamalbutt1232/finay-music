@@ -8,6 +8,8 @@ const ENV = require("../env");
 // GET USER ID
 const getUserID = (req, res) => {
   let uid = undefined;
+  console.log("req.token  :", req.token);
+
   jwt.verify(req.token, ENV.TOKEN_SECRET, function (err, data) {
     if (err) {
       const result = {

@@ -1,6 +1,5 @@
 const path = require("path");
 require("dotenv").config({ path: path.resolve(__dirname, "./.env") });
-module.exports = "GeeksforGeeks";
 
 const PORT = process.env.PORT;
 const MONGO_URL = process.env.MONGO_URL;

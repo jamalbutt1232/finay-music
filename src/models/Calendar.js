@@ -6,12 +6,13 @@ const CalendarSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    starttime: { type: Date, default: Date.now },
-    endtime: { type: Date, default: Date.now },
+    // time format will maisam provide?
+    starttime: { type: Date, required: true },
+    endtime: { type: Date, required: true },
     desc: {
       type: String,
       required: true,
-      max: 500,
+      max: 250,
     },
   },
   { timestamps: true }
