@@ -1,16 +1,21 @@
 const router = require("express").Router();
 const Message = require("../models/Message");
+const Conversation = require("../models/Conversation");
 
 //add
 
 router.post("/", async (req, res) => {
   const newMessage = new Message(req.body);
+  const { conversationId, text } = newMessage;
 
   try {
     const savedMessage = await newMessage.save();
+    await Conversation.findByIdAndUpdate(conversationId, {
+      $set: { lastMsg: text },
+    });
     const result = {
       status_code: 200,
-      status_msg: `All messages fetched successfully`,
+      status_msg: `Message Sent successfully`,
       data: savedMessage,
     };
     res.status(200).json(result);
