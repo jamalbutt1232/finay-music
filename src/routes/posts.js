@@ -8,6 +8,7 @@ const {
   singlePost,
   singleuserpost,
   uploadPost,
+  deleteUploadPost,
 } = require("../controller/posts");
 const verifyToken = require("../private/privateRoute");
 
@@ -22,6 +23,7 @@ const file_upload = multer({ storage }).single("file");
 
 router.post("/", verifyToken, create_a_post);
 router.post("/uploadpost", verifyToken, file_upload, uploadPost);
+router.delete("/deleteuploadpost", verifyToken, deleteUploadPost);
 router.put("/updatepost", verifyToken, updatePost);
 router.delete("/deletepost", verifyToken, deletePost);
 router.put("/like", verifyToken, likePost);
