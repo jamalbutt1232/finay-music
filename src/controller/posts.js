@@ -1,5 +1,7 @@
 const Post = require("../models/Post");
 const User = require("../models/User");
+const Notification = require("../models/Notification");
+
 const jwt = require("jsonwebtoken");
 const AWS = require("aws-sdk");
 
@@ -292,9 +294,22 @@ const likePost = async (req, res) => {
       try {
         const post = await Post.findById(req.body.id);
         const user = await deActiveStatusInner(post.userId);
+        const currentUser = await User.findById(userID);
         if (!user.deactive) {
           if (!post.likes.includes(userID)) {
             await post.updateOne({ $push: { likes: userID } });
+
+            //
+            //  GENERATING NOTIFICATION (SAVE IT)
+            const newNotification = new Notification({
+              currentId: userID,
+              otherId: post.userId,
+              postId: post._id,
+              message: `${currentUser.name} liked your post`,
+            });
+            await newNotification.save();
+            //
+
             const result = {
               status_code: 200,
               status_msg: `Post has been liked`,
@@ -308,6 +323,18 @@ const likePost = async (req, res) => {
               status_msg: `Post has been disliked`,
               data: post,
             };
+            //
+            //  REMOVING NOTIFICATION
+            await Notification.find({
+              currentId: userID,
+              otherId: post.userId,
+              postId: post._id,
+            })
+              .remove()
+              .exec();
+
+            //
+
             res.status(200).json(result);
           }
         } else {
@@ -320,7 +347,7 @@ const likePost = async (req, res) => {
       } catch (err) {
         const result = {
           status_code: 500,
-          status_msg: `Something went wrong`,
+          status_msg: `Something went wrong :${err}`,
         };
 
         res.status(500).json(result);
@@ -477,8 +504,7 @@ const singlePost = async (req, res) => {
     }
   }
 };
-
-//get all timeline post
+// Post of the user only (all of his posts)
 const singleuserpost = async (req, res) => {
   const userID = getUserID(req, res);
   if (userID !== undefined) {

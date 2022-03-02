@@ -2,6 +2,7 @@ const Comment = require("../models/Comment");
 const User = require("../models/User");
 const jwt = require("jsonwebtoken");
 const ENV = require("../env");
+const Post = require("../models/Post");
 
 // GET USER ID
 const getUserID = (req, res) => {
@@ -42,6 +43,17 @@ const create_a_comment = async (req, res) => {
       try {
         const savedComment = await newComment.save();
 
+        //  GENERATING NOTIFICATION (SAVE IT COMMENT)
+        const post = await Post.findById(req.body.postId);
+
+        const newNotification = new Notification({
+          currentId: userID,
+          otherId: post.userId,
+          postId: post._id,
+          message: `${currentUser.name} commented on your post`,
+        });
+        await newNotification.save();
+        //
         const result = {
           status_code: 200,
           status_msg: `Comment has been created`,
