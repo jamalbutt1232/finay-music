@@ -5,6 +5,7 @@ const jwt = require("jsonwebtoken");
 const OTP = require("../models/OTP");
 const ENV = require("../env");
 const sendNotification = require("../firebase/notification");
+const Notification = require("../models/Notification");
 // GET USER ID
 const getUserID = (req, res) => {
   let uid = undefined;
@@ -122,6 +123,7 @@ const singleUser = async (req, res) => {
 // follow user
 const followUser = async (req, res) => {
   const userID = getUserID(req, res);
+  const currentUser = await User.findById(userID);
   if (userID !== undefined) {
     const deactive = await deActiveStatusInner(userID);
     if (!deactive) {
@@ -129,8 +131,17 @@ const followUser = async (req, res) => {
         try {
           const user = await User.findById(req.body.id);
           if (!user.deactive) {
-            const currentUser = await User.findById(userID);
             if (!user.followers.includes(userID)) {
+              //  GENERATING NOTIFICATION (SAVE IT FOLLOW)
+              const newNotification = new Notification({
+                currentId: userID,
+                otherId: req.body.id,
+                postId: "",
+                message: `${currentUser.name} started following you`,
+              });
+              await newNotification.save();
+              //
+
               await user.updateOne({
                 $push: {
                   followers: userID,
@@ -156,6 +167,15 @@ const followUser = async (req, res) => {
               };
               res.status(200).send(result);
             } else {
+              //  REMOVING NOTIFICATION
+              await Notification.find({
+                currentId: userID,
+                otherId: req.body.id,
+              })
+                .remove()
+                .exec();
+
+              //
               const result = {
                 status_code: 403,
                 status_msg: `You already followed the user`,

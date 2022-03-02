@@ -14,6 +14,7 @@ const otpRoute = require("./routes/otp");
 const conversationRoute = require("./routes/conversations");
 const messageRoute = require("./routes/messages");
 const calendarRoute = require("./routes/calendar");
+const notificationRoute = require("./routes/notification");
 
 const ENV = require("./env");
 console.log("MONGO : ", ENV.MONGO_URL);
@@ -34,6 +35,7 @@ app.use("/api/messages", messageRoute);
 app.use("/api/comments", commentRoute);
 app.use("/api/otp", otpRoute);
 app.use("/api/calendar", calendarRoute);
+app.use("/api/notification", notificationRoute);
 
 app.get("/", (req, res) => {
   res.json("hi");
