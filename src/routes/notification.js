@@ -1,7 +1,8 @@
 const router = require("express").Router();
-// const { register, login } = require("../controller/notification");
+const { getNotifications } = require("../controller/notification");
+const verifyToken = require("../private/privateRoute");
 
-// router.post("/register", register);
+router.get("/", verifyToken, getNotifications);
 // router.post("/login", login);
 
 module.exports = router;
