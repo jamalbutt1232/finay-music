@@ -2,6 +2,7 @@ const User = require("../models/User");
 const jwt = require("jsonwebtoken");
 const ENV = require("../env");
 const Calendar = require("../models/Calendar");
+var moment = require("moment"); // require
 
 // GET USER ID
 const getUserID = (req, res) => {
@@ -29,30 +30,118 @@ const deActiveStatusInner = async (uid) => {
     return `deActiveStatusInner Issue : ${err}`;
   }
 };
+//create a calendar event
 const createCalendarEvent = async (req, res) => {
   const userID = getUserID(req, res);
 
   if (userID !== undefined) {
     const deactive = await deActiveStatusInner(userID);
     if (!deactive) {
-      let start = req.body.starttime;
+      // 2022-12-13T12:50 (YYYY-MM-DDTHH:MM)
+      let start_time = req.body.starttime;
+      let end_time = req.body.endtime;
+      start_time = moment(start_time);
+      end_time = moment(end_time);
 
-      //   const newCalendarEvent = new Calendar(req.body);
-      //   newCalendarEvent.userId = userID;
+      let newCalendarEvent = new Calendar(req.body);
+      newCalendarEvent.userId = userID;
       try {
-        var start_date = start.split("/", 3);
+        const savedCalendarEvent = await newCalendarEvent.save();
 
-        console.log("day : ", start_date[1]);
+        const result = {
+          status_code: 200,
+          status_msg: `Calpliendar event has been created`,
+          data: savedCalendarEvent,
+        };
 
-        // const savedCalendarEvent = await newCalendarEvent.save();
+        res.status(200).json(result);
+      } catch (err) {
+        const result = {
+          status_code: 500,
+          status_msg: `Something went wrong`,
+        };
 
-        // const result = {
-        //   status_code: 200,
-        //   status_msg: `Calpliendar event has been created`,
-        //   data: savedCalendarEvent,
-        // };
+        res.status(500).json(result);
+      }
+    } else {
+      const result = {
+        status_code: 403,
+        status_msg: `Please active your account`,
+      };
+      return res.status(403).send(result);
+    }
+  }
+};
+//delete a calendar event
+const deleteCalendarEvent = async (req, res) => {
+  const userID = getUserID(req, res);
 
-        res.status(200).json("there");
+  if (userID !== undefined) {
+    const deactive = await deActiveStatusInner(userID);
+    if (!deactive) {
+      try {
+        const calendar = await Calendar.findById(req.body.id);
+        if (calendar.userId === userID) {
+          await calendar.deleteOne();
+          const result = {
+            status_code: 200,
+            status_msg: `Calendar event has been deleted`,
+            data: calendar,
+          };
+
+          res.status(200).json(result);
+        } else {
+          const result = {
+            status_code: 403,
+            status_msg: `You can only delete ur calendar event`,
+          };
+
+          res.status(200).json(result);
+        }
+      } catch (err) {
+        const result = {
+          status_code: 500,
+          status_msg: `Something went wrong`,
+        };
+
+        res.status(500).json(result);
+      }
+    } else {
+      const result = {
+        status_code: 403,
+        status_msg: `Please active your account`,
+      };
+      return res.status(403).send(result);
+    }
+  }
+};
+// get all calendar events
+const allCalendarEvent = async (req, res) => {
+  const userID = getUserID(req, res);
+
+  if (userID !== undefined) {
+    const deactive = await deActiveStatusInner(userID);
+    if (!deactive) {
+      try {
+        const allcalendarevents = await Calendar.find({
+          userId: req.params.id,
+        });
+        if (allcalendarevents.length != 0) {
+          const result = {
+            status_code: 200,
+            status_msg: `All calendar event fetched`,
+            data: allcalendarevents,
+          };
+
+          res.status(200).json(result);
+        } else {
+          const result = {
+            status_code: 404,
+            status_msg: `You dont have any calendar event`,
+          };
+
+          res.status(404).json(result);
+        }
       } catch (err) {
         const result = {
           status_code: 500,
@@ -73,4 +162,6 @@ const createCalendarEvent = async (req, res) => {
 
 module.exports = {
   createCalendarEvent,
+  deleteCalendarEvent,
+  allCalendarEvent,
 };

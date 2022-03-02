@@ -69,7 +69,7 @@ const create_a_post = async (req, res) => {
     }
   }
 };
-
+// upload post
 const uploadPost = async (req, res) => {
   const userID = getUserID(req, res);
   if (userID !== undefined) {
@@ -127,6 +127,63 @@ const uploadPost = async (req, res) => {
 
         res.status(500).json(result);
       }
+    } else {
+      const result = {
+        status_code: 403,
+        status_msg: `Please active your account`,
+      };
+      return res.status(403).send(result);
+
+      ///////////////////////////////////////////////////////////////////
+    }
+  }
+};
+// delete post
+const deleteUploadPost = async (req, res) => {
+  const userID = getUserID(req, res);
+  if (userID !== undefined) {
+    const deactive = await deActiveStatusInner(userID);
+    if (!deactive) {
+      const post = await Post.findById(req.body.id);
+      let file = post.file;
+
+      AWS_ID = ENV.AWS_ID;
+      AWS_SECRET = ENV.AWS_SECRET;
+      AWS_BUCKET_NAME = ENV.AWS_BUCKET_NAME;
+      const s3 = new AWS.S3({
+        accessKeyId: AWS_ID,
+        secretAccessKey: AWS_SECRET,
+      });
+
+      try {
+        const params = {
+          Bucket: AWS_BUCKET_NAME,
+          Key: file,
+        };
+
+        s3.deleteObject(params, async (error, location) => {
+          if (error) {
+            res.status(500).send(error);
+          } else {
+            const result = {
+              status_code: 200,
+              status_msg: `File has been deleted on s3`,
+              data: location,
+            };
+
+            res.status(200).json(result);
+          }
+        });
+      } catch (err) {
+        const result = {
+          status_code: 500,
+          status_msg: `Something went wrong`,
+        };
+
+        res.status(500).json(result);
+      }
+
+      // console.log("public_link  :", public_link);
     } else {
       const result = {
         status_code: 403,
@@ -515,4 +572,5 @@ module.exports = {
   singlePost,
   singleuserpost,
   uploadPost,
+  deleteUploadPost,
 };
