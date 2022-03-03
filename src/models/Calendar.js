@@ -7,10 +7,9 @@ const CalendarSchema = new mongoose.Schema(
       required: true,
     },
     // time format will maisam provide?
-    starttime: { type: Date, required: true },
-    endtime: { type: Date, required: true },
+    starttime: { type: Array, required: true, default: [Date] },
     desc: {
-      type: String,
+      type: Array,
       required: true,
       max: 250,
     },

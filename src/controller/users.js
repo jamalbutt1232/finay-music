@@ -5,6 +5,7 @@ const jwt = require("jsonwebtoken");
 const OTP = require("../models/OTP");
 const ENV = require("../env");
 const Notification = require("../models/Notification");
+console.log(ENV);
 // GET USER ID
 const getUserID = (req, res) => {
   let uid = undefined;
@@ -151,13 +152,6 @@ const followUser = async (req, res) => {
                   followings: req.body.id,
                 },
               });
-              const pushToken = user.pushToken;
-              const message_notification = {
-                notification: {
-                  title: "Test",
-                  body: "Testing",
-                },
-              };
               const result = {
                 status_code: 200,
                 status_msg: `You now follow user`,
@@ -190,7 +184,7 @@ const followUser = async (req, res) => {
         } catch (err) {
           const result = {
             status_code: 500,
-            status_msg: `Something went wrong`,
+            status_msg: `Something went wrong :${err}`,
           };
           res.status(500).send(result);
         }
@@ -569,19 +563,18 @@ const sendSMS = async (req, res) => {
   if (userID !== undefined) {
     const deactive = await deActiveStatusInner(userID);
     if (!deactive) {
+      min = 2000;
+      max = 9999;
+      const random_sequence = Math.floor(Math.random() * (max - min) + min);
       var otpExist = await OTP.find({ userId: userID });
-      console.log("otpExist  :", otpExist);
+
       if (otpExist.length == 0) {
-        var accountSid = "AC29e6dec481584aad3c5be4cf93d0f0fa"; // Your Account SID from www.twilio.com/console
-        var authToken = "1a96b8b3f5e20bfe0aa1d1fab308d78d"; // Your Auth Token from www.twilio.com/console
-        const sender = "13516668982";
+        var accountSid = ENV.ACCOUNT_SID;
+        var authToken = ENV.AUTH_TOKEN;
+        const sender = ENV.SENDER;
         const client = require("twilio")(accountSid, authToken);
 
-        min = 2000;
-        max = 9000;
-
         try {
-          const random_sequence = Math.floor(Math.random() * (max - min) + min);
           client.messages
             .create({
               body: random_sequence,
