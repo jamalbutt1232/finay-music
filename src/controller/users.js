@@ -4,7 +4,6 @@ const jwt = require("jsonwebtoken");
 
 const OTP = require("../models/OTP");
 const ENV = require("../env");
-const sendNotification = require("../firebase/notification");
 const Notification = require("../models/Notification");
 console.log(ENV);
 // GET USER ID
@@ -153,7 +152,6 @@ const followUser = async (req, res) => {
                   followings: req.body.id,
                 },
               });
-
               const result = {
                 status_code: 200,
                 status_msg: `You now follow user`,
