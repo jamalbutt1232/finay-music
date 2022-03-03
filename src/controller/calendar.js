@@ -50,7 +50,7 @@ const createCalendarEvent = async (req, res) => {
 
         const result = {
           status_code: 200,
-          status_msg: `Calpliendar event has been created`,
+          status_msg: `Calendar event has been created`,
           data: savedCalendarEvent,
         };
 
@@ -58,7 +58,7 @@ const createCalendarEvent = async (req, res) => {
       } catch (err) {
         const result = {
           status_code: 500,
-          status_msg: `Something went wrong`,
+          status_msg: `Something went wrong :${err}`,
         };
 
         res.status(500).json(result);
