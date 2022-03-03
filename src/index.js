@@ -75,15 +75,16 @@ const io = require("socket.io")(server, {
 
 io.on("connection", (socket) => {
   console.log("Connected to socket.io");
+
   socket.on("setup", (userData) => {
-    socket.join(userData._id);
+    socket.join(userData._id); //Global room for our app users
     socket.emit("connected");
   });
 
-  socket.on("join chat", (room) => {
-    socket.join(room);
-    console.log("User Joined Room: " + room);
-  });
+  // socket.on("join chat", (room) => {
+  //   socket.join(room);
+  //   console.log("User Joined Room: " + room);
+  // });
   socket.on("typing", (room) => socket.in(room).emit("typing"));
   socket.on("stop typing", (room) => socket.in(room).emit("stop typing"));
 
@@ -92,6 +93,7 @@ io.on("connection", (socket) => {
     //console.log(chat, newMessageRecieved);
     //if (!chat.users) return console.log("chat.users not defined");
 
+    console.log("SENDING MESSAGE");
     socket.in(chat.reciever).emit("message recieved", newMessageRecieved);
     // chat.users.forEach((user) => {
     //   if (user._id == newMessageRecieved.sender._id) return;
