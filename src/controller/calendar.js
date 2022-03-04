@@ -37,31 +37,79 @@ const createCalendarEvent = async (req, res) => {
   if (userID !== undefined) {
     const deactive = await deActiveStatusInner(userID);
     if (!deactive) {
-      // 2022-12-13T12:50 (YYYY-MM-DDTHH:MM)
-      let start_time = req.body.starttime;
-      let end_time = req.body.endtime;
-      start_time = moment(start_time);
-      end_time = moment(end_time);
+      let tempDate = req.body.date + "T00:00:00.000Z";
 
-      let newCalendarEvent = new Calendar(req.body);
-      newCalendarEvent.userId = userID;
-      try {
-        const savedCalendarEvent = await newCalendarEvent.save();
+      const checkCalendarifExist = await Calendar.find({
+        userId: userID,
+        date: tempDate,
+      });
+      console.log("checkCalendarifExist   :", checkCalendarifExist);
+      if (checkCalendarifExist.length == 0) {
+        console.log("In");
+        let newCalendarEvent = new Calendar(req.body);
+        newCalendarEvent.userId = userID;
+        try {
+          const savedCalendarEvent = await newCalendarEvent.save();
+
+          const result = {
+            status_code: 200,
+            status_msg: `Calendar event has been created`,
+            data: savedCalendarEvent,
+          };
+
+          res.status(200).json(result);
+        } catch (err) {
+          const result = {
+            status_code: 500,
+            status_msg: `Something went wrong :${err}`,
+          };
+
+          res.status(500).json(result);
+        }
+      } else {
+        console.log("ELSE");
+        let innerObject = {
+          events: req.body.events,
+        };
+
+        for (i = 0; i < checkCalendarifExist[0].events.length; i++) {
+          for (var key in innerObject.events) {
+            var t = innerObject.events[key]["time"];
+            if (checkCalendarifExist[0].events[i].time == t) {
+              checkCalendarifExist[0].events =
+                checkCalendarifExist[0].events.filter(function (el) {
+                  return el.time != t;
+                });
+            }
+          }
+        }
+        for (var key in innerObject.events) {
+          var my_events = innerObject.events[key];
+          checkCalendarifExist[0].events.push(my_events);
+        }
+
+        await Calendar.find({
+          userId: userID,
+          date: tempDate,
+        })
+          .remove()
+          .exec();
+
+        console.log("checkCalendarifExist :", checkCalendarifExist[0].events);
+        const cal = new Calendar({
+          date: req.body.date,
+          events: checkCalendarifExist[0].events,
+          userId: userID,
+        });
+        const c = await cal.save();
 
         const result = {
           status_code: 200,
-          status_msg: `Calendar event has been created`,
-          data: savedCalendarEvent,
+          status_msg: `Calendar event has been updated`,
+          data: c,
         };
 
         res.status(200).json(result);
-      } catch (err) {
-        const result = {
-          status_code: 500,
-          status_msg: `Something went wrong :${err}`,
-        };
-
-        res.status(500).json(result);
       }
     } else {
       const result = {
