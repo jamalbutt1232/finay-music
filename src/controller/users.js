@@ -133,14 +133,16 @@ const followUser = async (req, res) => {
           const user = await User.findById(req.body.id);
           if (!user.deactive) {
             if (!user.followers.includes(userID)) {
-              //  GENERATING NOTIFICATION (SAVE IT FOLLOW)
-              const newNotification = new Notification({
-                currentId: userID,
-                otherId: req.body.id,
-                postId: "",
-                message: `${currentUser.name} started following you`,
-              });
-              await newNotification.save();
+              if (userID !== post.userId) {
+                //  GENERATING NOTIFICATION (SAVE IT FOLLOW)
+                const newNotification = new Notification({
+                  currentId: userID,
+                  otherId: req.body.id,
+                  postId: "",
+                  message: `${currentUser.name} started following you`,
+                });
+                await newNotification.save();
+              }
               //
 
               await user.updateOne({

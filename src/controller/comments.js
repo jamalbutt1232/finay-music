@@ -1,4 +1,5 @@
 const Comment = require("../models/Comment");
+const Notification = require("../models/Notification");
 const User = require("../models/User");
 const jwt = require("jsonwebtoken");
 const ENV = require("../env");
@@ -45,14 +46,16 @@ const create_a_comment = async (req, res) => {
 
         //  GENERATING NOTIFICATION (SAVE IT COMMENT)
         const post = await Post.findById(req.body.postId);
-
-        const newNotification = new Notification({
-          currentId: userID,
-          otherId: post.userId,
-          postId: post._id,
-          message: `${currentUser.name} commented on your post`,
-        });
-        await newNotification.save();
+        const currentUser = await User.findById(userID);
+        if (userID !== post.userId) {
+          const newNotification = new Notification({
+            currentId: userID,
+            otherId: post.userId,
+            postId: post._id,
+            message: `${currentUser.name} commented on your post`,
+          });
+          await newNotification.save();
+        }
         //
         const result = {
           status_code: 200,
@@ -64,7 +67,7 @@ const create_a_comment = async (req, res) => {
       } catch (err) {
         const result = {
           status_code: 500,
-          status_msg: `Something went wrong`,
+          status_msg: `Something went wrong :${err}`,
         };
 
         res.status(500).json(result);

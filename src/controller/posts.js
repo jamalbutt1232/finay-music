@@ -298,16 +298,17 @@ const likePost = async (req, res) => {
         if (!user.deactive) {
           if (!post.likes.includes(userID)) {
             await post.updateOne({ $push: { likes: userID } });
-
-            //
-            //  GENERATING NOTIFICATION (SAVE IT)
-            const newNotification = new Notification({
-              currentId: userID,
-              otherId: post.userId,
-              postId: post._id,
-              message: `${currentUser.name} liked your post`,
-            });
-            await newNotification.save();
+            if (userID !== post.userId) {
+              //
+              //  GENERATING NOTIFICATION (SAVE IT)
+              const newNotification = new Notification({
+                currentId: userID,
+                otherId: post.userId,
+                postId: post._id,
+                message: `${currentUser.name} liked your post`,
+              });
+              await newNotification.save();
+            }
             //
 
             const result = {
