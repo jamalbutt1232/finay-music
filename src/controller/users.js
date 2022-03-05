@@ -35,6 +35,17 @@ const deActiveStatusInner = async (uid) => {
     return `deActiveStatusInner Issue : ${err}`;
   }
 };
+
+// Get user type
+const getUserType = async (uid) => {
+  try {
+    const user = await User.findById(uid);
+    const status = user.profileType;
+    return status;
+  } catch (err) {
+    return `User Type Issue : ${err}`;
+  }
+};
 // update user
 const updateUser = async (req, res) => {
   const userID = getUserID(req, res);
@@ -93,17 +104,51 @@ const singleUser = async (req, res) => {
   if (userID !== undefined) {
     const deactive = await deActiveStatusInner(userID);
     if (!deactive) {
-      try {
-        const user = await User.findById(req.params.id);
-        console.log(user);
-        const { password, updatedAt, ...other } = user._doc;
+      const type = await getUserType(req.params.id);
 
-        const result = {
-          status_code: 200,
-          status_msg: `You successfuly fetched user information`,
-          data: other,
-        };
-        res.status(200).send(result);
+      try {
+        if (type == "public") {
+          const user = await User.findById(req.params.id);
+
+          const { password, updatedAt, ...other } = user._doc;
+
+          const result = {
+            status_code: 200,
+            status_msg: `You successfuly fetched user information`,
+            data: other,
+          };
+          res.status(200).send(result);
+        } else if (type == "supporter") {
+          const user = await User.findById(req.params.id);
+          let followers = user.followers;
+
+          if (followers.includes(userID)) {
+            const user = await User.findById(req.params.id);
+
+            const { password, updatedAt, ...other } = user._doc;
+
+            const result = {
+              status_code: 200,
+              status_msg: `You successfuly fetched user information`,
+              data: other,
+            };
+            res.status(200).send(result);
+          } else {
+            const result = {
+              status_code: 200,
+              status_msg: `You need to follow the user to view profile`,
+            };
+            res.status(200).send(result);
+          }
+        } else {
+          const user = await User.findById(req.params.id);
+          console.log(user);
+          const result = {
+            status_code: 200,
+            status_msg: `User is private`,
+          };
+          res.status(200).send(result);
+        }
       } catch (err) {
         const result = {
           status_code: 500,
@@ -132,14 +177,16 @@ const followUser = async (req, res) => {
           const user = await User.findById(req.body.id);
           if (!user.deactive) {
             if (!user.followers.includes(userID)) {
-              //  GENERATING NOTIFICATION (SAVE IT FOLLOW)
-              const newNotification = new Notification({
-                currentId: userID,
-                otherId: req.body.id,
-                postId: "",
-                message: `${currentUser.name} started following you`,
-              });
-              await newNotification.save();
+              if (userID !== post.userId) {
+                //  GENERATING NOTIFICATION (SAVE IT FOLLOW)
+                const newNotification = new Notification({
+                  currentId: userID,
+                  otherId: req.body.id,
+                  postId: "",
+                  message: `${currentUser.name} started following you`,
+                });
+                await newNotification.save();
+              }
               //
 
               await user.updateOne({
@@ -383,25 +430,65 @@ const getFollowers = async (req, res) => {
   if (userID !== undefined) {
     const deactive = await deActiveStatusInner(userID);
     if (!deactive) {
-      try {
-        // getting followers list so they can be excluded
-        let followersList = await User.find({ _id: req.params.id });
-        followersList = followersList[0].followers;
+      const type = await getUserType(req.params.id);
 
-        let usersList = await User.find({ _id: { $in: followersList } });
-        if (usersList.length != 0) {
-          const result = {
-            status_code: 200,
-            status_msg: `All followers fetched successfully`,
-            data: usersList,
-          };
-          res.status(200).send(result);
+      try {
+        if (type == "public") {
+          // getting followers list so they can be excluded
+          let followersList = await User.find({ _id: req.params.id });
+          followersList = followersList[0].followers;
+
+          let usersList = await User.find({ _id: { $in: followersList } });
+          if (usersList.length != 0) {
+            const result = {
+              status_code: 200,
+              status_msg: `All followers fetched successfully`,
+              data: usersList,
+            };
+            res.status(200).send(result);
+          } else {
+            const result = {
+              status_code: 404,
+              status_msg: `No followers found`,
+            };
+            res.status(404).send(result);
+          }
+        } else if ((type = "supporter")) {
+          const user = await User.findById(req.params.id);
+          let followers = user.followers;
+
+          if (followers.includes(userID)) {
+            let followersList = await User.find({ _id: req.params.id });
+            followersList = followersList[0].followers;
+
+            let usersList = await User.find({ _id: { $in: followersList } });
+            if (usersList.length != 0) {
+              const result = {
+                status_code: 200,
+                status_msg: `All followers fetched successfully`,
+                data: usersList,
+              };
+              res.status(200).send(result);
+            } else {
+              const result = {
+                status_code: 404,
+                status_msg: `No followers found`,
+              };
+              res.status(404).send(result);
+            }
+          } else {
+            const result = {
+              status_code: 403,
+              status_msg: `You need to follow the user to view followers`,
+            };
+            res.status(403).send(result);
+          }
         } else {
           const result = {
-            status_code: 404,
-            status_msg: `No followers found`,
+            status_code: 403,
+            status_msg: `Profile is private`,
           };
-          res.status(404).send(result);
+          res.status(403).send(result);
         }
       } catch (err) {
         const result = {
@@ -649,6 +736,41 @@ const verifySMS = async (req, res) => {
     }
   }
 };
+
+const setProfileType = async (req, res) => {
+  const userID = getUserID(req, res);
+  if (userID !== undefined) {
+    const deactive = await deActiveStatusInner(userID);
+
+    if (!deactive) {
+      try {
+        const user = await User.findByIdAndUpdate(userID, {
+          $set: { profileType: req.body.profile },
+        });
+
+        const result = {
+          status_code: 200,
+          status_msg: `You have successfully set profile type`,
+          data: user,
+        };
+        res.status(200).send(result);
+      } catch (err) {
+        const result = {
+          status_code: 500,
+          status_msg: `Something went wrong : ${err}`,
+        };
+        return res.status(500).send(result);
+      }
+    } else {
+      const result = {
+        status_code: 403,
+        status_msg: `Please activate your account`,
+      };
+      return res.status(403).send(result);
+    }
+  }
+};
+
 module.exports = {
   updateUser,
   deleteUser,
@@ -665,4 +787,5 @@ module.exports = {
   active2f,
   sendSMS,
   verifySMS,
+  setProfileType,
 };

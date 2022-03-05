@@ -92,6 +92,10 @@ const UserSchema = new mongoose.Schema(
     badgeCount: {
       type: Number,
     },
+    profileType: {
+      type: String,
+      default: "public",
+    },
   },
   { timestamps: true }
 );
