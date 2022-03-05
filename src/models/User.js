@@ -92,7 +92,15 @@ const UserSchema = new mongoose.Schema(
     badgeCount: {
       type: Number,
     },
-    profileType: {
+    bioType: {
+      type: String,
+      default: "public",
+    },
+    followerType: {
+      type: String,
+      default: "public",
+    },
+    postType: {
       type: String,
       default: "public",
     },

@@ -18,7 +18,15 @@ const notificationRoute = require("./routes/notification");
 
 const ENV = require("./env");
 console.log("MONGO : ", ENV.MONGO_URL);
-mongoose.connect(`${ENV.MONGO_URL}`, { useNewUrlParser: true }, () => {
+const adminPassword = encodeURIComponent("Fn#2HKdXGDt27bM");
+
+// mongoose.connect(
+//   `mongodb+srv://abhifinay:ethan217@finayapp.dieg5.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`,
+//   function (err) {
+//     if (err) console.log("err  :", err);
+//   }
+// );
+mongoose.connect(`${ENV.MONGO_URL}`, { useNewUrlParser: true }, (doc, err) => {
   console.log("Connected to Mongo");
 });
 

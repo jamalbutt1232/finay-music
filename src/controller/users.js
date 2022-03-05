@@ -36,11 +36,21 @@ const deActiveStatusInner = async (uid) => {
   }
 };
 
-// Get user type
-const getUserType = async (uid) => {
+// Get user bio type
+const getUserBioType = async (uid) => {
   try {
     const user = await User.findById(uid);
-    const status = user.profileType;
+    const status = user.bioType;
+    return status;
+  } catch (err) {
+    return `User Type Issue : ${err}`;
+  }
+};
+// Get user follower type
+const getUserFollowerType = async (uid) => {
+  try {
+    const user = await User.findById(uid);
+    const status = user.followerType;
     return status;
   } catch (err) {
     return `User Type Issue : ${err}`;
@@ -104,7 +114,7 @@ const singleUser = async (req, res) => {
   if (userID !== undefined) {
     const deactive = await deActiveStatusInner(userID);
     if (!deactive) {
-      const type = await getUserType(req.params.id);
+      const type = await getUserBioType(req.params.id);
 
       try {
         if (type == "public") {
@@ -177,7 +187,7 @@ const followUser = async (req, res) => {
           const user = await User.findById(req.body.id);
           if (!user.deactive) {
             if (!user.followers.includes(userID)) {
-              if (userID !== post.userId) {
+              if (userID !== req.body.id) {
                 //  GENERATING NOTIFICATION (SAVE IT FOLLOW)
                 const newNotification = new Notification({
                   currentId: userID,
@@ -430,8 +440,8 @@ const getFollowers = async (req, res) => {
   if (userID !== undefined) {
     const deactive = await deActiveStatusInner(userID);
     if (!deactive) {
-      const type = await getUserType(req.params.id);
-
+      const type = await getUserFollowerType(req.params.id);
+      console.log("Hi 1");
       try {
         if (type == "public") {
           // getting followers list so they can be excluded
@@ -453,7 +463,7 @@ const getFollowers = async (req, res) => {
             };
             res.status(404).send(result);
           }
-        } else if ((type = "supporter")) {
+        } else if (type == "supporter") {
           const user = await User.findById(req.params.id);
           let followers = user.followers;
 
@@ -737,40 +747,6 @@ const verifySMS = async (req, res) => {
   }
 };
 
-const setProfileType = async (req, res) => {
-  const userID = getUserID(req, res);
-  if (userID !== undefined) {
-    const deactive = await deActiveStatusInner(userID);
-
-    if (!deactive) {
-      try {
-        const user = await User.findByIdAndUpdate(userID, {
-          $set: { profileType: req.body.profile },
-        });
-
-        const result = {
-          status_code: 200,
-          status_msg: `You have successfully set profile type`,
-          data: user,
-        };
-        res.status(200).send(result);
-      } catch (err) {
-        const result = {
-          status_code: 500,
-          status_msg: `Something went wrong : ${err}`,
-        };
-        return res.status(500).send(result);
-      }
-    } else {
-      const result = {
-        status_code: 403,
-        status_msg: `Please activate your account`,
-      };
-      return res.status(403).send(result);
-    }
-  }
-};
-
 module.exports = {
   updateUser,
   deleteUser,
@@ -787,5 +763,4 @@ module.exports = {
   active2f,
   sendSMS,
   verifySMS,
-  setProfileType,
 };
