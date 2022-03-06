@@ -7,6 +7,7 @@ const AWS = require("aws-sdk");
 
 const { v4: uuidv4 } = require("uuid");
 const ENV = require("../env");
+const { crossOriginEmbedderPolicy } = require("helmet");
 
 // GET USER ID
 const getUserID = (req, res) => {
@@ -23,6 +24,14 @@ const getUserID = (req, res) => {
     }
   });
   return uid;
+};
+const getCompleteUser = async (uid) => {
+  try {
+    const user = await User.findById(uid);
+    return user;
+  } catch (err) {
+    return `Cannot get complete user issue : ${err}`;
+  }
 };
 
 // Get user de active status
@@ -370,7 +379,6 @@ const allPost = async (req, res) => {
     const deactive = await deActiveStatusInner(userID);
     if (!deactive) {
       try {
-        //   using promise here
         let myDetails = {
           user_name: "",
           user_email: "",
@@ -394,28 +402,43 @@ const allPost = async (req, res) => {
             return Post.find({ userId: friendId });
           })
         );
+        // console.log(friendPosts);
         let friendDetails = {
           user_name: "",
           user_email: "",
           user_img: "",
+          postType: "",
         };
 
-        for (i = 0; i < friendPosts[0].length; i++) {
-          const friendID = friendPosts[0][i].userId;
-          const friendData = await User.findById(friendID);
-          if (!friendData.deactive) {
-            friendDetails.user_name = friendData.name;
-            friendDetails.user_email = friendData.email;
-            friendDetails.user_img = friendData.profilePicture;
+        if (friendPosts.length > 0) {
+          for (i = 0; i < friendPosts[0].length; i++) {
+            const friendID = friendPosts[0][i].userId;
+            const friendData = await User.findById(friendID);
 
-            friendPosts[0][i] = {
-              ...friendPosts[0][i]._doc,
-              user: friendDetails,
-            };
+            if (!friendData.deactive) {
+              friendDetails.user_name = friendData.name;
+              friendDetails.user_email = friendData.email;
+              friendDetails.user_img = friendData.profilePicture;
+              friendDetails.postType = friendData.postType;
+
+              friendPosts[0][i] = {
+                ...friendPosts[0][i]._doc,
+                user: friendDetails,
+              };
+            }
           }
+          var allposts = list_of_posts.concat(...friendPosts);
+        } else {
+          var allposts = list_of_posts;
         }
 
-        let allposts = list_of_posts.concat(...friendPosts);
+        allposts.forEach((post) => {
+          if (post.user.postType == "private") {
+            allposts = allposts.filter(function (el) {
+              return el.user.postType != "private";
+            });
+          }
+        });
 
         allposts = allposts.sort(function (a, b) {
           return new Date(a.updatedAt) - new Date(b.updatedAt);
@@ -431,17 +454,22 @@ const allPost = async (req, res) => {
         allposts.forEach((post) => {
           if (post.likes.length != 0) {
             if (post.likes.includes(userID)) {
-              post = { ...post, ...likedPost };
+              post_it = { ...post, ...likedPost };
             } else {
-              post = { ...post, ...dislikedPost };
+              post_it = { ...post, ...dislikedPost };
             }
           } else {
-            post = { ...post, ...dislikedPost };
+            post_it = { ...post, ...dislikedPost };
           }
-          feed_posts.push(post);
+
+          if ("_doc" in post_it) {
+            feed_posts.push(post_it._doc);
+          } else {
+            feed_posts.push(post_it);
+          }
         });
 
-        if (allposts.length != 0) {
+        if (feed_posts.length != 0) {
           const result = {
             status_code: 200,
             status_msg: `Posts fetched`,
@@ -520,57 +548,132 @@ const singleuserpost = async (req, res) => {
         };
         const uid = req.params.id;
         const currentUser = await User.findById(uid);
-        myDetails = {
-          user_name: currentUser.name,
-          user_email: currentUser.email,
-          user_img: currentUser.profilePicture,
-        };
-        var userPosts = await Post.find({ userId: uid });
-        var list_of_posts = [];
-        userPosts.forEach((myPost) => {
-          myPost = { ...myPost._doc, user: myDetails };
-          list_of_posts.push(myPost);
-        });
-        allposts = list_of_posts;
-        allposts = allposts.sort(function (a, b) {
-          return new Date(a.updatedAt) - new Date(b.updatedAt);
-        });
-        var feed_posts = [];
-        let likedPost = {
-          likedPost: true,
-        };
-        let dislikedPost = {
-          likedPost: false,
-        };
+        if (currentUser.postType == "public") {
+          console.log("PUBLICCCCCC");
+          myDetails = {
+            user_name: currentUser.name,
+            user_email: currentUser.email,
+            user_img: currentUser.profilePicture,
+          };
+          var userPosts = await Post.find({ userId: uid });
+          var list_of_posts = [];
+          userPosts.forEach((myPost) => {
+            myPost = { ...myPost._doc, user: myDetails };
+            list_of_posts.push(myPost);
+          });
+          allposts = list_of_posts;
+          allposts = allposts.sort(function (a, b) {
+            return new Date(a.updatedAt) - new Date(b.updatedAt);
+          });
+          var feed_posts = [];
+          let likedPost = {
+            likedPost: true,
+          };
+          let dislikedPost = {
+            likedPost: false,
+          };
 
-        allposts.forEach((post) => {
-          if (post.likes.length != 0) {
-            if (post.likes.includes(uid)) {
-              post = { ...post, ...likedPost };
+          allposts.forEach((post) => {
+            if (post.likes.length != 0) {
+              if (post.likes.includes(uid)) {
+                post = { ...post, ...likedPost };
+              } else {
+                post = { ...post, ...dislikedPost };
+              }
             } else {
               post = { ...post, ...dislikedPost };
             }
+            feed_posts.push(post);
+          });
+
+          if (feed_posts.length != 0) {
+            const result = {
+              status_code: 200,
+              status_msg: `Posts fetched`,
+              data: feed_posts,
+            };
+
+            res.status(200).json(result);
           } else {
-            post = { ...post, ...dislikedPost };
+            const result = {
+              status_code: 404,
+              status_msg: `No posts for user found`,
+            };
+
+            res.status(404).json(result);
           }
-          feed_posts.push(post);
-        });
+        } else if (currentUser.postType == "supporter") {
+          console.log("Supporrrrrrrrrrrter");
+          let followers = currentUser.followers;
 
-        if (allposts.length != 0) {
-          const result = {
-            status_code: 200,
-            status_msg: `Posts fetched`,
-            data: feed_posts,
-          };
+          if (followers.includes(userID)) {
+            myDetails = {
+              user_name: currentUser.name,
+              user_email: currentUser.email,
+              user_img: currentUser.profilePicture,
+            };
+            var userPosts = await Post.find({ userId: uid });
+            var list_of_posts = [];
+            userPosts.forEach((myPost) => {
+              myPost = { ...myPost._doc, user: myDetails };
+              list_of_posts.push(myPost);
+            });
+            allposts = list_of_posts;
+            allposts = allposts.sort(function (a, b) {
+              return new Date(a.updatedAt) - new Date(b.updatedAt);
+            });
+            var feed_posts = [];
+            let likedPost = {
+              likedPost: true,
+            };
+            let dislikedPost = {
+              likedPost: false,
+            };
 
-          res.status(200).json(result);
+            allposts.forEach((post) => {
+              if (post.likes.length != 0) {
+                if (post.likes.includes(uid)) {
+                  post = { ...post, ...likedPost };
+                } else {
+                  post = { ...post, ...dislikedPost };
+                }
+              } else {
+                post = { ...post, ...dislikedPost };
+              }
+              feed_posts.push(post);
+            });
+
+            if (feed_posts.length != 0) {
+              const result = {
+                status_code: 200,
+                status_msg: `Posts fetched`,
+                data: feed_posts,
+              };
+
+              res.status(200).json(result);
+            } else {
+              const result = {
+                status_code: 404,
+                status_msg: `No posts for user found`,
+              };
+
+              res.status(404).json(result);
+            }
+          } else {
+            const result = {
+              status_code: 403,
+              status_msg: `You need to follow user to view his posts`,
+            };
+
+            res.status(403).json(result);
+          }
         } else {
           const result = {
-            status_code: 404,
-            status_msg: `No posts for user found`,
+            status_code: 403,
+            status_msg: `Account is private`,
           };
 
-          res.status(404).json(result);
+          res.status(403).json(result);
         }
       } catch (err) {
         const result = {
