@@ -17,11 +17,11 @@ const calendarRoute = require("./routes/calendar");
 const notificationRoute = require("./routes/notification");
 
 const ENV = require("./env");
-console.log("MONGO : ", ENV.MONGO_URL);
-const adminPassword = encodeURIComponent("Fn#2HKdXGDt27bM");
+// console.log("MONGO : ", ENV.MONGO_URL);
 
 // mongoose.connect(
-//   `mongodb+srv://abhifinay:ethan217@finayapp.dieg5.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`,
+//   `mongodb+srv://abhifinay:Whatisthemeaning@finayapp.dieg5.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`,
+//   { useNewUrlParser: true },
 //   function (err) {
 //     if (err) console.log("err  :", err);
 //   }
