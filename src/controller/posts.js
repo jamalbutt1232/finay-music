@@ -549,7 +549,6 @@ const singleuserpost = async (req, res) => {
         const uid = req.params.id;
         const currentUser = await User.findById(uid);
         if (currentUser.postType == "public") {
-          console.log("PUBLICCCCCC");
           myDetails = {
             user_name: currentUser.name,
             user_email: currentUser.email,

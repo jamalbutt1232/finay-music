@@ -62,9 +62,13 @@ const updateUser = async (req, res) => {
   if (userID !== undefined) {
     if (userID || req.body.isAdmin) {
       try {
-        const user = await User.findByIdAndUpdate(userID, {
-          $set: req.body,
-        });
+        const user = await User.findByIdAndUpdate(
+          userID,
+          {
+            $set: req.body,
+          },
+          { new: true }
+        );
         const result = {
           status_code: 200,
           status_msg: `Account has been updated`,
