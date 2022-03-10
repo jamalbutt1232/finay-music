@@ -38,6 +38,12 @@ const getNotifications = async (req, res) => {
     if (!deactive) {
       try {
         const allNotificaitons = await Notification.find({ otherId: userID });
+        // sort descending
+        allNotificaitons.sort(function (a, b) {
+          var dateA = new Date(a.updatedAt),
+            dateB = new Date(b.updatedAt);
+          return dateB - dateA;
+        });
         if (allNotificaitons.length != 0) {
           const result = {
             status_code: 200,
