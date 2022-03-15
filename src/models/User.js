@@ -104,6 +104,13 @@ const UserSchema = new mongoose.Schema(
       type: String,
       default: "public",
     },
+    algorand: {
+      type: Boolean,
+      default: false,
+    },
+    algorandAddress: {
+      type: String,
+    },
   },
   { timestamps: true }
 );
