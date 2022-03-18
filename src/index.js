@@ -10,6 +10,7 @@ const authRoute = require("./routes/auth");
 const postRoute = require("./routes/posts");
 const commentRoute = require("./routes/comments");
 const nftRoute = require("./routes/nft");
+const wishlistRoute = require("./routes/wishlist");
 const otpRoute = require("./routes/otp");
 
 const conversationRoute = require("./routes/conversations");
@@ -43,6 +44,7 @@ app.use("/api/conversations", conversationRoute);
 app.use("/api/messages", messageRoute);
 app.use("/api/comments", commentRoute);
 app.use("/api/nft", nftRoute);
+app.use("/api/wishlist", wishlistRoute);
 app.use("/api/otp", otpRoute);
 app.use("/api/calendar", calendarRoute);
 app.use("/api/notification", notificationRoute);

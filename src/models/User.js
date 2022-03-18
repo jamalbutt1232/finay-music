@@ -111,6 +111,14 @@ const UserSchema = new mongoose.Schema(
     algorandAddress: {
       type: String,
     },
+    likedNft: {
+      type: Array,
+      default: [],
+    },
+    starredNft: {
+      type: Array,
+      default: [],
+    },
   },
   { timestamps: true }
 );

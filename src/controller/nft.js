@@ -1,9 +1,7 @@
 const NFT = require("../models/NFT");
-const Notification = require("../models/Notification");
 const User = require("../models/User");
 const jwt = require("jsonwebtoken");
 const ENV = require("../env");
-const Post = require("../models/Post");
 
 // GET USER ID
 const getUserID = (req, res) => {
