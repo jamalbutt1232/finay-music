@@ -35,8 +35,12 @@ const createAsset = async (req, res) => {
   if (userID !== undefined) {
     const deactive = await deActiveStatusInner(userID);
     if (!deactive) {
-      const newNFT = new NFT(req.body);
-      newNFT.userId = userID;
+      // const newNFT = new NFT(req.body);
+      const newNFT = new NFT({
+        ...req.body,
+        ownerId: userID
+      });
+      //newNFT.userId = userID;
       try {
         const savedNFT = await newNFT.save();
         const result = {
@@ -70,7 +74,7 @@ const getAccessNFT = async (req, res) => {
   if (userID !== undefined) {
     try {
       const accessNFTs = await NFT.find({
-        type: "access",
+        $and: [{ type: "access" }, { ownerId: { $ne: userID } }],
       });
 
       const result = {
@@ -96,7 +100,7 @@ const getRegularNFT = async (req, res) => {
   if (userID !== undefined) {
     try {
       const regularNFTs = await NFT.find({
-        type: "regular",
+        $and: [{ type: "regular" }, { ownerId: { $ne: userID } }],
       });
 
       const result = {
