@@ -83,7 +83,9 @@ const removeFromWishlist = async (req, res) => {
   if (userID !== undefined) {
     const deactive = await deActiveStatusInner(userID);
     if (!deactive) {
-      const item = await Wishlist.findOne({ userId: userID });
+      const item = await Wishlist.findOne({
+        $and: [{ userId: { $eq: userID } }, { nft: { $eq: req.body.nft } }],
+      });
       try {
         const user = await User.findById(userID);
         await user.updateOne({ $pull: { starredNft: item.nft._id } });
