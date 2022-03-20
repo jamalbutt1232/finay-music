@@ -39,38 +39,49 @@ const createCart = async (req, res) => {
       const { _id } = req.body.nft;
       try {
         let result;
+        const user = await User.findById(userID);
         const cart = await Cart.findOne({ ownerID: userID });
         const item = await NFT.findOne({ _id });
+        if (!user.cartNFT.includes(_id)) {
+          await user.updateOne({ $push: { cartNFT: _id } });
+          const price = item.price;
+          const artist = item.artist;
+          const album = item.album;
+          const imgFile = item.imgFile;
+          if (cart) {
+            cart.items.push({ itemId: _id, artist, album, price, imgFile });
+            cart.bill = cart.items.reduce((acc, curr) => {
+              return acc + curr.price;
+            }, 0);
+            await cart.save();
+            result = {
+              status_code: 200,
+              status_msg: `Item added in cart`,
+              data: cart,
+            };
+          } else {
+            const newCart = await Cart.create({
+              ownerID: userID,
+              items: [{ itemId: _id, artist, album, price, imgFile }],
+              bill: price,
+            });
+            result = {
+              status_code: 200,
+              status_msg: `Cart Created and Item added`,
+              data: newCart,
+            };
+          }
 
-        const price = item.price;
-        const artist = item.artist;
-        const album = item.album;
-        const imgFile = item.imgFile;
-        if (cart) {
-          cart.items.push({ itemId: _id, artist, album, price, imgFile });
-          cart.bill = cart.items.reduce((acc, curr) => {
-            return acc + curr.price;
-          }, 0);
-          await cart.save();
-          result = {
+          res.status(200).json(result);
+        } else {
+          const result = {
             status_code: 200,
-            status_msg: `Item added in cart`,
+            status_msg: `Item already exists in cart`,
             data: cart,
           };
-        } else {
-          const newCart = await Cart.create({
-            ownerID: userID,
-            items: [{ itemId: _id, artist, album, price, imgFile }],
-            bill: price,
-          });
-          result = {
-            status_code: 200,
-            status_msg: `Cart Created and Item added`,
-            data: newCart,
-          };
-        }
 
-        res.status(200).json(result);
+          res.status(200).json(result);
+        }
       } catch (err) {
         const result = {
           status_code: 500,
@@ -94,6 +105,9 @@ const deleteCartItem = async (req, res) => {
   if (!deactive) {
     const itemId = req.query.itemId;
     try {
+      const user = await User.findById(userID);
+      await user.updateOne({ $pull: { cartNFT: itemId } });
+ 
       let cart = await Cart.findOne({ ownerID: userID });
       const itemIndex = cart.items.findIndex((item) => item.itemId == itemId);
       if (itemIndex > -1) {
