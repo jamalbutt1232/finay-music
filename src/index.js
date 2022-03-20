@@ -19,8 +19,12 @@ const messageRoute = require("./routes/messages");
 const calendarRoute = require("./routes/calendar");
 const notificationRoute = require("./routes/notification");
 
+// For documentation
+const swaggerJsDoc = require("swagger-jsdoc");
+const swaggerUi = require("swagger-ui-express");
+
 const ENV = require("./env");
-// console.log("MONGO : ", ENV.MONGO_URL);
+console.log("MONGO : ", ENV.MONGO_URL);
 
 // mongoose.connect(
 //   `mongodb+srv://abhifinay:Whatisthemeaning@finayapp.dieg5.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`,
@@ -37,6 +41,20 @@ mongoose.connect(`${ENV.MONGO_URL}`, { useNewUrlParser: true }, (doc, err) => {
 app.use(express.json());
 app.use(helmet());
 app.use(morgan("common"));
+////
+const options = {
+  definition: {
+    openapi: "3.0.0",
+    info: {
+      title: "Finay Music",
+      version: "1.0.0",
+    },
+  },
+  apis: ["./src/routes/*.js"], // files containing annotations as above
+};
+
+const swaggerDocument = swaggerJsDoc(options);
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.use("/api/users", userRoute);
 app.use("/api/auth", authRoute);
@@ -51,9 +69,13 @@ app.use("/api/otp", otpRoute);
 app.use("/api/calendar", calendarRoute);
 app.use("/api/notification", notificationRoute);
 
+app.get("/test", (req, res) => {
+  res.json("tester");
+});
 app.get("/", (req, res) => {
   res.json("hi");
 });
+
 // Notification API
 const notification_options = {
   priority: "high",

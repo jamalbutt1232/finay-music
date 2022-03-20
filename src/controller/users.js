@@ -5,6 +5,7 @@ const jwt = require("jsonwebtoken");
 const OTP = require("../models/OTP");
 const ENV = require("../env");
 const Notification = require("../models/Notification");
+
 console.log(ENV);
 // GET USER ID
 const getUserID = (req, res) => {
@@ -751,6 +752,44 @@ const verifySMS = async (req, res) => {
   }
 };
 
+// get a single searched user
+// http://localhost:8800/api/users/verifytoken?token=kin
+const verifyTokenWeb = async (req, res) => {
+  const token = req.query.token;
+  try {
+    if (typeof token !== "undefined") {
+      jwt.verify(token, ENV.TOKEN_SECRET, function (err, data) {
+        if (err) {
+          const result = {
+            status_code: 403,
+            status_msg: `Invalid token`,
+          };
+          res.status(403).send(result);
+        } else {
+          const result = {
+            status_code: 200,
+            status_msg: `Token verified successfully`,
+            data: token,
+          };
+          res.status(200).send(result);
+        }
+      });
+    } else {
+      const result = {
+        status_code: 404,
+        status_msg: `Token not found`,
+      };
+      res.status(404).send(result);
+    }
+  } catch (err) {
+    const result = {
+      status_code: 500,
+      status_msg: `Something went wrong`,
+    };
+    return res.status(500).send(result);
+  }
+};
+
 module.exports = {
   updateUser,
   deleteUser,
@@ -767,4 +806,5 @@ module.exports = {
   active2f,
   sendSMS,
   verifySMS,
+  verifyTokenWeb,
 };
