@@ -15,12 +15,13 @@ const {
   active2f,
   sendSMS,
   verifySMS,
+  verifyTokenWeb,
 } = require("../controller/users");
 const router = require("express").Router();
 const verifyToken = require("../private/privateRoute");
 
+router.get("/verifytoken", verifyTokenWeb);
 router.put("/updateuser", verifyToken, updateUser);
-
 router.get("/singleuser/:id", verifyToken, singleUser);
 router.put("/follow", verifyToken, followUser);
 router.put("/unfollow", verifyToken, unfollowUser);
