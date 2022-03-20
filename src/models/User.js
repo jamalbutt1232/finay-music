@@ -104,6 +104,25 @@ const UserSchema = new mongoose.Schema(
       type: String,
       default: "public",
     },
+    algorand: {
+      type: Boolean,
+      default: false,
+    },
+    algorandAddress: {
+      type: String,
+    },
+    likedNft: {
+      type: Array,
+      default: [],
+    },
+    starredNft: {
+      type: Array,
+      default: [],
+    },
+    cartNFT: {
+      type: Array,
+      default: [],
+    },
   },
   { timestamps: true }
 );
