@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const helmet = require("helmet");
 const morgan = require("morgan");
+const cors = require('cors')
 
 const userRoute = require("./routes/users");
 const authRoute = require("./routes/auth");
@@ -38,6 +39,7 @@ mongoose.connect(`${ENV.MONGO_URL}`, { useNewUrlParser: true }, (doc, err) => {
 });
 
 // Middleware
+app.use(cors())
 app.use(express.json());
 app.use(helmet());
 app.use(morgan("common"));
@@ -103,10 +105,10 @@ const server = app.listen(PORT, () => {
 
 const io = require("socket.io")(server, {
   pingTimeout: 60000,
-  cors: {
-    origin: "http://localhost:3000",
-    // credentials: true,
-  },
+  // cors: {
+  //   origin: "http://localhost:3000",
+  //   // credentials: true,
+  // },
 });
 
 io.on("connection", (socket) => {
