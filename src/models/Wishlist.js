@@ -1,14 +1,33 @@
 const mongoose = require("mongoose");
-
+const ObjectID = mongoose.Schema.Types.ObjectId;
 const WishlistSchema = new mongoose.Schema(
   {
-    userId: {
-      type: String,
+    ownerID: {
+      type: ObjectID,
       required: true,
+      ref: "User",
     },
-    nft: {
-        type: Object
-    }
+    items: [
+      {
+        itemId: {
+          type: ObjectID,
+          ref: "NFT",
+          required: true,
+        },
+        artist: {
+          type: String,
+        },
+        album: {
+          type: String,
+        },
+        price: {
+          type: Number,
+        },
+        imgFile: {
+          type: String,
+        },
+      },
+    ],
   },
   { timestamps: true }
 );

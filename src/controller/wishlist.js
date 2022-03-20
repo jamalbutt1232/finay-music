@@ -1,5 +1,6 @@
 const Wishlist = require("../models/Wishlist");
 const User = require("../models/User");
+const NFT = require("../models/NFT");
 const jwt = require("jsonwebtoken");
 const ENV = require("../env");
 
@@ -36,25 +37,45 @@ const addtoWishlist = async (req, res) => {
   if (userID !== undefined) {
     const deactive = await deActiveStatusInner(userID);
     if (!deactive) {
-      const newItem = new Wishlist(req.body);
-      newItem.userId = userID;
+      const { _id } = req.body.nft;
       try {
+        let result;
         const user = await User.findById(userID);
-        if (!user.starredNft.includes(req.body.nft._id)) {
-          const savedItem = await newItem.save();
-          await user.updateOne({ $push: { starredNft: savedItem.nft._id } });
-          const result = {
-            status_code: 200,
-            status_msg: `Item added to wishlist`,
-            data: savedItem,
-          };
+        const wishlist = await Wishlist.findOne({ ownerID: userID });
+        const item = await NFT.findOne({ _id });
+        if (!user.starredNft.includes(_id)) {
+          await user.updateOne({ $push: { starredNft: _id } });
+          const price = item.price;
+          const artist = item.artist;
+          const album = item.album;
+          const imgFile = item.imgFile;
+          if (wishlist) {
+            wishlist.items.push({ itemId: _id, artist, album, price, imgFile });
+            await wishlist.save();
+            result = {
+              status_code: 200,
+              status_msg: `Item added in wishlist`,
+              data: wishlist,
+            };
+          } else {
+            const newWishlist = await Wishlist.create({
+              ownerID: userID,
+              items: [{ itemId: _id, artist, album, price, imgFile }],
+              bill: price,
+            });
+            result = {
+              status_code: 200,
+              status_msg: `Wishlist created and Item added`,
+              data: newWishlist,
+            };
+          }
 
           res.status(200).json(result);
         } else {
           const result = {
             status_code: 200,
             status_msg: `Item already exists in wishlist`,
-            data: {},
+            data: wishlist,
           };
 
           res.status(200).json(result);
@@ -79,40 +100,44 @@ const addtoWishlist = async (req, res) => {
 
 const removeFromWishlist = async (req, res) => {
   const userID = getUserID(req, res);
+  const deactive = await deActiveStatusInner(userID);
+  if (!deactive) {
+    const itemId = req.query.itemId;
+    try {
+      const user = await User.findById(userID);
+      await user.updateOne({ $pull: { starredNft: itemId } });
 
-  if (userID !== undefined) {
-    const deactive = await deActiveStatusInner(userID);
-    if (!deactive) {
-      const item = await Wishlist.findOne({
-        $and: [{ userId: { $eq: userID } }, { nft: { $eq: req.body.nft } }],
-      });
-      try {
-        const user = await User.findById(userID);
-        await user.updateOne({ $pull: { starredNft: item.nft._id } });
-        await item.deleteOne();
-
-        const result = {
+      let wishlist = await Wishlist.findOne({ ownerID: userID });
+      const itemIndex = wishlist.items.findIndex(
+        (item) => item.itemId == itemId
+      );
+      if (itemIndex > -1) {
+        wishlist.items.splice(itemIndex, 1);
+        wishlist = await wishlist.save();
+        result = {
           status_code: 200,
-          status_msg: `Item removed from wishlist`,
-          data: item,
+          status_msg: `Item deleted from wishlist`,
+          data: wishlist,
         };
-
         res.status(200).json(result);
-      } catch (err) {
-        const result = {
-          status_code: 500,
-          status_msg: `Something went wrong :${err}`,
-        };
-
-        res.status(500).json(result);
+      } else {
+        res.status(404).send("item not found");
       }
-    } else {
+    } catch (error) {
+      console.log(error);
       const result = {
-        status_code: 403,
-        status_msg: `Please active your account`,
+        status_code: 500,
+        status_msg: `Something went wrong :${err}`,
       };
-      return res.status(403).send(result);
+
+      res.status(500).json(result);
     }
+  } else {
+    const result = {
+      status_code: 403,
+      status_msg: `Please active your account`,
+    };
+    return res.status(403).send(result);
   }
 };
 
@@ -121,15 +146,21 @@ const getWishlistItems = async (req, res) => {
 
   if (userID !== undefined) {
     try {
-      const items = await Wishlist.find({
-        userId: userID,
-      });
-
-      const result = {
-        status_code: 200,
-        status_msg: `Wishlist Items fetched`,
-        data: items,
-      };
+      const wishlist = await Wishlist.findOne({ ownerID: userID });
+      let result;
+      if (wishlist && wishlist.items.length > 0) {
+        result = {
+          status_code: 200,
+          status_msg: `Wishlist fetched`,
+          data: wishlist,
+        };
+      } else {
+        result = {
+          status_code: 200,
+          status_msg: `Wishlist Empty`,
+          data: wishlist,
+        };
+      }
 
       res.status(200).json(result);
     } catch (err) {

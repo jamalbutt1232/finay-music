@@ -119,6 +119,10 @@ const UserSchema = new mongoose.Schema(
       type: Array,
       default: [],
     },
+    cartNFT: {
+      type: Array,
+      default: [],
+    },
   },
   { timestamps: true }
 );
