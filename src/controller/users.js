@@ -180,7 +180,7 @@ const singleUser = async (req, res) => {
     }
   }
 };
-// follow user
+// follow user 
 const followUser = async (req, res) => {
   const userID = getUserID(req, res);
   const currentUser = await User.findById(userID);

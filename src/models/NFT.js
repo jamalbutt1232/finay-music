@@ -34,6 +34,7 @@ const NFTSchema = new mongoose.Schema(
     },
     type: {
       type: String,
+      required: true,
     },
   },
   { timestamps: true }

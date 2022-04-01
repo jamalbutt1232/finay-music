@@ -10,7 +10,7 @@ router.post("/", async (req, res) => {
 
   try {
     const savedConversation = await newConversation.save();
-    
+
     const result = {
       status_code: 200,
       status_msg: `Coversation saved successfully`,
@@ -41,7 +41,6 @@ router.get("/:userId", async (req, res) => {
 });
 
 // get conv includes two userId
-
 router.get("/find/:firstUserId/:secondUserId", async (req, res) => {
   try {
     const conversation = await Conversation.findOne({
@@ -52,7 +51,7 @@ router.get("/find/:firstUserId/:secondUserId", async (req, res) => {
       status_msg: `Conversation fetched successfully`,
       data: conversation ?? {},
     };
-    res.status(200).json(result)
+    res.status(200).json(result);
   } catch (err) {
     res.status(500).json(err);
   }

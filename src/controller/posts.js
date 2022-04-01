@@ -252,14 +252,18 @@ const updatePost = async (req, res) => {
 };
 //delete a post
 const deletePost = async (req, res) => {
+  console.log("Came here 01");
   const userID = getUserID(req, res);
 
   if (userID !== undefined) {
     const deactive = await deActiveStatusInner(userID);
     if (!deactive) {
       try {
+        console.log("Came here 1");
+
         const post = await Post.findById(req.body.id);
         if (post.userId === userID) {
+          console.log("Came here");
           await post.deleteOne();
           const result = {
             status_code: 200,
