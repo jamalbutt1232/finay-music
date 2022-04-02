@@ -1,26 +1,15 @@
 const mongoose = require("mongoose");
 const ObjectID = mongoose.Schema.Types.ObjectId;
-const NFTSchema = new mongoose.Schema(
+const SongsSchema = new mongoose.Schema(
   {
     ownerId: {
       type: ObjectID,
       required: true,
       ref: "User",
     },
-    price: {
-      type: Number,
-      required: true,
-    },
-    productID: {
-      type: String,
-      required: true,
-    },
-    totalQuantity: {
-      type: Number,
-      required: true,
-    },
-    availableQuantity: {
-      type: Number,
+    itemId: {
+      type: ObjectID,
+      ref: "NFT",
       required: true,
     },
     album: {
@@ -31,19 +20,11 @@ const NFTSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    desc: {
-      type: String,
-      max: 500,
-      required: true,
-    },
     imgFile: {
       type: String,
       required: true,
     },
     audioFile: {
-      type: String,
-    },
-    type: {
       type: String,
       required: true,
     },
@@ -51,4 +32,4 @@ const NFTSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model("NFT", NFTSchema);
+module.exports = mongoose.model("Songs", SongsSchema);

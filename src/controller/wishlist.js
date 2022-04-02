@@ -49,8 +49,10 @@ const addtoWishlist = async (req, res) => {
           const artist = item.artist;
           const album = item.album;
           const imgFile = item.imgFile;
+          const audioFile = item.audioFile;
+          const productID = item.productID
           if (wishlist) {
-            wishlist.items.push({ itemId: _id, artist, album, price, imgFile });
+            wishlist.items.push({ itemId: _id, artist, album, price, imgFile, audioFile, productID });
             await wishlist.save();
             result = {
               status_code: 200,
@@ -60,7 +62,7 @@ const addtoWishlist = async (req, res) => {
           } else {
             const newWishlist = await Wishlist.create({
               ownerID: userID,
-              items: [{ itemId: _id, artist, album, price, imgFile }],
+              items: [{ itemId: _id, artist, album, price, imgFile, audioFile, productID }],
               bill: price,
             });
             result = {
