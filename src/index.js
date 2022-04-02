@@ -14,6 +14,8 @@ const nftRoute = require("./routes/nft");
 const cartRoute = require("./routes/cart");
 const wishlistRoute = require("./routes/wishlist");
 const otpRoute = require("./routes/otp");
+const receiptRoute = require("./routes/receipt");
+const songRoute = require("./routes/song");
 
 const conversationRoute = require("./routes/conversations");
 const messageRoute = require("./routes/messages");
@@ -70,6 +72,8 @@ app.use("/api/wishlist", wishlistRoute);
 app.use("/api/otp", otpRoute);
 app.use("/api/calendar", calendarRoute);
 app.use("/api/notification", notificationRoute);
+app.use("/api/iap", receiptRoute)
+app.use("/api/songs", songRoute);
 
 app.get("/test", (req, res) => {
   res.json("tester");

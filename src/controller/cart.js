@@ -48,8 +48,10 @@ const createCart = async (req, res) => {
           const artist = item.artist;
           const album = item.album;
           const imgFile = item.imgFile;
+          const audioFile = item.audioFile;
+          const productID = item.productID
           if (cart) {
-            cart.items.push({ itemId: _id, artist, album, price, imgFile });
+            cart.items.push({ itemId: _id, artist, album, price, imgFile, audioFile, productID });
             cart.bill = cart.items.reduce((acc, curr) => {
               return acc + curr.price;
             }, 0);
@@ -62,7 +64,7 @@ const createCart = async (req, res) => {
           } else {
             const newCart = await Cart.create({
               ownerID: userID,
-              items: [{ itemId: _id, artist, album, price, imgFile }],
+              items: [{ itemId: _id, artist, album, price, imgFile, audioFile, productID }],
               bill: price,
             });
             result = {
