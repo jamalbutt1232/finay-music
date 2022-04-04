@@ -23,7 +23,13 @@ const CartSchema = new mongoose.Schema(
         price: {
           type: Number,
         },
+        productID: {
+          type: String,
+        },
         imgFile: {
+          type: String,
+        },
+        audioFile: {
           type: String,
         },
       },
