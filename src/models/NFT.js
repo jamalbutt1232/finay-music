@@ -7,6 +7,10 @@ const NFTSchema = new mongoose.Schema(
       required: true,
       ref: "User",
     },
+    holders: {
+      type: Array,
+      default: [],
+    },
     price: {
       type: Number,
       required: true,

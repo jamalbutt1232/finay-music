@@ -73,33 +73,28 @@ const updateAsset = async (req, res) => {
     if (!deactive) {
       const { itemId } = req.body;
       const item = await NFT.findOne({ _id: itemId });
-      console.log("item",item)
+      console.log("item", item);
       if (item.availableQuantity > 0) {
-
         try {
-          const updatedNFT = await NFT.findByIdAndUpdate(
-            itemId,
-            {
-              $set: { availableQuantity: item.availableQuantity - 1 },
-            },
-          );
+          const updatedNFT = await NFT.findByIdAndUpdate(itemId, {
+            $set: { availableQuantity: item.availableQuantity - 1 },
+          });
           const result = {
             status_code: 200,
             status_msg: `NFT asset has been updated`,
             data: updatedNFT,
           };
-  
+
           res.status(200).json(result);
         } catch (err) {
           const result = {
             status_code: 500,
             status_msg: `Something went wrong :${err}`,
           };
-  
+
           res.status(500).json(result);
         }
-      }
-      else{
+      } else {
         const result = {
           status_code: 404,
           status_msg: `NFT not available`,
@@ -175,7 +170,11 @@ const getRegularNFT = async (req, res) => {
   if (userID !== undefined) {
     try {
       const regularNFTs = await NFT.find({
-        $and: [{ type: "regular" }, { ownerId: { $ne: userID } }],
+        $and: [
+          { type: "regular" },
+          { ownerId: { $ne: userID } },
+          //{ holders: { $not:userID } },
+        ],
       });
 
       const result = {
@@ -227,5 +226,5 @@ module.exports = {
   getUserAccessNFT,
   getRegularNFT,
   getUserRegularNFT,
-  updateAsset
+  updateAsset,
 };

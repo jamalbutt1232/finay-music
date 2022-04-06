@@ -88,9 +88,14 @@ const createSong = async (req, res) => {
         });
         try {
           const deleteCartRes = await deleteFromCart(itemId, userID);
-          console.log("deleteCartRes", deleteCartRes)
-          if (deleteCartRes.status_code === 200) {
+          console.log("deleteCartRes", deleteCartRes);
+          if (
+            deleteCartRes.status_code === 200 ||
+            deleteCartRes.status_code === 404
+          ) {
             const savedSong = await newSong.save();
+            await item.updateOne({ $push: { holders: userID } });
+
             const result = {
               status_code: 200,
               status_msg: `Song has been created`,
