@@ -68,7 +68,7 @@ const deleteFromCart = async (itemId, userID) => {
     console.log(error);
     const result = {
       status_code: 500,
-      status_msg: `Something went wrong :${err}`,
+      status_msg: `Something went wrong :${error}`,
     };
     return result;
   }
@@ -88,8 +88,14 @@ const createSong = async (req, res) => {
         });
         try {
           const deleteCartRes = await deleteFromCart(itemId, userID);
-          if (deleteCartRes.status_code === 200) {
+          console.log("deleteCartRes", deleteCartRes);
+          if (
+            deleteCartRes.status_code === 200 ||
+            deleteCartRes.status_code === 404
+          ) {
             const savedSong = await newSong.save();
+            await item.updateOne({ $push: { holders: userID } });
+
             const result = {
               status_code: 200,
               status_msg: `Song has been created`,
@@ -100,7 +106,7 @@ const createSong = async (req, res) => {
           } else {
             const result = {
               status_code: 500,
-              status_msg: `Something went wrong`,
+              status_msg: `Delete from cart error`,
             };
 
             res.status(500).json(result);
@@ -119,7 +125,7 @@ const createSong = async (req, res) => {
           status_msg: `This song is sold out`,
         };
 
-        res.status(500).json(result);
+        res.status(404).json(result);
       }
     } else {
       const result = {
