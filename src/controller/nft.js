@@ -200,7 +200,7 @@ const getUserRegularNFT = async (req, res) => {
   if (userID !== undefined) {
     try {
       const regularNFTs = await NFT.find({
-        $and: [{ type: "regular" }, { ownerId: { $eq: req.params.userID } }],
+        $and: [{ type: "regular" }, { ownerId: { $eq: req.params.id } }],
       });
 
       const result = {
