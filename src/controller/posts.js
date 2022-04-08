@@ -387,12 +387,14 @@ const allPost = async (req, res) => {
           user_name: "",
           user_email: "",
           user_img: "",
+          post_type: "",
         };
         const currentUser = await User.findById(userID);
         myDetails = {
           user_name: currentUser.name,
           user_email: currentUser.email,
           user_img: currentUser.profilePicture,
+          post_type: currentUser.postType,
         };
         var userPosts = await Post.find({ userId: userID });
         var list_of_posts = [];
@@ -401,45 +403,62 @@ const allPost = async (req, res) => {
           list_of_posts.push(myPost);
         });
 
-        const friendPosts = await Promise.all(
+        var friendPosts = await Promise.all(
           currentUser.followings.map((friendId) => {
             return Post.find({ userId: friendId });
           })
         );
-        // console.log(friendPosts);
-        let friendDetails = {
-          user_name: "",
-          user_email: "",
-          user_img: "",
-          postType: "",
-        };
+        friendPosts = friendPosts.filter((el) => {
+          return el.length != 0;
+        });
+
+        friendPosts = [].concat.apply([], friendPosts);
+        var t_friendPosts = [];
+
+        var t_friendPostsv2 = {};
+
+        let index = 0;
 
         if (friendPosts.length > 0) {
-          for (i = 0; i < friendPosts[0].length; i++) {
-            const friendID = friendPosts[0][i].userId;
+          for (i = 0; i < friendPosts.length; i++) {
+            var friendDetails = {
+              user_name: "",
+              user_email: "",
+              user_img: "",
+              post_type: "",
+            };
+            const friendID = friendPosts[i].userId;
             const friendData = await User.findById(friendID);
-
+            console.log(friendData.email);
             if (!friendData.deactive) {
               friendDetails.user_name = friendData.name;
               friendDetails.user_email = friendData.email;
               friendDetails.user_img = friendData.profilePicture;
-              friendDetails.postType = friendData.postType;
 
-              friendPosts[0][i] = {
-                ...friendPosts[0][i]._doc,
+              friendDetails.post_type = friendData.postType;
+
+              t_friendPostsv2 = {
+                ...friendPosts[i]._doc,
                 user: friendDetails,
               };
+
+              t_friendPosts[index] = t_friendPostsv2;
+              index = index + 1;
             }
           }
+
+          friendPosts = t_friendPosts;
+
           var allposts = list_of_posts.concat(...friendPosts);
         } else {
           var allposts = list_of_posts;
         }
-
+        console.log("all post for each :", allposts);
         allposts.forEach((post) => {
-          if (post.user.postType == "private") {
+          if (post.user.post_type == "private") {
+            console.log("Came to private");
             allposts = allposts.filter(function (el) {
-              return el.user.postType != "private";
+              return el.user.post_type != "private";
             });
           }
         });

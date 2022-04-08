@@ -175,7 +175,7 @@ const getRegularNFT = async (req, res) => {
         $and: [
           { type: "regular" },
           { ownerId: { $ne: userID } },
-          //{ holders: { $not:userID } },
+          { holders: { $ne: userID } },
         ],
       });
 
