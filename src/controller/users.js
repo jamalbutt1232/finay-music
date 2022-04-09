@@ -5,6 +5,7 @@ const jwt = require("jsonwebtoken");
 const OTP = require("../models/OTP");
 const ENV = require("../env");
 const Notification = require("../models/Notification");
+const bcrypt = require("bcrypt");
 
 console.log(ENV);
 // GET USER ID
@@ -57,6 +58,41 @@ const getUserFollowerType = async (uid) => {
     return `User Type Issue : ${err}`;
   }
 };
+// Update pswd
+const updatePassword = async (req, res) => {
+  const userID = getUserID(req, res);
+  if (userID !== undefined) {
+    if (userID || req.body.isAdmin) {
+      try {
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(req.body.password, salt);
+
+        const user = await User.findByIdAndUpdate(
+          userID,
+          {
+            password: hashedPassword,
+          },
+          { new: true }
+        );
+        const result = {
+          status_code: 200,
+          status_msg: `Password has been updated`,
+          data: user,
+        };
+        res.status(200).send(result);
+      } catch (err) {
+        const result = {
+          status_code: 500,
+          status_msg: `Something went wrong ${err}`,
+        };
+        return res.status(500).send(result);
+      }
+    } else {
+      return res.status(403).json("You can update only your account");
+    }
+  }
+};
+
 // update user
 const updateUser = async (req, res) => {
   const userID = getUserID(req, res);
@@ -180,7 +216,7 @@ const singleUser = async (req, res) => {
     }
   }
 };
-// follow user 
+// follow user
 const followUser = async (req, res) => {
   const userID = getUserID(req, res);
   const currentUser = await User.findById(userID);
@@ -807,4 +843,5 @@ module.exports = {
   sendSMS,
   verifySMS,
   verifyTokenWeb,
+  updatePassword
 };
