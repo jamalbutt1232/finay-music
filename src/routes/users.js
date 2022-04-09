@@ -16,6 +16,7 @@ const {
   sendSMS,
   verifySMS,
   verifyTokenWeb,
+  updatePassword,
 } = require("../controller/users");
 const router = require("express").Router();
 const verifyToken = require("../private/privateRoute");
@@ -130,6 +131,7 @@ const verifyToken = require("../private/privateRoute");
 
 router.get("/verifytoken", verifyTokenWeb);
 router.put("/updateuser", verifyToken, updateUser);
+router.put("/updatepassword", verifyToken, updatePassword);
 router.get("/singleuser/:id", verifyToken, singleUser);
 router.put("/follow", verifyToken, followUser);
 router.put("/unfollow", verifyToken, unfollowUser);

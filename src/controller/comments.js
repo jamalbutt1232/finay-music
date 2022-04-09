@@ -105,20 +105,25 @@ const getAllComments = async (req, res) => {
         return dateA - dateB;
       });
 
-      const commentUsers = await Promise.all(
+      let commentUsers = await Promise.all(
         allcomments.map((friendId) => {
           return User.find({ _id: friendId.userId });
         })
       );
-      let userDetails = {
-        user_name: "",
-        user_email: "",
-        user_img: "",
-      };
+      commentUsers = [].concat.apply([], commentUsers);
+
+      console.log(commentUsers);
       for (i = 0; i < commentUsers.length; i++) {
-        userDetails.user_name = commentUsers[0][0].name;
-        userDetails.user_email = commentUsers[0][0].email;
-        userDetails.user_img = commentUsers[0][0].img || "";
+        var userDetails = {
+          user_name: "",
+          user_email: "",
+          user_img: "",
+        };
+
+        userDetails.user_name = commentUsers[i].name;
+        userDetails.user_email = commentUsers[i].email;
+        userDetails.user_img = commentUsers[i].img || "";
+
         allcomments[i] = { ...allcomments[i]._doc, user: userDetails };
       }
 

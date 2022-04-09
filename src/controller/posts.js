@@ -394,7 +394,7 @@ const allPost = async (req, res) => {
           user_name: currentUser.name,
           user_email: currentUser.email,
           user_img: currentUser.profilePicture,
-          post_type: currentUser.postType,
+          post_type: currentUser.isPost,
         };
         var userPosts = await Post.find({ userId: userID });
         var list_of_posts = [];
@@ -435,7 +435,7 @@ const allPost = async (req, res) => {
               friendDetails.user_email = friendData.email;
               friendDetails.user_img = friendData.profilePicture;
 
-              friendDetails.post_type = friendData.postType;
+              friendDetails.post_type = friendData.isPost;
 
               t_friendPostsv2 = {
                 ...friendPosts[i]._doc,
