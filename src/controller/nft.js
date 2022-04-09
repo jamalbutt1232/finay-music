@@ -30,6 +30,7 @@ const deActiveStatusInner = async (uid) => {
   }
 };
 const createAsset = async (req, res) => {
+  console.log("Came to createAsset");
   const userID = getUserID(req, res);
 
   if (userID !== undefined) {
@@ -113,6 +114,7 @@ const updateAsset = async (req, res) => {
 };
 
 const getAccessNFT = async (req, res) => {
+  console.log("Came to getAccessNFT ");
   const userID = getUserID(req, res);
 
   if (userID !== undefined) {
