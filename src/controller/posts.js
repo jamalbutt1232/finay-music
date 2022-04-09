@@ -402,7 +402,6 @@ const allPost = async (req, res) => {
             return Post.find({ userId: friendId });
           })
         );
-        // console.log(friendPosts);
         let friendDetails = {
           user_name: "",
           user_email: "",
@@ -414,11 +413,6 @@ const allPost = async (req, res) => {
           for (i = 0; i < friendPosts[0].length; i++) {
             const friendID = friendPosts[0][i].userId;
             const friendData = await User.findById(friendID);
-            // console.log(
-            //   "friendData.postType",
-            //   friendData.postType,
-            //   friendData.email
-            // );
 
             if (!friendData.deactive) {
               friendDetails.user_name = friendData.name;
@@ -440,17 +434,11 @@ const allPost = async (req, res) => {
         allposts.forEach((post) => {
           
           if (post?.user?.postType && post?.user?.postType === "private") {
-            console.log(
-              "post.user.postType",
-              post.user.postType,
-              post.user.user_email
-            );
             allposts = allposts.filter(function (el) {
               return el.user.postType !== "private";
             });
           }
         });
-        console.log("I AM HERE")
 
         allposts = allposts.sort(function (a, b) {
           return new Date(a.updatedAt) - new Date(b.updatedAt);

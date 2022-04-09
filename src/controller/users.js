@@ -79,9 +79,9 @@ const updateUser = async (req, res) => {
       } catch (err) {
         const result = {
           status_code: 500,
-          status_msg: `Something went wrong`,
+          status_msg: `Something went wrong ${err}`,
         };
-        return res.status(500).send(result, err);
+        return res.status(500).send(result);
       }
     } else {
       return res.status(403).json("You can update only your account");
