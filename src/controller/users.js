@@ -843,5 +843,5 @@ module.exports = {
   sendSMS,
   verifySMS,
   verifyTokenWeb,
-  updatePassword
+  updatePassword,
 };
