@@ -78,6 +78,22 @@ const UserSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    isPost: {
+      type: String,
+      default: "public",
+    },
+    isMedia: {
+      type: String,
+      default: "public",
+    },
+    isFollowers: {
+      type: String,
+      default: "public",
+    },
+    isContact: {
+      type: String,
+      default: "public",
+    },
     location: {
       type: Object,
       default: undefined,
