@@ -54,7 +54,7 @@ const create_a_comment = async (req, res) => {
 
         userDetails.user_name = user.name;
         userDetails.user_email = user.email;
-        userDetails.user_img = user.img || "";
+        userDetails.user_img = user.profilePicture || "";
 
         savedComment = { ...savedComment._doc, user: userDetails };
         //  GENERATING NOTIFICATION (SAVE IT COMMENT)
@@ -135,7 +135,7 @@ const getAllComments = async (req, res) => {
 
         userDetails.user_name = commentUsers[i].name;
         userDetails.user_email = commentUsers[i].email;
-        userDetails.user_img = commentUsers[i].img || "";
+        userDetails.user_img = commentUsers[i].profilePicture || "";
 
         allcomments[i] = { ...allcomments[i]._doc, user: userDetails };
       }
