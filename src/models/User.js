@@ -13,6 +13,13 @@ const UserSchema = new mongoose.Schema(
       required: true,
       min: 6,
     },
+    isValid: {
+      type: Boolean,
+      default: false,
+    },
+    uniqueCode: {
+      type: String,
+    },
     name: {
       type: String,
       default: "",

@@ -1,6 +1,11 @@
 const router = require("express").Router();
 
-const { register, login } = require("../controller/auth");
+const {
+  register,
+  login,
+  verifyMAIL,
+  sendMailAgain,
+} = require("../controller/auth");
 
 /**
  * @swagger
@@ -86,11 +91,7 @@ router.post("/register", register);
  */
 
 router.post("/login", login);
-
-
+router.post("/verifymail", verifyMAIL);
+router.put("/sendmailagain", sendMailAgain);
 
 module.exports = router;
-
-//
-
-//
