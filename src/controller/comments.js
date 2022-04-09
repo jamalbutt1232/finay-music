@@ -4,6 +4,7 @@ const User = require("../models/User");
 const jwt = require("jsonwebtoken");
 const ENV = require("../env");
 const Post = require("../models/Post");
+const { listeners } = require("../models/User");
 
 // GET USER ID
 const getUserID = (req, res) => {
@@ -37,13 +38,25 @@ const create_a_comment = async (req, res) => {
   if (userID !== undefined) {
     const deactive = await deActiveStatusInner(userID);
     if (!deactive) {
-      const user = await User.findById(req.body.userId);
-      // if (!user.deactive) {
-      const newComment = new Comment(req.body);
-      newComment.userId = userID;
-      try {
-        const savedComment = await newComment.save();
+      const user = await User.findById(userID);
 
+      // if (!user.deactive) {
+      let newComment = new Comment(req.body);
+      newComment.userId = userID;
+
+      try {
+        let savedComment = await newComment.save();
+        var userDetails = {
+          user_name: "",
+          user_email: "",
+          user_img: "",
+        };
+
+        userDetails.user_name = user.name;
+        userDetails.user_email = user.email;
+        userDetails.user_img = user.img || "";
+
+        savedComment = { ...savedComment._doc, user: userDetails };
         //  GENERATING NOTIFICATION (SAVE IT COMMENT)
         const post = await Post.findById(req.body.postId);
         const currentUser = await User.findById(userID);
