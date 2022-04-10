@@ -85,6 +85,7 @@ const createSong = async (req, res) => {
         const newSong = new Song({
           ...req.body,
           ownerId: userID,
+          orgOwnerId: item.ownerId
         });
         try {
           const deleteCartRes = await deleteFromCart(itemId, userID);
