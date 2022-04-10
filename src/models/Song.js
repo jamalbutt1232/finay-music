@@ -7,6 +7,11 @@ const SongsSchema = new mongoose.Schema(
       required: true,
       ref: "User",
     },
+    orgOwnerId: {
+      type: ObjectID,
+      required: true,
+      ref: "User",
+    },
     itemId: {
       type: ObjectID,
       ref: "NFT",
