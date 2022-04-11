@@ -234,7 +234,7 @@ const followUser = async (req, res) => {
                   currentId: userID,
                   otherId: req.body.id,
                   postId: "",
-                  message: `${currentUser.name} started following you`,
+                  message: `${currentUser.name} supports you`,
                 });
                 await newNotification.save();
               }
@@ -573,14 +573,14 @@ const getFollowings = async (req, res) => {
         if (usersList.length != 0) {
           const result = {
             status_code: 200,
-            status_msg: `All followings fetched successfully`,
+            status_msg: `All supporters fetched successfully`,
             data: usersList,
           };
           res.status(200).send(result);
         } else {
           const result = {
             status_code: 404,
-            status_msg: `No followings found`,
+            status_msg: `No supporters found`,
           };
           res.status(404).send(result);
         }
