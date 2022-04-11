@@ -178,7 +178,7 @@ const getWishlistItems = async (req, res) => {
         result = {
           status_code: 200,
           status_msg: `Wishlist Empty`,
-          data: wishlist,
+          data: [],
         };
       }
 
