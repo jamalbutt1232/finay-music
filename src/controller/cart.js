@@ -166,7 +166,7 @@ const getCart = async (req, res) => {
         result = {
           status_code: 200,
           status_msg: `Cart Empty`,
-          data: cart,
+          data: [],
         };
       }
 
