@@ -715,6 +715,7 @@ const sendSMS = async (req, res) => {
         try {
           client.messages
             .create({
+              messagingServiceSid: "MGd14546f0eff71fc2982699f4b2ed9373",
               body: random_sequence,
               from: sender,
               to: req.body.number,
