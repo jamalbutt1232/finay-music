@@ -175,6 +175,7 @@ const register = async (req, res) => {
           let code = sendMail(req.body.email);
           // create new user
           const newUser = new User({
+            name: req.body.name,
             email: req.body.email,
             password: hashedPassword,
             uniqueCode: code,
