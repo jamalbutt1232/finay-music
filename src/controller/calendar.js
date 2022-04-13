@@ -129,22 +129,31 @@ const deleteCalendarEvent = async (req, res) => {
     if (!deactive) {
       try {
         const calendar = await Calendar.findById(req.body.id);
-        if (calendar.userId === userID) {
-          await calendar.deleteOne();
-          const result = {
-            status_code: 200,
-            status_msg: `Calendar event has been deleted`,
-            data: calendar,
-          };
-
-          res.status(200).json(result);
-        } else {
+        if (calendar == undefined) {
           const result = {
             status_code: 403,
-            status_msg: `You can only delete ur calendar event`,
+            status_msg: `No such event exist`,
           };
 
-          res.status(200).json(result);
+          res.status(403).json(result);
+        } else {
+          if (calendar.userId === userID) {
+            await calendar.deleteOne();
+            const result = {
+              status_code: 200,
+              status_msg: `Calendar event has been deleted`,
+              data: calendar,
+            };
+
+            res.status(200).json(result);
+          } else {
+            const result = {
+              status_code: 403,
+              status_msg: `You can only delete ur calendar event`,
+            };
+
+            res.status(403).json(result);
+          }
         }
       } catch (err) {
         const result = {

@@ -164,7 +164,7 @@ const register = async (req, res) => {
       if (user) {
         const result = {
           status_code: 500,
-          status_msg: `This user is already registered with ${req.body.email} e-mail`,
+          status_msg: `This user is already registered with ${email} e-mail`,
         };
         res.status(500).send(result);
       } else {
@@ -172,7 +172,7 @@ const register = async (req, res) => {
           //   generate new password
           const salt = await bcrypt.genSalt(10);
           const hashedPassword = await bcrypt.hash(req.body.password, salt);
-          let code = sendMail(req.body.email);
+          let code = sendMail(email);
           // create new user
           const newUser = new User({
             name: req.body.name,
