@@ -149,45 +149,60 @@ const verifyMAIL = async (req, res) => {
   }
 };
 
+function checkEmail(email) {
+  const emailRegexp = /^[\w.%+-]+@[\w.-]+\.[\w]{2,6}$/;
+  return emailRegexp.test(email);
+}
+
 const register = async (req, res) => {
   try {
-    // Check if a user already exists
-    const user = await User.findOne({ email: req.body.email });
-    if (user) {
-      const result = {
-        status_code: 500,
-        status_msg: `This user is already registered with ${req.body.email} e-mail`,
-      };
-      res.status(500).send(result);
-    } else {
-      if (req.body.password === req.body.confirmpassword) {
-        //   generate new password
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(req.body.password, salt);
-        let code = sendMail(req.body.email);
-        // create new user
-        const newUser = new User({
-          email: req.body.email,
-          password: hashedPassword,
-          uniqueCode: code,
-        });
+    const email = req.body.email.toLowerCase();
 
-        // save user and responsd
-        const user = await newUser.save();
-        // const user = "yes yser";
-        const result = {
-          status_code: 200,
-          status_msg: "User successfully registered",
-          data: user,
-        };
-        res.status(200).send(result);
-      } else {
+    if (checkEmail(email)) {
+      // Check if a user already exists
+      const user = await User.findOne({ email: email });
+      if (user) {
         const result = {
           status_code: 500,
-          status_msg: "Both password fields does not match",
+          status_msg: `This user is already registered with ${req.body.email} e-mail`,
         };
         res.status(500).send(result);
+      } else {
+        if (req.body.password === req.body.confirmpassword) {
+          //   generate new password
+          const salt = await bcrypt.genSalt(10);
+          const hashedPassword = await bcrypt.hash(req.body.password, salt);
+          let code = sendMail(req.body.email);
+          // create new user
+          const newUser = new User({
+            email: req.body.email,
+            password: hashedPassword,
+            uniqueCode: code,
+          });
+
+          // save user and responsd
+          const user = await newUser.save();
+          // const user = "yes yser";
+          const result = {
+            status_code: 200,
+            status_msg: "User successfully registered",
+            data: user,
+          };
+          res.status(200).send(result);
+        } else {
+          const result = {
+            status_code: 500,
+            status_msg: "Both password fields does not match",
+          };
+          res.status(500).send(result);
+        }
       }
+    } else {
+      const result = {
+        status_code: 500,
+        status_msg: "Email format is incorrect",
+      };
+      res.status(500).send(result);
     }
   } catch (err) {
     console.log("SIGNUP ERROR", err);
@@ -198,39 +213,48 @@ const register = async (req, res) => {
 
 const login = async (req, res) => {
   try {
-    const user = await User.findOne({
-      email: req.body.email,
-    });
-    const userNotFound = {
-      status_code: 404,
-      status_msg: "User not found",
-    };
-    if (!user) {
-      res.status(404).send(userNotFound);
-    } else {
-      const validPassword = await bcrypt.compare(
-        req.body.password,
-        user.password
-      );
-      const incorrectPassword = {
-        status_code: 400,
-        status_msg: "Password Incorrect",
+    const email = req.body.email.toLowerCase();
+    if (checkEmail(email)) {
+      const user = await User.findOne({
+        email: email,
+      });
+      const userNotFound = {
+        status_code: 404,
+        status_msg: "User not found",
       };
-      if (!validPassword) {
-        res.status(400).send(incorrectPassword);
+      if (!user) {
+        res.status(404).send(userNotFound);
       } else {
-        const auth_token = jwt.sign({ _id: user._id }, ENV.TOKEN_SECRET);
-        // res.header("auth-token", token).send(token);
-
-        // token field, message and status code
-        const result = {
-          token: auth_token,
-          status_code: 200,
-          status_msg: "User logged in successfully",
+        const validPassword = await bcrypt.compare(
+          req.body.password,
+          user.password
+        );
+        const incorrectPassword = {
+          status_code: 400,
+          status_msg: "Password Incorrect",
         };
+        if (!validPassword) {
+          res.status(400).send(incorrectPassword);
+        } else {
+          const auth_token = jwt.sign({ _id: user._id }, ENV.TOKEN_SECRET);
+          // res.header("auth-token", token).send(token);
 
-        res.status(200).send(result);
+          // token field, message and status code
+          const result = {
+            token: auth_token,
+            status_code: 200,
+            status_msg: "User logged in successfully",
+          };
+
+          res.status(200).send(result);
+        }
       }
+    } else {
+      const result = {
+        status_code: 500,
+        status_msg: "Email format is incorrect",
+      };
+      res.status(500).send(result);
     }
   } catch (err) {
     const result = {
