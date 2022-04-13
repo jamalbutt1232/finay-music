@@ -176,7 +176,7 @@ const register = async (req, res) => {
           // create new user
           const newUser = new User({
             name: req.body.name,
-            email: req.body.email,
+            email: email,
             password: hashedPassword,
             uniqueCode: code,
           });
