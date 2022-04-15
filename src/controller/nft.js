@@ -235,20 +235,22 @@ const likeNFT = async (req, res) => {
 
         if (!user.deactive) {
           if (!nft.likes.includes(userID)) {
-            await nft.updateOne({ $push: { likes: userID } });
-
+            await nft.updateOne({ $push: { likes: userID } }, { new: true });
+            const t_nft = await NFT.findById(req.body.id);
             const result = {
               status_code: 200,
               status_msg: `NFT has been liked`,
-              data: nft,
+              data: t_nft,
             };
             res.status(200).json(result);
           } else {
-            await nft.updateOne({ $pull: { likes: userID } });
+            await nft.updateOne({ $pull: { likes: userID } }, { new: true });
+            const t_nft = await NFT.findById(req.body.id);
+
             const result = {
               status_code: 200,
               status_msg: `NFT has been disliked`,
-              data: nft,
+              data: t_nft,
             };
 
             res.status(200).json(result);
