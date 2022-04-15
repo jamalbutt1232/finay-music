@@ -51,6 +51,10 @@ const NFTSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    likes: {
+      type: Array,
+      default: [],
+    },
   },
   { timestamps: true }
 );
