@@ -715,6 +715,85 @@ const singleuserpost = async (req, res) => {
   }
 };
 
+//Flag a post
+const flagPost = async (req, res) => {
+  const userID = getUserID(req, res);
+
+  if (userID !== undefined) {
+    const deactive = await deActiveStatusInner(userID);
+    if (!deactive) {
+      try {
+        const post = await Post.findById(req.body.id);
+        const user = await deActiveStatusInner(post.userId);
+        const currentUser = await User.findById(userID);
+        if (!user.deactive) {
+          if (!post.likes.includes(userID)) {
+            await post.updateOne({ $push: { likes: userID } });
+            if (userID !== post.userId) {
+              //
+              //  GENERATING NOTIFICATION (SAVE IT)
+              const newNotification = new Notification({
+                currentId: userID,
+                otherId: post.userId,
+                postId: post._id,
+                message: `${currentUser.name} liked your post`,
+              });
+              await newNotification.save();
+            }
+            //
+
+            const result = {
+              status_code: 200,
+              status_msg: `Post has been liked`,
+              data: post,
+            };
+            res.status(200).json(result);
+          } else {
+            await post.updateOne({ $pull: { likes: userID } });
+            const result = {
+              status_code: 200,
+              status_msg: `Post has been disliked`,
+              data: post,
+            };
+            //
+            //  REMOVING NOTIFICATION
+            await Notification.find({
+              currentId: userID,
+              otherId: post.userId,
+              postId: post._id,
+            })
+              .remove()
+              .exec();
+
+            //
+
+            res.status(200).json(result);
+          }
+        } else {
+          const result = {
+            status_code: 403,
+            status_msg: `You cannot like the post of an unactivated user`,
+          };
+          res.status(403).send(result);
+        }
+      } catch (err) {
+        const result = {
+          status_code: 500,
+          status_msg: `Something went wrong :${err}`,
+        };
+
+        res.status(500).json(result);
+      }
+    } else {
+      const result = {
+        status_code: 403,
+        status_msg: `Please active your account`,
+      };
+      return res.status(403).send(result);
+    }
+  }
+};
+
 module.exports = {
   create_a_post,
   updatePost,
