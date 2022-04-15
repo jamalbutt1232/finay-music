@@ -175,7 +175,7 @@ const getRegularNFT = async (req, res) => {
         $and: [
           { type: "regular" },
           { ownerId: { $ne: userID } },
-          { holders: { $ne:userID } },
+          { holders: { $ne: userID } },
         ],
       });
 
@@ -222,6 +222,61 @@ const getUserRegularNFT = async (req, res) => {
     }
   }
 };
+
+const likeNFT = async (req, res) => {
+  const userID = getUserID(req, res);
+
+  if (userID !== undefined) {
+    const deactive = await deActiveStatusInner(userID);
+    if (!deactive) {
+      try {
+        const nft = await NFT.findById(req.body.id);
+        const user = await deActiveStatusInner(nft.userId);
+
+        if (!user.deactive) {
+          if (!nft.likes.includes(userID)) {
+            await nft.updateOne({ $push: { likes: userID } });
+
+            const result = {
+              status_code: 200,
+              status_msg: `NFT has been liked`,
+              data: nft,
+            };
+            res.status(200).json(result);
+          } else {
+            await nft.updateOne({ $pull: { likes: userID } });
+            const result = {
+              status_code: 200,
+              status_msg: `NFT has been disliked`,
+              data: nft,
+            };
+
+            res.status(200).json(result);
+          }
+        } else {
+          const result = {
+            status_code: 403,
+            status_msg: `You cannot like the nft of an unactivated user`,
+          };
+          res.status(403).send(result);
+        }
+      } catch (err) {
+        const result = {
+          status_code: 500,
+          status_msg: `Something went wrong :${err}`,
+        };
+
+        res.status(500).json(result);
+      }
+    } else {
+      const result = {
+        status_code: 403,
+        status_msg: `Please active your account`,
+      };
+      return res.status(403).send(result);
+    }
+  }
+};
 module.exports = {
   createAsset,
   getAccessNFT,
@@ -229,4 +284,5 @@ module.exports = {
   getRegularNFT,
   getUserRegularNFT,
   updateAsset,
+  likeNFT,
 };
