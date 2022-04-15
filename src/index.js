@@ -134,11 +134,15 @@ io.on("connection", (socket) => {
 
   socket.on("new message", (newMessageRecieved) => {
     var chat = newMessageRecieved;
-    //console.log("socket.id",socket);
 
     console.log("SENDING MESSAGE");
     socket.in(chat.reciever).emit("message recieved", newMessageRecieved);
+    socket.in(chat.reciever).emit("message notification", "New Message");
   });
+
+  socket.on("comment notification", (post) => socket.in(post.id).emit("comment notification", "New Comment"));
+  socket.on("like notification", (post) => socket.in(post.id).emit("like notification", "New Like"));
+  socket.on("support notification", (user) => socket.in(user.id).emit("support notification", "New Supporter"));
 
   socket.off("setup", () => {
     console.log("USER DISCONNECTED");
