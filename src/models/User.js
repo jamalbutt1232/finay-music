@@ -32,6 +32,10 @@ const UserSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    coverPicture: {
+      type: String,
+      default: "",
+    },
     personalSite: {
       type: String,
       default: "",
