@@ -180,8 +180,9 @@ const allCalendarEvent = async (req, res) => {
     const deactive = await deActiveStatusInner(userID);
     if (!deactive) {
       try {
+        let tempDate = req.params.date + "T00:00:00.000Z";
         const allcalendarevents = await Calendar.find({
-          userId: req.params.id,
+          $and: [{ date: tempDate }, { userId: req.params.id }],
         });
         if (allcalendarevents.length != 0) {
           const result = {
