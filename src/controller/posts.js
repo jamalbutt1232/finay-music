@@ -66,7 +66,7 @@ const create_a_post = async (req, res) => {
       } catch (err) {
         const result = {
           status_code: 500,
-          status_msg: `Something went wrong`,
+          status_msg: `Something went wrong :${err}`,
         };
 
         res.status(500).json(result);
@@ -405,9 +405,13 @@ const allPost = async (req, res) => {
 
         var friendPosts = await Promise.all(
           currentUser.followings.map((friendId) => {
-            return Post.find({ userId: friendId });
+            return Post.find({
+              $and: [{ userId: friendId }, { flag: { $ne: userID } }],
+            });
           })
         );
+        // let flaggedUsers = await Post
+
         friendPosts = friendPosts.filter((el) => {
           return el.length != 0;
         });
@@ -453,7 +457,7 @@ const allPost = async (req, res) => {
         } else {
           var allposts = list_of_posts;
         }
-        console.log("all post for each :", allposts);
+
         allposts.forEach((post) => {
           if (post.user.post_type == "private") {
             console.log("Came to private");
@@ -534,16 +538,24 @@ const singlePost = async (req, res) => {
     if (!deactive) {
       try {
         const post = await Post.findById(req.body.id);
-        const result = {
-          status_code: 200,
-          status_msg: `Single post fetched`,
-          data: post,
-        };
-        res.status(200).json(result);
+        if (!post.flag.includes(userID)) {
+          const result = {
+            status_code: 200,
+            status_msg: `Single post fetched`,
+            data: post,
+          };
+          res.status(200).json(result);
+        } else {
+          const result = {
+            status_code: 500,
+            status_msg: `Flagged post cannot be fetched`,
+          };
+          res.status(500).json(result);
+        }
       } catch (err) {
         const result = {
-          status_code: 200,
-          status_msg: `Something went wrong`,
+          status_code: 500,
+          status_msg: `Something went wrong :${err}`,
         };
         res.status(500).json(result);
       }
@@ -725,54 +737,40 @@ const flagPost = async (req, res) => {
       try {
         const post = await Post.findById(req.body.id);
         const user = await deActiveStatusInner(post.userId);
-        const currentUser = await User.findById(userID);
+        const t_user = await User.findById(post.userId);
         if (!user.deactive) {
-          if (!post.likes.includes(userID)) {
-            await post.updateOne({ $push: { likes: userID } });
-            if (userID !== post.userId) {
-              //
-              //  GENERATING NOTIFICATION (SAVE IT)
-              const newNotification = new Notification({
-                currentId: userID,
-                otherId: post.userId,
-                postId: post._id,
-                message: `${currentUser.name} liked your post`,
-              });
-              await newNotification.save();
+          if (t_user._id != userID) {
+            if (!post.flag.includes(userID)) {
+              await post.updateOne({ $push: { flag: userID } });
+              const t_post = await Post.findById(req.body.id);
+              const result = {
+                status_code: 200,
+                status_msg: `Post has been flagged`,
+                data: t_post,
+              };
+              res.status(200).json(result);
+            } else {
+              await post.updateOne({ $pull: { flag: userID } });
+              const t_post = await Post.findById(req.body.id);
+              const result = {
+                status_code: 200,
+                status_msg: `Post has been un-flagged`,
+                data: t_post,
+              };
+
+              res.status(200).json(result);
             }
-            //
-
-            const result = {
-              status_code: 200,
-              status_msg: `Post has been liked`,
-              data: post,
-            };
-            res.status(200).json(result);
           } else {
-            await post.updateOne({ $pull: { likes: userID } });
             const result = {
-              status_code: 200,
-              status_msg: `Post has been disliked`,
-              data: post,
+              status_code: 500,
+              status_msg: `You cannot flag your own post`,
             };
-            //
-            //  REMOVING NOTIFICATION
-            await Notification.find({
-              currentId: userID,
-              otherId: post.userId,
-              postId: post._id,
-            })
-              .remove()
-              .exec();
-
-            //
-
-            res.status(200).json(result);
+            res.status(500).json(result);
           }
         } else {
           const result = {
             status_code: 403,
-            status_msg: `You cannot like the post of an unactivated user`,
+            status_msg: `You cannot flag the post of an unactivated user`,
           };
           res.status(403).send(result);
         }
@@ -804,4 +802,5 @@ module.exports = {
   singleuserpost,
   uploadPost,
   deleteUploadPost,
+  flagPost,
 };
