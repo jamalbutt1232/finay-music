@@ -75,7 +75,7 @@ const updateAsset = async (req, res) => {
       const { itemId } = req.body;
       const item = await NFT.findOne({ _id: itemId });
       console.log("item", item);
-      if (item.availableQuantity > 0) {
+      if (item?.availableQuantity > 0) {
         try {
           const updatedNFT = await NFT.findByIdAndUpdate(itemId, {
             $set: { availableQuantity: item.availableQuantity - 1 },
