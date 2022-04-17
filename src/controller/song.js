@@ -80,8 +80,8 @@ const createSong = async (req, res) => {
     const deactive = await deActiveStatusInner(userID);
     if (!deactive) {
       const { itemId } = req.body;
-      const item = await NFT.findOne({ itemId });
-      if (item.availableQuantity > 0) {
+      const item = await NFT.findOne({ _id: itemId });
+      if (item?.availableQuantity > 0) {
         const newSong = new Song({
           ...req.body,
           ownerId: userID,
@@ -95,6 +95,7 @@ const createSong = async (req, res) => {
             deleteCartRes.status_code === 404
           ) {
             const savedSong = await newSong.save();
+            console.log("CHOSEN NFT", item)
             await item.updateOne({ $push: { holders: userID } });
 
             const result = {
