@@ -267,9 +267,68 @@ const login = async (req, res) => {
   }
 };
 
+const jwksClient = require("jwks-rsa");
+const client = jwksClient({
+  jwksUri: "https://appleid.apple.com/auth/keys",
+});
+function getAppleSigningKeys(kid) {
+  return new Promise((resolve) => {
+    client.getSigningKey(kid, (err, key) => {
+      if (err) {
+        console.log(error);
+        resolve(null);
+      }
+      const signingKey = key.getPublicKey();
+      resolve(signingKey);
+    });
+  });
+}
+function verifyJWT(json, publicKey) {
+  return new Promise((resolve) => {
+    jwt.verify(json, publicKey, (err, payload) => {
+      if (err) {
+        console.log(err);
+        return resolve(null);
+      }
+      resolve(payload);
+    });
+  });
+}
+const appleAuth = async (req, res) => {
+  const { response } = req.body;
+  try {
+    const { identityToken, user } = response;
+    const json = jwt.decode(identityToken, { complete: true });
+    const kid = json?.header?.kid;
+
+    const appleKey = await getAppleSigningKeys(kid);
+    if (!appleKey) {
+      console.log("Something went wrong");
+      return;
+    }
+    const payload = await verifyJWT(identityToken, appleKey);
+    if (!payload) {
+      console.log("Something went wrong");
+      return;
+    }
+
+    console.log("Sign in with apple suceeded!", payload);
+
+    if (
+      payload.sub === user &&
+      payload.aud === "org.reactjs.native.example.social-media"
+    ) {
+      return res.status(200).json("User Authenticated");
+    }
+  } catch (err) {
+    return res.status(500).json({ message: err.message || err });
+  }
+};
+
 module.exports = {
   register,
   login,
   verifyMAIL,
   sendMailAgain,
+  appleAuth,
 };
