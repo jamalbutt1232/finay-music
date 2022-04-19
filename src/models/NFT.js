@@ -19,6 +19,9 @@ const NFTSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    genre: {
+      type: String,
+    },
     totalQuantity: {
       type: Number,
       required: true,
