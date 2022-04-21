@@ -5,7 +5,7 @@ const OTPSchema = new mongoose.Schema({
   createdAt: {
     type: Date,
     default: Date.now,
-    expires: "2m",
+    expires: "1m",
   },
   code: {
     type: String,

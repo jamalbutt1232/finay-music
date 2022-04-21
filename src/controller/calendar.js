@@ -173,6 +173,7 @@ const deleteCalendarEvent = async (req, res) => {
   }
 };
 // get all calendar events
+// get all calendar events
 const allCalendarEvent = async (req, res) => {
   const userID = getUserID(req, res);
 
@@ -180,10 +181,9 @@ const allCalendarEvent = async (req, res) => {
     const deactive = await deActiveStatusInner(userID);
     if (!deactive) {
       try {
-        const date = req.body.date + "T00:00:00.000Z";
+        let tempDate = req.params.date + "T00:00:00.000Z";
         const allcalendarevents = await Calendar.find({
-          userId: req.params.id,
-          date: date,
+          $and: [{ date: tempDate }, { userId: req.params.id }],
         });
         if (allcalendarevents.length != 0) {
           const result = {
