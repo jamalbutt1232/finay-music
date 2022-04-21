@@ -923,6 +923,86 @@ const verifySMS = async (req, res) => {
   }
 };
 
+// Subscribe user
+const subscribeUser = async (req, res) => {
+  const userID = getUserID(req, res);
+  const currentUser = await User.findById(userID);
+  if (userID !== undefined) {
+    const deactive = await deActiveStatusInner(userID);
+    if (!deactive) {
+      if (userID !== req.body.id) {
+        try {
+          const user = await User.findById(req.body.id);
+          if (!user.deactive) {
+            if (!user.followers.includes(userID)) {
+              if (userID !== req.body.id) {
+                //  GENERATING NOTIFICATION (SAVE IT FOLLOW)
+                const newNotification = new Notification({
+                  currentId: userID,
+                  otherId: req.body.id,
+                  postId: "",
+                  message: `${currentUser.name} subscribed you`,
+                });
+                await newNotification.save();
+              }
+
+              await currentUser.updateOne({
+                $push: {
+                  subscribers: req.body.id,
+                },
+              });
+              const result = {
+                status_code: 200,
+                status_msg: `You have subscribed the user`,
+                data: user,
+              };
+              res.status(200).send(result);
+            } else {
+              //  REMOVING NOTIFICATION
+              await Notification.find({
+                currentId: userID,
+                otherId: req.body.id,
+              })
+                .remove()
+                .exec();
+
+              //
+              const result = {
+                status_code: 403,
+                status_msg: `You already subscribed to the user`,
+              };
+              res.status(403).send(result);
+            }
+          } else {
+            const result = {
+              status_code: 403,
+              status_msg: `You cannot follow an unactivated use`,
+            };
+            res.status(403).send(result);
+          }
+        } catch (err) {
+          const result = {
+            status_code: 500,
+            status_msg: `Something went wrong :${err}`,
+          };
+          res.status(500).send(result);
+        }
+      } else {
+        const result = {
+          status_code: 403,
+          status_msg: `You cant follow yourself`,
+        };
+        res.status(403).send(result);
+      }
+    } else {
+      const result = {
+        status_code: 403,
+        status_msg: `Please active your account`,
+      };
+      return res.status(403).send(result);
+    }
+  }
+};
 // get a single searched user
 // http://localhost:8800/api/users/verifytoken?token=kin
 const verifyTokenWeb = async (req, res) => {
@@ -981,4 +1061,5 @@ module.exports = {
   verifySMS,
   verifyTokenWeb,
   updatePassword,
+  subscribeUser,
 };

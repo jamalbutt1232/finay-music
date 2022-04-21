@@ -145,21 +145,42 @@ const getUserAccessNFT = async (req, res) => {
 
   if (userID !== undefined) {
     try {
-      const accessNFTs = await NFT.find({
-        $and: [{ type: "access" }, { ownerId: { $eq: req.params.userID } }],
-      });
+      const user = await User.findById(userID);
+      let ifSubscriberExists = user.subscribers.includes(req.params.id);
 
-      const result = {
-        status_code: 200,
-        status_msg: `User's Access NFTs fetched`,
-        data: accessNFTs,
-      };
+      if (ifSubscriberExists) {
+        const accessNFTs = await NFT.find({
+          $and: [{ type: "access" }, { ownerId: { $eq: req.params.id } }],
+        });
 
-      res.status(200).json(result);
+        if (accessNFTs.length != 0) {
+          const result = {
+            status_code: 200,
+            status_msg: `User's Access NFTs fetched`,
+            data: accessNFTs,
+          };
+
+          res.status(200).json(result);
+        } else {
+          const result = {
+            status_code: 200,
+            status_msg: `No NFT exist`,
+          };
+
+          res.status(200).json(result);
+        }
+      } else {
+        const result = {
+          status_code: 404,
+          status_msg: `You need to subscribe to view access NFTs`,
+        };
+
+        res.status(404).json(result);
+      }
     } catch (err) {
       const result = {
         status_code: 500,
-        status_msg: `Something went wrong`,
+        status_msg: `Something went wrong :${err}`,
       };
 
       res.status(500).json(result);

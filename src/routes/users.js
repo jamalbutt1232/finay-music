@@ -19,6 +19,7 @@ const {
   updatePassword,
   verifySMSFirstTime,
   sendSMSFirstTime,
+  subscribeUser,
 } = require("../controller/users");
 const router = require("express").Router();
 const verifyToken = require("../private/privateRoute");
@@ -147,11 +148,12 @@ router.get("/deactivestatus", verifyToken, deActiveStatus);
 router.put("/twofactor", verifyToken, active2f);
 router.post("/sendsms", verifyToken, sendSMS);
 router.get("/verifysms/:code", verifyToken, verifySMS);
-router.post("/sendsmsfirsttime", verifyToken, sendSMSFirstTime);
+router.post("/createsandboxnumber", verifyToken, sendSMSFirstTime);
 router.get(
-  "/verifysmsfirsttime/:number/:code",
+  "/verifysandboxnumber/:number/:code",
   verifyToken,
   verifySMSFirstTime
 );
+router.put("/subscribe", verifyToken, subscribeUser);
 
 module.exports = router;
