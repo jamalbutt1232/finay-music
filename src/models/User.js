@@ -61,6 +61,11 @@ const UserSchema = new mongoose.Schema(
       max: 300,
       default: "",
     },
+    tagline: {
+      type: String,
+      max: 300,
+      default: "",
+    },
     number: {
       type: String,
       default: "",
