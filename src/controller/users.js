@@ -947,12 +947,12 @@ const subscribeUser = async (req, res) => {
               // await nft.updateOne({ $push: { likes: userID } }, { new: true });
               await currentUser.updateOne({
                 $push: {
-                  subscribers: req.body.id,
+                  subscribees: req.body.id,
                 },
               });
               await user.updateOne({
                 $push: {
-                  subscribees: req.body.id,
+                  subscribers: userID,
                 },
               });
 
