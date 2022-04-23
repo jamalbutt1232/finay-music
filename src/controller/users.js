@@ -933,7 +933,6 @@ const subscribeUser = async (req, res) => {
         try {
           const user = await User.findById(req.body.id);
           if (!user.deactive) {
-
             if (!currentUser.subscribers.includes(req.body.id)) {
               if (userID !== req.body.id) {
                 //  GENERATING NOTIFICATION (SAVE IT FOLLOW)
@@ -948,9 +947,15 @@ const subscribeUser = async (req, res) => {
               // await nft.updateOne({ $push: { likes: userID } }, { new: true });
               await currentUser.updateOne({
                 $push: {
-                  subscribers: req.body.id,
+                  subscribees: req.body.id,
                 },
               });
+              await user.updateOne({
+                $push: {
+                  subscribers: userID,
+                },
+              });
+
               const t_user = await User.findById(userID);
               const result = {
                 status_code: 200,
