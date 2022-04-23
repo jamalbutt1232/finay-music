@@ -6,6 +6,7 @@ const NotificationSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    // otherId: post.userId,
     otherId: {
       type: String,
       required: true,

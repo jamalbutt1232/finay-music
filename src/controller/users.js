@@ -485,7 +485,6 @@ const getFollowers = async (req, res) => {
     const deactive = await deActiveStatusInner(userID);
     if (!deactive) {
       const type = await getUserFollowerType(req.params.id);
-      console.log("Hi 1");
       try {
         if (type == "public") {
           // getting followers list so they can be excluded
@@ -934,7 +933,8 @@ const subscribeUser = async (req, res) => {
         try {
           const user = await User.findById(req.body.id);
           if (!user.deactive) {
-            if (!user.followers.includes(userID)) {
+
+            if (!currentUser.subscribers.includes(req.body.id)) {
               if (userID !== req.body.id) {
                 //  GENERATING NOTIFICATION (SAVE IT FOLLOW)
                 const newNotification = new Notification({
@@ -945,16 +945,17 @@ const subscribeUser = async (req, res) => {
                 });
                 await newNotification.save();
               }
-
+              // await nft.updateOne({ $push: { likes: userID } }, { new: true });
               await currentUser.updateOne({
                 $push: {
                   subscribers: req.body.id,
                 },
               });
+              const t_user = await User.findById(userID);
               const result = {
                 status_code: 200,
                 status_msg: `You have subscribed the user`,
-                data: user,
+                data: t_user,
               };
               res.status(200).send(result);
             } else {
@@ -1003,6 +1004,89 @@ const subscribeUser = async (req, res) => {
     }
   }
 };
+
+// All related users
+const relatedUsers = async (req, res) => {
+  const userID = getUserID(req, res);
+  const currentUser = await User.findById(userID);
+  if (userID !== undefined) {
+    const deactive = await deActiveStatusInner(userID);
+    if (!deactive) {
+      try {
+        if (!currentUser.deactive) {
+          let followersList = [];
+          followersList = followersList.concat(currentUser.followers);
+
+          let followingsList = [];
+          followingsList = followingsList.concat(currentUser.followings);
+
+          var relatedUsers = followersList.concat(followingsList);
+          var t_user = await User.find({ user });
+          var userDetailsList = [];
+
+          // Issue is coz of await, we dont get user and we loop through.
+          // So 1 way is we can use multi query to fetch all users before loop
+          relatedUsers.forEach(async (user) => {
+            console.log("1");
+            var userDetails = {
+              user_name: "",
+              user_email: "",
+              user_img: "",
+              user_id: "",
+            };
+            console.log("2");
+
+            var t_user = await User.findById(user);
+            console.log("3");
+            userDetails = {
+              user_name: t_user.name,
+              user_email: t_user.email,
+              user_img: t_user.profilePicture || "",
+              user_id: t_user._id,
+            };
+            console.log("4");
+            userDetailsList = userDetailsList.concat(userDetails);
+            console.log("5");
+          });
+          console.log(userDetailsList);
+          if (relatedUsers.length > 0) {
+            const result = {
+              status_code: 200,
+              status_msg: `Related users list fetched`,
+              data: userDetails,
+            };
+            res.status(200).send(result);
+          } else {
+            const result = {
+              status_code: 200,
+              status_msg: `No list`,
+            };
+            res.status(200).send(result);
+          }
+        } else {
+          const result = {
+            status_code: 403,
+            status_msg: `You cannot fetch list an unactivated user`,
+          };
+          res.status(403).send(result);
+        }
+      } catch (err) {
+        const result = {
+          status_code: 500,
+          status_msg: `Something went wrong : ${err}`,
+        };
+        res.status(500).send(result);
+      }
+    } else {
+      const result = {
+        status_code: 403,
+        status_msg: `Please active your account`,
+      };
+      return res.status(403).send(result);
+    }
+  }
+};
+
 // get a single searched user
 // http://localhost:8800/api/users/verifytoken?token=kin
 const verifyTokenWeb = async (req, res) => {
@@ -1062,4 +1146,5 @@ module.exports = {
   verifyTokenWeb,
   updatePassword,
   subscribeUser,
+  relatedUsers,
 };

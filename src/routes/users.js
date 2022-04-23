@@ -20,6 +20,7 @@ const {
   verifySMSFirstTime,
   sendSMSFirstTime,
   subscribeUser,
+  relatedUsers,
 } = require("../controller/users");
 const router = require("express").Router();
 const verifyToken = require("../private/privateRoute");
@@ -155,5 +156,5 @@ router.get(
   verifySMSFirstTime
 );
 router.put("/subscribe", verifyToken, subscribeUser);
-
+router.get("/relatedusers", verifyToken, relatedUsers);
 module.exports = router;
