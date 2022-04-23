@@ -1,5 +1,5 @@
 const path = require("path");
-require("dotenv").config({ path: path.resolve(__dirname, "./.env") });
+require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
 
 const PORT = process.env.PORT;
 const MONGO_URL = process.env.MONGO_URL;
@@ -11,20 +11,20 @@ const ACCOUNT_SID = process.env.ACCOUNT_SID;
 const AUTH_TOKEN = process.env.AUTH_TOKEN;
 const SENDER = process.env.SENDER;
 
-APPLE_SIGNIN_CLIENT_ID = process.env.APPLE_SIGNIN_CLIENT_ID,
-APPLE_SIGNIN_TEAM_ID = process.env.APPLE_SIGNIN_TEAM_ID,
-APPLE_SIGNIN_KEY_ID = process.env.APPLE_SIGNIN_KEY_ID,
-module.exports = {
-  PORT,
-  MONGO_URL,
-  TOKEN_SECRET,
-  AWS_ID,
-  AWS_SECRET,
-  AWS_BUCKET_NAME,
-  ACCOUNT_SID,
-  AUTH_TOKEN,
-  SENDER,
-  APPLE_SIGNIN_CLIENT_ID,
-  APPLE_SIGNIN_TEAM_ID,
-  APPLE_SIGNIN_KEY_ID
-};
+(APPLE_SIGNIN_CLIENT_ID = process.env.APPLE_SIGNIN_CLIENT_ID),
+  (APPLE_SIGNIN_TEAM_ID = process.env.APPLE_SIGNIN_TEAM_ID),
+  (APPLE_SIGNIN_KEY_ID = process.env.APPLE_SIGNIN_KEY_ID),
+  (module.exports = {
+    PORT,
+    MONGO_URL,
+    TOKEN_SECRET,
+    AWS_ID,
+    AWS_SECRET,
+    AWS_BUCKET_NAME,
+    ACCOUNT_SID,
+    AUTH_TOKEN,
+    SENDER,
+    APPLE_SIGNIN_CLIENT_ID,
+    APPLE_SIGNIN_TEAM_ID,
+    APPLE_SIGNIN_KEY_ID,
+  });
