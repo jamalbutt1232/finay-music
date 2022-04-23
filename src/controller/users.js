@@ -7,6 +7,9 @@ const ENV = require("../env");
 const Notification = require("../models/Notification");
 const bcrypt = require("bcrypt");
 
+var AWS = require("aws-sdk");
+AWS.config.update({ region: "us-west-2" });
+
 console.log(ENV);
 // GET USER ID
 const getUserID = (req, res) => {
@@ -696,62 +699,193 @@ const active2f = async (req, res) => {
   }
 };
 
+const sendSMSFirstTime = async (req, res) => {
+  const userID = getUserID(req, res);
+  if (userID !== undefined) {
+    const deactive = await deActiveStatusInner(userID);
+    if (!deactive) {
+      try {
+        const number = req.body.number;
+        AWS_ID = ENV.AWS_ID;
+        AWS_SECRET = ENV.AWS_SECRET;
+        var params = {
+          PhoneNumber: number /* required */,
+          LanguageCode: "en-US",
+        };
+        var sns = new AWS.SNS({
+          accessKeyId: AWS_ID,
+          secretAccessKey: AWS_SECRET,
+        });
+
+        sns.createSMSSandboxPhoneNumber(params, function (err, data) {
+          if (err) {
+            const result = {
+              status_code: 404,
+              status_msg: `Message couldnt be sent :${err}`,
+            };
+            return res.status(404).json(result);
+          } else {
+            const result = {
+              status_code: 200,
+              status_msg: `Please check code`,
+              data: `Message sent`,
+            };
+            return res.status(200).json(result);
+          }
+        });
+
+        // var otpExist = await OTP.find({ userId: userID });
+
+        // if (otpExist.length == 0) {
+        //   const newOTP = new OTP(req.body);
+        //   newOTP.code = random_sequence;
+        //   newOTP.userId = userID;
+        //   await newOTP.save();
+
+        // }
+      } catch (err) {
+        const result = {
+          status_code: 500,
+          status_msg: `Something went wrong : ${err}`,
+        };
+        return res.status(500).json(result);
+      }
+    } else {
+      const result = {
+        status_code: 404,
+        status_msg: `A code was already sent to you. Wait for 2 minutes to send another one`,
+      };
+      return res.status(404).json(result);
+    }
+  }
+};
+
 const sendSMS = async (req, res) => {
   const userID = getUserID(req, res);
   if (userID !== undefined) {
     const deactive = await deActiveStatusInner(userID);
     if (!deactive) {
-      min = 2000;
-      max = 9999;
-      const random_sequence = Math.floor(Math.random() * (max - min) + min);
-      var otpExist = await OTP.find({ userId: userID });
-
-      if (otpExist.length == 0) {
-        var accountSid = ENV.ACCOUNT_SID;
-        var authToken = ENV.AUTH_TOKEN;
-        const sender = ENV.SENDER;
-        const client = require("twilio")(accountSid, authToken);
-
-        try {
-          client.messages
-            .create({
-              messagingServiceSid: "MGd14546f0eff71fc2982699f4b2ed9373",
-              body: random_sequence,
-              from: sender,
-              to: req.body.number,
-            })
-            .then((message) => {
-              console.log(message);
-            });
-
-          const newOTP = new OTP(req.body);
-          newOTP.code = random_sequence;
-          newOTP.userId = userID;
-          await newOTP.save();
-          const result = {
-            status_code: 200,
-            status_msg: `Please check code`,
-            data: `Message sent : ${random_sequence}`,
-          };
-          return res.status(200).json(result);
-        } catch (err) {
-          const result = {
-            status_code: 500,
-            status_msg: `Something went wrong : ${err}`,
-          };
-          return res.status(500).json(result);
-        }
-      } else {
-        const result = {
-          status_code: 404,
-          status_msg: `A code was already sent to you. Wait for 2 minutes to send another one`,
+      try {
+        var random = Math.floor(1000 + Math.random() * 9000);
+        const YOUR_MESSAGE = `Your verification code is ${random}`;
+        const number = req.body.number;
+        console.log("number :", number);
+        AWS_ID = ENV.AWS_ID;
+        AWS_SECRET = ENV.AWS_SECRET;
+        // Set the parameters
+        var params = {
+          Message: YOUR_MESSAGE,
+          PhoneNumber: number,
+          MessageAttributes: {
+            "AWS.SNS.SMS.SenderID": {
+              DataType: "String",
+              StringValue: "subject",
+            },
+            "AWS.SNS.SMS.SMSType": {
+              DataType: "String",
+              StringValue: "Transactional",
+            },
+          },
         };
-        return res.status(404).json(result);
+
+        var publishTextPromise = new AWS.SNS({
+          apiVersion: "2010-03-31",
+          accessKeyId: AWS_ID,
+          secretAccessKey: AWS_SECRET,
+        })
+          .publish(params)
+          .promise();
+
+        publishTextPromise
+          .then(async function (data) {
+            var otpExist = await OTP.find({ userId: userID });
+
+            if (otpExist.length == 0) {
+              const newOTP = new OTP();
+              newOTP.code = random;
+              newOTP.userId = userID;
+              await newOTP.save();
+
+              const result = {
+                status_code: 200,
+                status_msg: `Message sent : ${random}`,
+              };
+              return res.status(500).json(result);
+            }
+          })
+          .catch(function (err) {
+            res.end(JSON.stringify({ Error: err }));
+          });
+
+        // }
+      } catch (err) {
+        const result = {
+          status_code: 500,
+          status_msg: `Something went wrong : ${err}`,
+        };
+        return res.status(500).json(result);
       }
+    } else {
+      const result = {
+        status_code: 404,
+        status_msg: `A code was already sent to you. Wait for 2 minutes to send another one`,
+      };
+      return res.status(404).json(result);
     }
   }
 };
 
+const verifySMSFirstTime = async (req, res) => {
+  const userID = getUserID(req, res);
+  if (userID !== undefined) {
+    const deactive = await deActiveStatusInner(userID);
+    if (!deactive) {
+      try {
+        const number = req.params.number;
+        AWS_ID = ENV.AWS_ID;
+        AWS_SECRET = ENV.AWS_SECRET;
+        var params = {
+          PhoneNumber: number /* required */,
+          OneTimePassword: req.params.code,
+        };
+        var sns = new AWS.SNS({
+          accessKeyId: AWS_ID,
+          secretAccessKey: AWS_SECRET,
+        });
+
+        sns.verifySMSSandboxPhoneNumber(params, function (err, data) {
+          if (err) {
+            const result = {
+              status_code: 404,
+              status_msg: `Incorrect verification`,
+            };
+            return res.status(404).json(result);
+          } else {
+            console.log("Came here");
+
+            const result = {
+              status_code: 200,
+              status_msg: `Verified`,
+            };
+            return res.status(200).json(result);
+          }
+        });
+      } catch (err) {
+        const result = {
+          status_code: 500,
+          status_msg: `Something went wrong`,
+        };
+        return res.status(500).json(result);
+      }
+    } else {
+      const result = {
+        status_code: 403,
+        status_msg: `Please active your account`,
+      };
+      return res.status(403).send(result);
+    }
+  }
+};
 const verifySMS = async (req, res) => {
   const userID = getUserID(req, res);
   if (userID !== undefined) {
@@ -789,6 +923,86 @@ const verifySMS = async (req, res) => {
   }
 };
 
+// Subscribe user
+const subscribeUser = async (req, res) => {
+  const userID = getUserID(req, res);
+  const currentUser = await User.findById(userID);
+  if (userID !== undefined) {
+    const deactive = await deActiveStatusInner(userID);
+    if (!deactive) {
+      if (userID !== req.body.id) {
+        try {
+          const user = await User.findById(req.body.id);
+          if (!user.deactive) {
+            if (!user.followers.includes(userID)) {
+              if (userID !== req.body.id) {
+                //  GENERATING NOTIFICATION (SAVE IT FOLLOW)
+                const newNotification = new Notification({
+                  currentId: userID,
+                  otherId: req.body.id,
+                  postId: "",
+                  message: `${currentUser.name} subscribed you`,
+                });
+                await newNotification.save();
+              }
+
+              await currentUser.updateOne({
+                $push: {
+                  subscribers: req.body.id,
+                },
+              });
+              const result = {
+                status_code: 200,
+                status_msg: `You have subscribed the user`,
+                data: user,
+              };
+              res.status(200).send(result);
+            } else {
+              //  REMOVING NOTIFICATION
+              await Notification.find({
+                currentId: userID,
+                otherId: req.body.id,
+              })
+                .remove()
+                .exec();
+
+              //
+              const result = {
+                status_code: 403,
+                status_msg: `You already subscribed to the user`,
+              };
+              res.status(403).send(result);
+            }
+          } else {
+            const result = {
+              status_code: 403,
+              status_msg: `You cannot follow an unactivated use`,
+            };
+            res.status(403).send(result);
+          }
+        } catch (err) {
+          const result = {
+            status_code: 500,
+            status_msg: `Something went wrong :${err}`,
+          };
+          res.status(500).send(result);
+        }
+      } else {
+        const result = {
+          status_code: 403,
+          status_msg: `You cant follow yourself`,
+        };
+        res.status(403).send(result);
+      }
+    } else {
+      const result = {
+        status_code: 403,
+        status_msg: `Please active your account`,
+      };
+      return res.status(403).send(result);
+    }
+  }
+};
 // get a single searched user
 // http://localhost:8800/api/users/verifytoken?token=kin
 const verifyTokenWeb = async (req, res) => {
@@ -841,8 +1055,11 @@ module.exports = {
   deActive,
   deActiveStatus,
   active2f,
+  sendSMSFirstTime,
   sendSMS,
+  verifySMSFirstTime,
   verifySMS,
   verifyTokenWeb,
   updatePassword,
+  subscribeUser,
 };

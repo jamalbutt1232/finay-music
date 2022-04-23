@@ -173,6 +173,7 @@ const deleteCalendarEvent = async (req, res) => {
   }
 };
 // get all calendar events
+// get all calendar events
 const allCalendarEvent = async (req, res) => {
   const userID = getUserID(req, res);
 
