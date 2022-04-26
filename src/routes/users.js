@@ -149,12 +149,6 @@ router.get("/deactivestatus", verifyToken, deActiveStatus);
 router.put("/twofactor", verifyToken, active2f);
 router.post("/sendsms", verifyToken, sendSMS);
 router.get("/verifysms/:code", verifyToken, verifySMS);
-router.post("/createsandboxnumber", verifyToken, sendSMSFirstTime);
-router.get(
-  "/verifysandboxnumber/:number/:code",
-  verifyToken,
-  verifySMSFirstTime
-);
 router.put("/subscribe", verifyToken, subscribeUser);
 router.get("/relatedusers", verifyToken, relatedUsers);
 module.exports = router;

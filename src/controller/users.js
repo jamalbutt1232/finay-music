@@ -698,67 +698,6 @@ const active2f = async (req, res) => {
   }
 };
 
-const sendSMSFirstTime = async (req, res) => {
-  const userID = getUserID(req, res);
-  if (userID !== undefined) {
-    const deactive = await deActiveStatusInner(userID);
-    if (!deactive) {
-      try {
-        const number = req.body.number;
-        AWS_ID = ENV.AWS_ID;
-        AWS_SECRET = ENV.AWS_SECRET;
-        var params = {
-          PhoneNumber: number /* required */,
-          LanguageCode: "en-US",
-        };
-        var sns = new AWS.SNS({
-          accessKeyId: AWS_ID,
-          secretAccessKey: AWS_SECRET,
-        });
-
-        sns.createSMSSandboxPhoneNumber(params, function (err, data) {
-          if (err) {
-            const result = {
-              status_code: 404,
-              status_msg: `Message couldnt be sent :${err}`,
-            };
-            return res.status(404).json(result);
-          } else {
-            const result = {
-              status_code: 200,
-              status_msg: `Please check code`,
-              data: `Message sent`,
-            };
-            return res.status(200).json(result);
-          }
-        });
-
-        // var otpExist = await OTP.find({ userId: userID });
-
-        // if (otpExist.length == 0) {
-        //   const newOTP = new OTP(req.body);
-        //   newOTP.code = random_sequence;
-        //   newOTP.userId = userID;
-        //   await newOTP.save();
-
-        // }
-      } catch (err) {
-        const result = {
-          status_code: 500,
-          status_msg: `Something went wrong : ${err}`,
-        };
-        return res.status(500).json(result);
-      }
-    } else {
-      const result = {
-        status_code: 404,
-        status_msg: `A code was already sent to you. Wait for 2 minutes to send another one`,
-      };
-      return res.status(404).json(result);
-    }
-  }
-};
-
 const sendSMS = async (req, res) => {
   const userID = getUserID(req, res);
   if (userID !== undefined) {
@@ -794,15 +733,15 @@ const sendSMS = async (req, res) => {
         })
           .publish(params)
           .promise();
-
+        const user = await User.findById(userID);
         publishTextPromise
           .then(async function (data) {
-            var otpExist = await OTP.find({ userId: userID });
+            var otpExist = await OTP.find({ email: user.email });
 
             if (otpExist.length == 0) {
               const newOTP = new OTP();
               newOTP.code = random;
-              newOTP.userId = userID;
+              newOTP.email = user.email;
               await newOTP.save();
 
               const result = {
@@ -834,64 +773,14 @@ const sendSMS = async (req, res) => {
   }
 };
 
-const verifySMSFirstTime = async (req, res) => {
-  const userID = getUserID(req, res);
-  if (userID !== undefined) {
-    const deactive = await deActiveStatusInner(userID);
-    if (!deactive) {
-      try {
-        const number = req.params.number;
-        AWS_ID = ENV.AWS_ID;
-        AWS_SECRET = ENV.AWS_SECRET;
-        var params = {
-          PhoneNumber: number /* required */,
-          OneTimePassword: req.params.code,
-        };
-        var sns = new AWS.SNS({
-          accessKeyId: AWS_ID,
-          secretAccessKey: AWS_SECRET,
-        });
-
-        sns.verifySMSSandboxPhoneNumber(params, function (err, data) {
-          if (err) {
-            const result = {
-              status_code: 404,
-              status_msg: `Incorrect verification`,
-            };
-            return res.status(404).json(result);
-          } else {
-            console.log("Came here");
-
-            const result = {
-              status_code: 200,
-              status_msg: `Verified`,
-            };
-            return res.status(200).json(result);
-          }
-        });
-      } catch (err) {
-        const result = {
-          status_code: 500,
-          status_msg: `Something went wrong`,
-        };
-        return res.status(500).json(result);
-      }
-    } else {
-      const result = {
-        status_code: 403,
-        status_msg: `Please active your account`,
-      };
-      return res.status(403).send(result);
-    }
-  }
-};
 const verifySMS = async (req, res) => {
   const userID = getUserID(req, res);
   if (userID !== undefined) {
     const deactive = await deActiveStatusInner(userID);
     if (!deactive) {
       try {
-        let otp = await OTP.find({ userId: userID, code: req.params.code });
+        const user = await User.findById(userID);
+        let otp = await OTP.find({ email: user.email, code: req.params.code });
         if (otp.length != 0) {
           const result = {
             status_code: 200,
@@ -1144,9 +1033,9 @@ module.exports = {
   deActive,
   deActiveStatus,
   active2f,
-  sendSMSFirstTime,
+
   sendSMS,
-  verifySMSFirstTime,
+
   verifySMS,
   verifyTokenWeb,
   updatePassword,
