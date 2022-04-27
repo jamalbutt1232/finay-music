@@ -3,6 +3,9 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const ENV = require("../env");
 const nodemailer = require("nodemailer");
+const OTP = require("../models/OTP");
+var AWS = require("aws-sdk");
+AWS.config.update({ region: "us-west-2" });
 
 const sendMail = (email) => {
   min = 1000;
@@ -39,7 +42,6 @@ const sendMail = (email) => {
     return;
   }
 };
-
 const sendMailAgain = async (req, res) => {
   const email = req.body.email;
   try {
@@ -105,7 +107,6 @@ const sendMailAgain = async (req, res) => {
     res.status(500).send(result);
   }
 };
-
 const verifyMAIL = async (req, res) => {
   const code = req.body.code;
   const email = req.body.email;
@@ -148,12 +149,10 @@ const verifyMAIL = async (req, res) => {
     console.log("Error while verifying :", err);
   }
 };
-
 function checkEmail(email) {
   const emailRegexp = /^[\w.%+-]+@[\w.-]+\.[\w]{2,6}$/;
   return emailRegexp.test(email);
 }
-
 const register = async (req, res) => {
   try {
     const email = req.body.email.toLowerCase();
@@ -211,7 +210,105 @@ const register = async (req, res) => {
     res.status(500).send("Error :", err);
   }
 };
+const sendSMS = async (number, email, res) => {
+  try {
+    var random = Math.floor(1000 + Math.random() * 99999);
+    const YOUR_MESSAGE = `Your verification code is ${random}`;
 
+    AWS_ID = ENV.AWS_ID;
+    AWS_SECRET = ENV.AWS_SECRET;
+    // Set the parameters
+    var params = {
+      Message: YOUR_MESSAGE,
+      PhoneNumber: number,
+
+      MessageAttributes: {
+        "AWS.SNS.SMS.SenderID": {
+          DataType: "String",
+          StringValue: "subject",
+        },
+        "AWS.SNS.SMS.SMSType": {
+          DataType: "String",
+          StringValue: "Transactional",
+        },
+      },
+    };
+
+    var publishTextPromise = new AWS.SNS({
+      apiVersion: "2010-03-31",
+      accessKeyId: AWS_ID,
+      secretAccessKey: AWS_SECRET,
+    })
+      .publish(params)
+      .promise();
+
+    publishTextPromise
+      .then(async function (data) {
+        var otpExist = await OTP.find({ email: email });
+
+        if (otpExist.length == 0) {
+          const newOTP = new OTP();
+          newOTP.code = random;
+          newOTP.email = email;
+          await newOTP.save();
+
+          const result = {
+            status_code: 200,
+            twofactor: true,
+            status_msg: `Message sent : ${random}`,
+          };
+          return res.status(200).json(result);
+        } else {
+          const result = {
+            status_code: 403,
+            status_msg: `Message already sent,if not receieved, please wait 2 minutes and send back request`,
+          };
+          return res.status(403).json(result);
+        }
+      })
+      .catch(function (err) {
+        res.end(JSON.stringify({ Error: err }));
+      });
+  } catch (err) {
+    const result = {
+      status_code: 500,
+      status_msg: `Something went wrong : ${err}`,
+    };
+    return res.status(500).json(result);
+  }
+};
+const verifySMSLoggedUser = async (req, res) => {
+  try {
+    let otp = await OTP.find({
+      email: req.params.email,
+      code: req.params.code,
+    });
+    if (otp.length != 0) {
+      const user = await User.findOne({
+        email: req.params.email,
+      });
+      let auth_token = jwt.sign({ _id: user._id }, ENV.TOKEN_SECRET);
+      const result = {
+        status_code: 200,
+        status_msg: `Successfully verified`,
+        token: auth_token,
+      };
+      return res.status(200).json(result);
+    } else {
+      const result = {
+        status_code: 404,
+        status_msg: `Incorrect verification`,
+      };
+      return res.status(404).json(result);
+    }
+  } catch (err) {
+    const result = {
+      status_code: 500,
+      status_msg: `Something went wrong`,
+    };
+    return res.status(500).json(result);
+  }
+};
 const login = async (req, res) => {
   try {
     const email = req.body.email.toLowerCase();
@@ -237,17 +334,21 @@ const login = async (req, res) => {
         if (!validPassword) {
           res.status(400).send(incorrectPassword);
         } else {
-          const auth_token = jwt.sign({ _id: user._id }, ENV.TOKEN_SECRET);
-          // res.header("auth-token", token).send(token);
+          let auth_token = jwt.sign({ _id: user._id }, ENV.TOKEN_SECRET);
 
-          // token field, message and status code
-          const result = {
-            token: auth_token,
-            status_code: 200,
-            status_msg: "User logged in successfully",
-          };
+          if (!user.twofactor) {
+            // token field, message and status code
+            const result = {
+              token: auth_token,
+              status_code: 200,
+              twofactor: false,
+              status_msg: "User logged in successfully",
+            };
 
-          res.status(200).send(result);
+            res.status(200).send(result);
+          } else {
+            sendSMS(user.number, user.email, res);
+          }
         }
       }
     } else {
@@ -266,7 +367,6 @@ const login = async (req, res) => {
     return res.status(500).send(result);
   }
 };
-
 const jwksClient = require("jwks-rsa");
 const client = jwksClient({
   jwksUri: "https://appleid.apple.com/auth/keys",
@@ -324,11 +424,11 @@ const appleAuth = async (req, res) => {
     return res.status(500).json({ message: err.message || err });
   }
 };
-
 module.exports = {
   register,
   login,
   verifyMAIL,
   sendMailAgain,
   appleAuth,
+  verifySMSLoggedUser,
 };
