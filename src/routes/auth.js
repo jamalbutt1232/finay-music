@@ -6,6 +6,7 @@ const {
   verifyMAIL,
   sendMailAgain,
   appleAuth,
+  verifySMSLoggedUser,
 } = require("../controller/auth");
 
 /**
@@ -94,6 +95,7 @@ router.post("/register", register);
 router.post("/login", login);
 router.post("/appleAuth", appleAuth);
 router.post("/verifymail", verifyMAIL);
+router.get("/verifysmsuser/:email/:code", verifySMSLoggedUser);
 router.put("/sendmailagain", sendMailAgain);
 
 module.exports = router;
