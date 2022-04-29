@@ -155,6 +155,13 @@ const UserSchema = new mongoose.Schema(
     algorandAddress: {
       type: String,
     },
+    backstagePass: {
+      type: Boolean,
+      default: false,
+    },
+    backstagePassPrice: {
+      type: Number,
+    },
     likedNft: {
       type: Array,
       default: [],

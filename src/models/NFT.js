@@ -17,22 +17,18 @@ const NFTSchema = new mongoose.Schema(
     },
     productID: {
       type: String,
-      required: true,
     },
     genre: {
       type: String,
     },
     totalQuantity: {
       type: Number,
-      required: true,
     },
     availableQuantity: {
       type: Number,
-      required: true,
     },
     album: {
       type: String,
-      required: true,
     },
     artist: {
       type: String,
@@ -51,8 +47,17 @@ const NFTSchema = new mongoose.Schema(
       type: String,
     },
     type: {
+      // Access or Regular
       type: String,
       required: true,
+    },
+    category: {
+      // Song or Event
+      type: String,
+      required: true,
+    },
+    eventTime: {
+      type: Date,
     },
     likes: {
       type: Array,

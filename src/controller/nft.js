@@ -30,7 +30,6 @@ const deActiveStatusInner = async (uid) => {
   }
 };
 const createAsset = async (req, res) => {
-  console.log("Came to createAsset");
   const userID = getUserID(req, res);
 
   if (userID !== undefined) {
@@ -74,7 +73,6 @@ const updateAsset = async (req, res) => {
     if (!deactive) {
       const { itemId } = req.body;
       const item = await NFT.findOne({ _id: itemId });
-      console.log("item", item);
       if (item?.availableQuantity > 0) {
         try {
           const updatedNFT = await NFT.findByIdAndUpdate(itemId, {
@@ -113,88 +111,16 @@ const updateAsset = async (req, res) => {
   }
 };
 
-const getAccessNFT = async (req, res) => {
-  console.log("Came to getAccessNFT ");
+// new apis start
+const getRegularSongNFT = async (req, res) => {
   const userID = getUserID(req, res);
 
   if (userID !== undefined) {
     try {
-      const accessNFTs = await NFT.find({
-        $and: [{ type: "access" }, { ownerId: { $ne: userID } }],
-      });
-
-      const result = {
-        status_code: 200,
-        status_msg: `Access NFTs fetched`,
-        data: accessNFTs,
-      };
-
-      res.status(200).json(result);
-    } catch (err) {
-      const result = {
-        status_code: 500,
-        status_msg: `Something went wrong`,
-      };
-
-      res.status(500).json(result);
-    }
-  }
-};
-const getUserAccessNFT = async (req, res) => {
-  const userID = getUserID(req, res);
-
-  if (userID !== undefined) {
-    try {
-      const user = await User.findById(userID);
-      let ifSubscriberExists = user.subscribers.includes(req.params.id);
-
-      if (ifSubscriberExists) {
-        const accessNFTs = await NFT.find({
-          $and: [{ type: "access" }, { ownerId: { $eq: req.params.id } }],
-        });
-
-        if (accessNFTs.length != 0) {
-          const result = {
-            status_code: 200,
-            status_msg: `User's Access NFTs fetched`,
-            data: accessNFTs,
-          };
-
-          res.status(200).json(result);
-        } else {
-          const result = {
-            status_code: 200,
-            status_msg: `No NFT exist`,
-          };
-
-          res.status(200).json(result);
-        }
-      } else {
-        const result = {
-          status_code: 404,
-          status_msg: `You need to subscribe to view access NFTs`,
-        };
-
-        res.status(404).json(result);
-      }
-    } catch (err) {
-      const result = {
-        status_code: 500,
-        status_msg: `Something went wrong :${err}`,
-      };
-
-      res.status(500).json(result);
-    }
-  }
-};
-const getRegularNFT = async (req, res) => {
-  const userID = getUserID(req, res);
-
-  if (userID !== undefined) {
-    try {
-      const regularNFTs = await NFT.find({
+      const regularSongNFT = await NFT.find({
         $and: [
           { type: "regular" },
+          { category: "song" },
           { ownerId: { $ne: userID } },
           { holders: { $ne: userID } },
         ],
@@ -202,8 +128,8 @@ const getRegularNFT = async (req, res) => {
 
       const result = {
         status_code: 200,
-        status_msg: `Regular NFTs fetched`,
-        data: regularNFTs,
+        status_msg: `Regular Song NFTs fetched`,
+        data: regularSongNFT,
       };
 
       res.status(200).json(result);
@@ -217,19 +143,24 @@ const getRegularNFT = async (req, res) => {
     }
   }
 };
-const getUserRegularNFT = async (req, res) => {
+const getRegularEventNFT = async (req, res) => {
   const userID = getUserID(req, res);
 
   if (userID !== undefined) {
     try {
-      const regularNFTs = await NFT.find({
-        $and: [{ type: "regular" }, { ownerId: { $eq: req.params.id } }],
+      const regularEventNFT = await NFT.find({
+        $and: [
+          { type: "regular" },
+          { category: "event" },
+          { ownerId: { $ne: userID } },
+          { holders: { $ne: userID } },
+        ],
       });
 
       const result = {
         status_code: 200,
-        status_msg: `User's Regular NFTs fetched`,
-        data: regularNFTs,
+        status_msg: `Regular Event NFTs fetched`,
+        data: regularEventNFT,
       };
 
       res.status(200).json(result);
@@ -243,6 +174,320 @@ const getUserRegularNFT = async (req, res) => {
     }
   }
 };
+
+const getAccessSongNFT = async (req, res) => {
+  const userID = getUserID(req, res);
+
+  if (userID !== undefined) {
+    try {
+      const accessSongNFT = await NFT.find({
+        $and: [
+          { type: "access" },
+          { category: "song" },
+          { ownerId: { $ne: userID } },
+        ],
+      });
+
+      const result = {
+        status_code: 200,
+        status_msg: `Access Song NFTs fetched`,
+        data: accessSongNFT,
+      };
+
+      res.status(200).json(result);
+    } catch (err) {
+      const result = {
+        status_code: 500,
+        status_msg: `Something went wrong`,
+      };
+
+      res.status(500).json(result);
+    }
+  }
+};
+const getAccessEventNFT = async (req, res) => {
+  const userID = getUserID(req, res);
+
+  if (userID !== undefined) {
+    try {
+      const accessEventNFT = await NFT.find({
+        $and: [
+          { type: "access" },
+          { category: "event" },
+          { ownerId: { $ne: userID } },
+        ],
+      });
+
+      const result = {
+        status_code: 200,
+        status_msg: `Regular Event NFTs fetched`,
+        data: accessEventNFT,
+      };
+
+      res.status(200).json(result);
+    } catch (err) {
+      const result = {
+        status_code: 500,
+        status_msg: `Something went wrong`,
+      };
+
+      res.status(500).json(result);
+    }
+  }
+};
+
+const getUserRegularSongNFT = async (req, res) => {
+  const userID = getUserID(req, res);
+
+  if (userID !== undefined) {
+    try {
+      const regularSongNFT = await NFT.find({
+        $and: [
+          { type: "regular" },
+          { category: "song" },
+          { ownerId: { $eq: req.params.id } },
+        ],
+      });
+
+      const result = {
+        status_code: 200,
+        status_msg: `User Regular Song NFTs fetched`,
+        data: regularSongNFT,
+      };
+
+      res.status(200).json(result);
+    } catch (err) {
+      const result = {
+        status_code: 500,
+        status_msg: `Something went wrong`,
+      };
+
+      res.status(500).json(result);
+    }
+  }
+};
+const getUserRegularEventNFT = async (req, res) => {
+  const userID = getUserID(req, res);
+
+  if (userID !== undefined) {
+    try {
+      const regularEventNFT = await NFT.find({
+        $and: [
+          { type: "regular" },
+          { category: "event" },
+          { ownerId: { $eq: req.params.id } },
+        ],
+      });
+
+      const result = {
+        status_code: 200,
+        status_msg: `User Regular Event NFTs fetched`,
+        data: regularEventNFT,
+      };
+
+      res.status(200).json(result);
+    } catch (err) {
+      const result = {
+        status_code: 500,
+        status_msg: `Something went wrong`,
+      };
+
+      res.status(500).json(result);
+    }
+  }
+};
+
+const getUserAccessSongNFT = async (req, res) => {
+  const userID = getUserID(req, res);
+
+  if (userID !== undefined) {
+    try {
+      const accessSongNFT = await NFT.find({
+        $and: [
+          { type: "access" },
+          { category: "song" },
+          { ownerId: { $eq: req.params.id } },
+        ],
+      });
+
+      const result = {
+        status_code: 200,
+        status_msg: `User Access Song NFTs fetched`,
+        data: accessSongNFT,
+      };
+
+      res.status(200).json(result);
+    } catch (err) {
+      const result = {
+        status_code: 500,
+        status_msg: `Something went wrong`,
+      };
+
+      res.status(500).json(result);
+    }
+  }
+};
+const getUserAccessEventNFT = async (req, res) => {
+  const userID = getUserID(req, res);
+
+  if (userID !== undefined) {
+    try {
+      const accessEventNFT = await NFT.find({
+        $and: [
+          { type: "access" },
+          { category: "event" },
+          { ownerId: { $eq: req.params.id } },
+        ],
+      });
+
+      const result = {
+        status_code: 200,
+        status_msg: `User Regular Event NFTs fetched`,
+        data: accessEventNFT,
+      };
+
+      res.status(200).json(result);
+    } catch (err) {
+      const result = {
+        status_code: 500,
+        status_msg: `Something went wrong`,
+      };
+
+      res.status(500).json(result);
+    }
+  }
+};
+// new apis end
+
+// const getAccessNFT = async (req, res) => {
+//   const userID = getUserID(req, res);
+
+//   if (userID !== undefined) {
+//     try {
+//       const accessNFTs = await NFT.find({
+//         $and: [{ type: "access" }, { ownerId: { $ne: userID } }],
+//       });
+
+//       const result = {
+//         status_code: 200,
+//         status_msg: `Access NFTs fetched`,
+//         data: accessNFTs,
+//       };
+
+//       res.status(200).json(result);
+//     } catch (err) {
+//       const result = {
+//         status_code: 500,
+//         status_msg: `Something went wrong`,
+//       };
+
+//       res.status(500).json(result);
+//     }
+//   }
+// };
+// const getUserAccessNFT = async (req, res) => {
+//   const userID = getUserID(req, res);
+
+//   if (userID !== undefined) {
+//     try {
+//       const user = await User.findById(userID);
+//       let ifSubscriberExists = user.subscribers.includes(req.params.id);
+
+//       if (ifSubscriberExists) {
+//         const accessNFTs = await NFT.find({
+//           $and: [{ type: "access" }, { ownerId: { $eq: req.params.id } }],
+//         });
+
+//         if (accessNFTs.length != 0) {
+//           const result = {
+//             status_code: 200,
+//             status_msg: `User's Access NFTs fetched`,
+//             data: accessNFTs,
+//           };
+
+//           res.status(200).json(result);
+//         } else {
+//           const result = {
+//             status_code: 200,
+//             status_msg: `No NFT exist`,
+//           };
+
+//           res.status(200).json(result);
+//         }
+//       } else {
+//         const result = {
+//           status_code: 404,
+//           status_msg: `You need to subscribe to view access NFTs`,
+//         };
+
+//         res.status(404).json(result);
+//       }
+//     } catch (err) {
+//       const result = {
+//         status_code: 500,
+//         status_msg: `Something went wrong :${err}`,
+//       };
+
+//       res.status(500).json(result);
+//     }
+//   }
+// };
+// const getRegularNFT = async (req, res) => {
+//   const userID = getUserID(req, res);
+
+//   if (userID !== undefined) {
+//     try {
+//       const regularNFTs = await NFT.find({
+//         $and: [
+//           { type: "regular" },
+//           { ownerId: { $ne: userID } },
+//           { holders: { $ne: userID } },
+//         ],
+//       });
+
+//       const result = {
+//         status_code: 200,
+//         status_msg: `Regular NFTs fetched`,
+//         data: regularNFTs,
+//       };
+
+//       res.status(200).json(result);
+//     } catch (err) {
+//       const result = {
+//         status_code: 500,
+//         status_msg: `Something went wrong`,
+//       };
+
+//       res.status(500).json(result);
+//     }
+//   }
+// };
+// const getUserRegularNFT = async (req, res) => {
+//   const userID = getUserID(req, res);
+
+//   if (userID !== undefined) {
+//     try {
+//       const regularNFTs = await NFT.find({
+//         $and: [{ type: "regular" }, { ownerId: { $eq: req.params.id } }],
+//       });
+
+//       const result = {
+//         status_code: 200,
+//         status_msg: `User's Regular NFTs fetched`,
+//         data: regularNFTs,
+//       };
+
+//       res.status(200).json(result);
+//     } catch (err) {
+//       const result = {
+//         status_code: 500,
+//         status_msg: `Something went wrong`,
+//       };
+
+//       res.status(500).json(result);
+//     }
+//   }
+// };
 
 const likeNFT = async (req, res) => {
   const userID = getUserID(req, res);
@@ -302,10 +547,16 @@ const likeNFT = async (req, res) => {
 };
 module.exports = {
   createAsset,
-  getAccessNFT,
-  getUserAccessNFT,
-  getRegularNFT,
-  getUserRegularNFT,
   updateAsset,
   likeNFT,
+  //
+  getRegularSongNFT,
+  getAccessSongNFT,
+  getUserRegularSongNFT,
+  getUserAccessSongNFT,
+  //
+  getRegularEventNFT,
+  getAccessEventNFT,
+  getUserRegularEventNFT,
+  getUserAccessEventNFT,
 };
