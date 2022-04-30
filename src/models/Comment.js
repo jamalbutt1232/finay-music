@@ -15,6 +15,10 @@ const CommentSchema = new mongoose.Schema(
       required: true,
       max: 500,
     },
+    tagged: {
+      type: Array,
+      default: [],
+    },
   },
   { timestamps: true }
 );

@@ -915,48 +915,49 @@ const relatedUsers = async (req, res) => {
           followingsList = followingsList.concat(currentUser.followings);
 
           var relatedUsers = followersList.concat(followingsList);
-          var t_user = await User.find({ user });
+
           var userDetailsList = [];
+          // var users;
+          User.find(
+            {
+              _id: {
+                $in: relatedUsers,
+              },
+            },
+            function (err, docs) {
+              docs.forEach((user) => {
+                var userDetails = {
+                  user_name: "",
+                  user_email: "",
+                  user_img: "",
+                  user_id: "",
+                };
 
-          // Issue is coz of await, we dont get user and we loop through.
-          // So 1 way is we can use multi query to fetch all users before loop
-          relatedUsers.forEach(async (user) => {
-            console.log("1");
-            var userDetails = {
-              user_name: "",
-              user_email: "",
-              user_img: "",
-              user_id: "",
-            };
-            console.log("2");
+                userDetails = {
+                  user_name: user.name,
+                  user_email: user.email,
+                  user_img: user.profilePicture || "",
+                  user_id: user._id,
+                };
 
-            var t_user = await User.findById(user);
-            console.log("3");
-            userDetails = {
-              user_name: t_user.name,
-              user_email: t_user.email,
-              user_img: t_user.profilePicture || "",
-              user_id: t_user._id,
-            };
-            console.log("4");
-            userDetailsList = userDetailsList.concat(userDetails);
-            console.log("5");
-          });
-          console.log(userDetailsList);
-          if (relatedUsers.length > 0) {
-            const result = {
-              status_code: 200,
-              status_msg: `Related users list fetched`,
-              data: userDetails,
-            };
-            res.status(200).send(result);
-          } else {
-            const result = {
-              status_code: 200,
-              status_msg: `No list`,
-            };
-            res.status(200).send(result);
-          }
+                userDetailsList = userDetailsList.concat(userDetails);
+              });
+              if (userDetailsList.length > 0) {
+                const result = {
+                  status_code: 200,
+                  status_msg: `Related users list fetched`,
+                  data: userDetailsList,
+                };
+                res.status(200).send(result);
+              } else {
+                const result = {
+                  status_code: 200,
+                  status_msg: `No list`,
+                };
+                res.status(200).send(result);
+              }
+            }
+          );
         } else {
           const result = {
             status_code: 403,
