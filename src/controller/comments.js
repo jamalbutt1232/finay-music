@@ -39,18 +39,32 @@ const create_a_comment = async (req, res) => {
     const deactive = await deActiveStatusInner(userID);
     if (!deactive) {
       const user = await User.findById(userID);
+      const taggedUsers = req.body.taggedUsers;
 
       // if (!user.deactive) {
       let newComment = new Comment(req.body);
       newComment.userId = userID;
 
       try {
+        var taggedList = [];
+
         let savedComment = await newComment.save();
         var userDetails = {
           user_name: "",
           user_email: "",
           user_img: "",
         };
+        if (taggedUsers != undefined) {
+          taggedUsers.map((user_id) => {
+            var userDetails = {
+              currentId: userID,
+              otherId: user_id,
+              postId: savedComment._id,
+              message: `${user.name} tagged you in a post`,
+            };
+            taggedList = taggedList.concat(userDetails);
+          });
+        }
 
         userDetails.user_name = user.name;
         userDetails.user_email = user.email;
@@ -70,13 +84,29 @@ const create_a_comment = async (req, res) => {
           await newNotification.save();
         }
         //
-        const result = {
-          status_code: 200,
-          status_msg: `Comment has been created`,
-          data: savedComment,
-        };
+        if (taggedList.length > 0) {
+          Notification.insertMany(taggedList)
+            .then(function (docs) {
+              const result = {
+                status_code: 200,
+                status_msg: `Comment has been created`,
+                data: savedComment,
+              };
 
-        res.status(200).json(result);
+              res.status(200).json(result);
+            })
+            .catch(function (err) {
+              res.status(500).send(err);
+            });
+        } else {
+          const result = {
+            status_code: 200,
+            status_msg: `Comment has been created`,
+            data: savedComment,
+          };
+
+          res.status(200).json(result);
+        }
       } catch (err) {
         const result = {
           status_code: 500,

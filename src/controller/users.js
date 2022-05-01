@@ -918,46 +918,54 @@ const relatedUsers = async (req, res) => {
 
           var userDetailsList = [];
           // var users;
-          User.find(
-            {
-              _id: {
-                $in: relatedUsers,
+          if (relatedUsers.length > 0) {
+            User.find(
+              {
+                _id: {
+                  $in: relatedUsers,
+                },
               },
-            },
-            function (err, docs) {
-              docs.forEach((user) => {
-                var userDetails = {
-                  user_name: "",
-                  user_email: "",
-                  user_img: "",
-                  user_id: "",
-                };
+              function (err, docs) {
+                docs.forEach((user) => {
+                  var userDetails = {
+                    user_name: "",
+                    user_email: "",
+                    user_img: "",
+                    user_id: "",
+                  };
 
-                userDetails = {
-                  user_name: user.name,
-                  user_email: user.email,
-                  user_img: user.profilePicture || "",
-                  user_id: user._id,
-                };
+                  userDetails = {
+                    user_name: user.name,
+                    user_email: user.email,
+                    user_img: user.profilePicture || "",
+                    user_id: user._id,
+                  };
 
-                userDetailsList = userDetailsList.concat(userDetails);
-              });
-              if (userDetailsList.length > 0) {
-                const result = {
-                  status_code: 200,
-                  status_msg: `Related users list fetched`,
-                  data: userDetailsList,
-                };
-                res.status(200).send(result);
-              } else {
-                const result = {
-                  status_code: 200,
-                  status_msg: `No list`,
-                };
-                res.status(200).send(result);
+                  userDetailsList = userDetailsList.concat(userDetails);
+                });
+                if (userDetailsList.length > 0) {
+                  const result = {
+                    status_code: 200,
+                    status_msg: `Related users list fetched`,
+                    data: userDetailsList,
+                  };
+                  res.status(200).send(result);
+                } else {
+                  const result = {
+                    status_code: 200,
+                    status_msg: `No list`,
+                  };
+                  res.status(200).send(result);
+                }
               }
-            }
-          );
+            );
+          } else {
+            const result = {
+              status_code: 200,
+              status_msg: `No list`,
+            };
+            res.status(200).send(result);
+          }
         } else {
           const result = {
             status_code: 403,
