@@ -159,9 +159,6 @@ const UserSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    backstagePassPrice: {
-      type: Number,
-    },
     likedNft: {
       type: Array,
       default: [],
