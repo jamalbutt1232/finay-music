@@ -44,25 +44,59 @@ const deActiveStatusInner = async (uid) => {
     return `deActiveStatusInner Issue : ${err}`;
   }
 };
-
+// Comment tag remaining
 const create_a_post = async (req, res) => {
   const userID = getUserID(req, res);
 
   if (userID !== undefined) {
     const deactive = await deActiveStatusInner(userID);
     if (!deactive) {
+      const taggedUsers = req.body.taggedUsers;
+
       const newPost = new Post(req.body);
       newPost.userId = userID;
       try {
         const savedPost = await newPost.save();
+        const currentUser = await User.findById(userID);
+        //  GENERATING NOTIFICATION (TO THE TAGGED USER)
 
-        const result = {
-          status_code: 200,
-          status_msg: `Post has been created`,
-          data: savedPost,
-        };
+        var taggedList = [];
+        if (taggedUsers != undefined) {
+          taggedUsers.map((user_id) => {
+            var userDetails = {
+              currentId: userID,
+              otherId: user_id,
+              postId: savedPost._id,
+              message: `${currentUser.name} tagged you in a post`,
+            };
+            taggedList = taggedList.concat(userDetails);
+          });
+        }
 
-        res.status(200).json(result);
+        if (taggedList.length > 0) {
+
+          Notification.insertMany(taggedList)
+            .then(function (docs) {
+              const result = {
+                status_code: 200,
+                status_msg: `Post has been created`,
+                data: savedPost,
+              };
+
+              res.status(200).json(result);
+            })
+            .catch(function (err) {
+              res.status(500).send(err);
+            });
+        } else {
+          const result = {
+            status_code: 200,
+            status_msg: `Post has been created`,
+            data: savedPost,
+          };
+
+          res.status(200).json(result);
+        }
       } catch (err) {
         const result = {
           status_code: 500,

@@ -37,7 +37,7 @@ const getNotifications = async (req, res) => {
     const deactive = await deActiveStatusInner(userID);
     if (!deactive) {
       try {
-        const allNotificaitons = await Notification.find({ otherId: userID });
+        const allNotificaitons = await Notification.find({ otherUserId: userID });
         // sort descending
         allNotificaitons.sort(function (a, b) {
           var dateA = new Date(a.updatedAt),
