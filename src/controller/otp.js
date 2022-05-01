@@ -1,5 +1,5 @@
 const User = require("../models/User");
-const OTP = require("../models/OTP");
+
 const ENV = require("../env");
 
 // GET USER ID
