@@ -74,7 +74,6 @@ const create_a_post = async (req, res) => {
         }
 
         if (taggedList.length > 0) {
-
           Notification.insertMany(taggedList)
             .then(function (docs) {
               const result = {
@@ -286,30 +285,50 @@ const updatePost = async (req, res) => {
 };
 //delete a post
 const deletePost = async (req, res) => {
-  console.log("Came here 01");
   const userID = getUserID(req, res);
 
   if (userID !== undefined) {
     const deactive = await deActiveStatusInner(userID);
     if (!deactive) {
       try {
-        console.log("Came here 1");
-
         const post = await Post.findById(req.body.id);
-        if (post.userId === userID) {
-          console.log("Came here");
-          await post.deleteOne();
-          const result = {
-            status_code: 200,
-            status_msg: `Post has been deleted`,
-            data: post,
-          };
+        const listOfPosts = post.shared;
 
-          res.status(200).json(result);
+        if (post.userId === userID) {
+          // if needed to add logic to deal with sub deleteion
+          // if (post.userId === post.author) {
+          //   await post.updateOne({ $pull: { shared: userID } });
+          // }
+
+          await post.deleteOne();
+          if (listOfPosts.length > 0) {
+            console.log("Came ehre");
+            Post.deleteMany({ _id: { $in: listOfPosts } })
+              .then(function (docs) {
+                const result = {
+                  status_code: 200,
+                  status_msg: `Post has been deleted`,
+                  data: post,
+                };
+
+                res.status(200).json(result);
+              })
+              .catch(function (err) {
+                res.status(500).send(err);
+              });
+          } else {
+            const result = {
+              status_code: 200,
+              status_msg: `Post has been deleted`,
+              data: post,
+            };
+
+            res.status(200).json(result);
+          }
         } else {
           const result = {
             status_code: 403,
-            status_msg: `You can only delete ur post`,
+            status_msg: `You can only delete your post`,
           };
 
           res.status(200).json(result);
@@ -431,6 +450,7 @@ const allPost = async (req, res) => {
           post_type: currentUser.isPost,
         };
         var userPosts = await Post.find({ userId: userID });
+
         var list_of_posts = [];
         userPosts.forEach((myPost) => {
           myPost = { ...myPost._doc, user: myDetails };
@@ -826,6 +846,80 @@ const flagPost = async (req, res) => {
   }
 };
 
+//Share a post
+const sharePost = async (req, res) => {
+  const userID = getUserID(req, res);
+
+  if (userID !== undefined) {
+    const deactive = await deActiveStatusInner(userID);
+    if (!deactive) {
+      try {
+        const post = await Post.findById(req.body.postId);
+        const user = deActiveStatusInner(post.userId);
+
+        if (!user.deactive) {
+          if (user._id != userID) {
+            if (!post.shared.includes(userID)) {
+              const newPost = new Post({
+                desc: post.desc,
+                author: post.userId,
+                file: post.file || "",
+                type: req.body.type,
+                userId: userID,
+              });
+              newPost.save();
+              await post.updateOne({ $push: { shared: newPost._id } });
+
+              const result = {
+                status_code: 200,
+                status_msg: `Post has been shared`,
+                data: newPost,
+              };
+              res.status(200).json(result);
+            }
+            // else {
+            //   await post.updateOne({ $pull: { flag: userID } });
+            //   const t_post = await Post.findById(req.body.id);
+            //   const result = {
+            //     status_code: 200,
+            //     status_msg: `Post has been un-flagged`,
+            //     data: t_post,
+            //   };
+
+            //   res.status(200).json(result);
+            // }
+          } else {
+            const result = {
+              status_code: 500,
+              status_msg: `You cannot share your own post`,
+            };
+            res.status(500).json(result);
+          }
+        } else {
+          const result = {
+            status_code: 403,
+            status_msg: `You cannot flag the post of an unactivated user`,
+          };
+          res.status(403).send(result);
+        }
+      } catch (err) {
+        const result = {
+          status_code: 500,
+          status_msg: `Something went wrong :${err}`,
+        };
+
+        res.status(500).json(result);
+      }
+    } else {
+      const result = {
+        status_code: 403,
+        status_msg: `Please active your account`,
+      };
+      return res.status(403).send(result);
+    }
+  }
+};
+
 module.exports = {
   create_a_post,
   updatePost,
@@ -837,4 +931,5 @@ module.exports = {
   uploadPost,
   deleteUploadPost,
   flagPost,
+  sharePost,
 };
