@@ -220,7 +220,7 @@ const getAccessEventNFT = async (req, res) => {
 
       const result = {
         status_code: 200,
-        status_msg: `Regular Event NFTs fetched`,
+        status_msg: `Access Event NFTs fetched`,
         data: accessEventNFT,
       };
 
@@ -302,21 +302,39 @@ const getUserAccessSongNFT = async (req, res) => {
 
   if (userID !== undefined) {
     try {
-      const accessSongNFT = await NFT.find({
-        $and: [
-          { type: "access" },
-          { category: "song" },
-          { ownerId: { $eq: req.params.id } },
-        ],
-      });
+      var flag = false;
+      if (req.params.id == userID) {
+        flag = true;
+      }
 
-      const result = {
-        status_code: 200,
-        status_msg: `User Access Song NFTs fetched`,
-        data: accessSongNFT,
-      };
+      const user = await User.findById(req.params.id);
 
-      res.status(200).json(result);
+      let ifSubscriberExists = user.subscribers.includes(userID);
+
+      if (ifSubscriberExists || flag) {
+        const accessSongNFT = await NFT.find({
+          $and: [
+            { type: "access" },
+            { category: "song" },
+            { ownerId: { $eq: req.params.id } },
+          ],
+        });
+
+        const result = {
+          status_code: 200,
+          status_msg: `User Access Song NFTs fetched`,
+          data: accessSongNFT,
+        };
+
+        res.status(200).json(result);
+      } else {
+        const result = {
+          status_code: 200,
+          status_msg: `You need to subscribe to the user`,
+        };
+
+        res.status(200).json(result);
+      }
     } catch (err) {
       const result = {
         status_code: 500,
@@ -332,21 +350,38 @@ const getUserAccessEventNFT = async (req, res) => {
 
   if (userID !== undefined) {
     try {
-      const accessEventNFT = await NFT.find({
-        $and: [
-          { type: "access" },
-          { category: "event" },
-          { ownerId: { $eq: req.params.id } },
-        ],
-      });
+      var flag = false;
+      if (req.params.id == userID) {
+        flag = true;
+      }
 
-      const result = {
-        status_code: 200,
-        status_msg: `User Regular Event NFTs fetched`,
-        data: accessEventNFT,
-      };
+      const user = await User.findById(req.params.id);
 
-      res.status(200).json(result);
+      let ifSubscriberExists = user.subscribers.includes(userID);
+      if (ifSubscriberExists || flag) {
+        const accessEventNFT = await NFT.find({
+          $and: [
+            { type: "access" },
+            { category: "event" },
+            { ownerId: { $eq: req.params.id } },
+          ],
+        });
+
+        const result = {
+          status_code: 200,
+          status_msg: `User Regular Event NFTs fetched`,
+          data: accessEventNFT,
+        };
+
+        res.status(200).json(result);
+      } else {
+        const result = {
+          status_code: 200,
+          status_msg: `You need to subscribe to the user`,
+        };
+
+        res.status(200).json(result);
+      }
     } catch (err) {
       const result = {
         status_code: 500,
