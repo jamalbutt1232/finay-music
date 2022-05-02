@@ -21,7 +21,9 @@ router.post("/create_asset", verifyToken, createAsset);
 router.put("/update_nft", verifyToken, updateAsset);
 router.put("/likenft", verifyToken, likeNFT);
 //
+// regular_song_nft : user individual uploaded. Retrieve all songs except the user whos calling it
 router.get("/regular_song_nft", verifyToken, getRegularSongNFT);
+// getAccessSongNFT : backstage pass. Retrieve all Access songs except the user whos calling it
 router.get("/access_song_nft", verifyToken, getAccessSongNFT);
 router.get("/regular_song_nft_user/:id", verifyToken, getUserRegularSongNFT);
 router.get("/access_song_nft_user/:id", verifyToken, getUserAccessSongNFT);
