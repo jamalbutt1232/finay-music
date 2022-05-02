@@ -25,6 +25,13 @@ const PostSchema = new mongoose.Schema(
       type: Array,
       default: [],
     },
+    shared: {
+      type: Array,
+      default: [],
+    },
+    author: {
+      type: String,
+    },
   },
   { timestamps: true }
 );
