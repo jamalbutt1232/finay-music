@@ -1,6 +1,7 @@
 const User = require("../models/User");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const { OAuth2Client } = require("google-auth-library");
 const ENV = require("../env");
 const nodemailer = require("nodemailer");
 const OTP = require("../models/OTP");
@@ -367,6 +368,81 @@ const login = async (req, res) => {
     return res.status(500).send(result);
   }
 };
+
+// Google Signin
+const googleClient = new OAuth2Client(
+  "440544890779-qv3d23gv8cmg99se14de5d3vh69r047b.apps.googleusercontent.com"
+);
+async function verify(token) {
+  const ticket = await googleClient.verifyIdToken({
+    idToken: token,
+    audience:
+      "440544890779-qv3d23gv8cmg99se14de5d3vh69r047b.apps.googleusercontent.com", // Specify the CLIENT_ID of the app that accesses the backend
+  });
+  const payload = ticket.getPayload();
+  const userid = payload["sub"];
+  console.log("userid", userid, "payload", payload);
+  // If request specified a G Suite domain:
+  // const domain = payload['hd'];
+}
+const googleAuth = async (req, res) => {
+  const { token, user } = req.body;
+  try {
+    const ticket = await googleClient.verifyIdToken({
+      idToken: token,
+      audience:
+        "440544890779-qv3d23gv8cmg99se14de5d3vh69r047b.apps.googleusercontent.com", // Specify the CLIENT_ID of the app that accesses the backend
+    });
+    const { sub, aud, azp, email, name, picture } = ticket.getPayload();
+    if (
+      sub === user &&
+      aud ===
+        "440544890779-qv3d23gv8cmg99se14de5d3vh69r047b.apps.googleusercontent.com" &&
+      azp ===
+        "440544890779-k3jhi3pjg5g9jiv479dmk1nrldc4jhps.apps.googleusercontent.com"
+    ) {
+      const user = await User.findOne({ email: email });
+      if (user) {
+        // user exists
+        let auth_token = jwt.sign({ _id: user._id }, ENV.TOKEN_SECRET);
+
+        const result = {
+          token: auth_token,
+          status_code: 200,
+          status_msg: "User logged in successfully",
+        };
+        res.status(200).send(result);
+      } else {
+        // create new user
+        const newUser = new User({
+          name: name,
+          email: email,
+          profilePicture: picture,
+        });
+
+        // save user and responsd
+        await newUser.save();
+        let auth_token = jwt.sign({ _id: newUser._id }, ENV.TOKEN_SECRET);
+
+        const result = {
+          token: auth_token,
+          status_code: 200,
+          status_msg: "User created in successfully",
+        };
+        res.status(200).send(result);
+      }
+    }
+  } catch (err) {
+    console.log("GOOGLE ERROR", err);
+    const result = {
+      status_code: 500,
+      status_msg: "Something went wrong",
+    };
+
+    return res.status(500).send(result);
+  }
+};
+// Apple Signin
 const jwksClient = require("jwks-rsa");
 const client = jwksClient({
   jwksUri: "https://appleid.apple.com/auth/keys",
@@ -431,4 +507,5 @@ module.exports = {
   sendMailAgain,
   appleAuth,
   verifySMSLoggedUser,
+  googleAuth,
 };
