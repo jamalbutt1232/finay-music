@@ -10,7 +10,6 @@ const UserSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      required: true,
       min: 6,
     },
     isValid: {
@@ -145,6 +144,7 @@ const UserSchema = new mongoose.Schema(
       default: "public",
     },
     postType: {
+      // not being used anywhere now
       type: String,
       default: "public",
     },
