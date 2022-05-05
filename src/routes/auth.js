@@ -6,6 +6,7 @@ const {
   verifyMAIL,
   sendMailAgain,
   appleAuth,
+  googleAuth,
   verifySMSLoggedUser,
 } = require("../controller/auth");
 
@@ -94,6 +95,7 @@ router.post("/register", register);
 
 router.post("/login", login);
 router.post("/appleAuth", appleAuth);
+router.post("/googleAuth", googleAuth);
 router.post("/verifymail", verifyMAIL);
 router.post("/verifysmsuser", verifySMSLoggedUser);
 router.put("/sendmailagain", sendMailAgain);
