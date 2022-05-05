@@ -406,12 +406,19 @@ const googleAuth = async (req, res) => {
         // user exists
         let auth_token = jwt.sign({ _id: user._id }, ENV.TOKEN_SECRET);
 
-        const result = {
-          token: auth_token,
-          status_code: 200,
-          status_msg: "User logged in successfully",
-        };
-        res.status(200).send(result);
+        if (!user.twofactor) {
+          // token field, message and status code
+          const result = {
+            token: auth_token,
+            status_code: 200,
+            twofactor: false,
+            status_msg: "User logged in successfully",
+          };
+
+          res.status(200).send(result);
+        } else {
+          sendSMS(user.number, user.email, res);
+        }
       } else {
         // create new user
         const newUser = new User({
