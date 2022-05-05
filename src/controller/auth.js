@@ -280,12 +280,12 @@ const sendSMS = async (number, email, res) => {
 const verifySMSLoggedUser = async (req, res) => {
   try {
     let otp = await OTP.find({
-      email: req.params.email,
-      code: req.params.code,
+      email: req.body.email,
+      code: req.body.code,
     });
     if (otp.length != 0) {
       const user = await User.findOne({
-        email: req.params.email,
+        email: req.body.email,
       });
       let auth_token = jwt.sign({ _id: user._id }, ENV.TOKEN_SECRET);
       const result = {
