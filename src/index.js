@@ -22,6 +22,7 @@ const conversationRoute = require("./routes/conversations");
 const messageRoute = require("./routes/messages");
 const calendarRoute = require("./routes/calendar");
 const notificationRoute = require("./routes/notification");
+const adRoute = require("./routes/Ad");
 
 // For documentation
 const swaggerJsDoc = require("swagger-jsdoc");
@@ -76,6 +77,7 @@ app.use("/api/notification", notificationRoute);
 app.use("/api/iap", receiptRoute);
 app.use("/api/songs", songRoute);
 app.use("/api/pass", passRoute);
+app.use("/api/ad", adRoute);
 
 app.get("/test", (req, res) => {
   res.json("tester");
