@@ -281,12 +281,12 @@ const sendSMS = async (number, email, res) => {
 const verifySMSLoggedUser = async (req, res) => {
   try {
     let otp = await OTP.find({
-      email: req.params.email,
-      code: req.params.code,
+      email: req.body.email,
+      code: req.body.code,
     });
     if (otp.length != 0) {
       const user = await User.findOne({
-        email: req.params.email,
+        email: req.body.email,
       });
       let auth_token = jwt.sign({ _id: user._id }, ENV.TOKEN_SECRET);
       const result = {
@@ -406,12 +406,19 @@ const googleAuth = async (req, res) => {
         // user exists
         let auth_token = jwt.sign({ _id: user._id }, ENV.TOKEN_SECRET);
 
-        const result = {
-          token: auth_token,
-          status_code: 200,
-          status_msg: "User logged in successfully",
-        };
-        res.status(200).send(result);
+        if (!user.twofactor) {
+          // token field, message and status code
+          const result = {
+            token: auth_token,
+            status_code: 200,
+            twofactor: false,
+            status_msg: "User logged in successfully",
+          };
+
+          res.status(200).send(result);
+        } else {
+          sendSMS(user.number, user.email, res);
+        }
       } else {
         // create new user
         const newUser = new User({

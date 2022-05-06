@@ -522,7 +522,7 @@ const allPost = async (req, res) => {
         });
 
         allposts = allposts.sort(function (a, b) {
-          return new Date(a.updatedAt) - new Date(b.updatedAt);
+          return new Date(b.updatedAt) - new Date(a.updatedAt);
         });
         var feed_posts = [];
         let likedPost = {
@@ -651,7 +651,7 @@ const singleuserpost = async (req, res) => {
           });
           allposts = list_of_posts;
           allposts = allposts.sort(function (a, b) {
-            return new Date(a.updatedAt) - new Date(b.updatedAt);
+            return new Date(b.updatedAt) - new Date(a.updatedAt);
           });
           var feed_posts = [];
           let likedPost = {
@@ -864,7 +864,7 @@ const sharePost = async (req, res) => {
                 desc: post.desc,
                 author: post.userId,
                 file: post.file || "",
-                type: req.body.type,
+                type: post.type,
                 userId: userID,
               });
               newPost.save();
