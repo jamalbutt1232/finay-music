@@ -129,7 +129,7 @@ const deleteAd = async (req, res) => {
     if (!deactive) {
       try {
         const ad = await Ad.findById(req.body.id);
-      
+
         if (ad.userId === userID) {
           await ad.deleteOne();
 
@@ -231,9 +231,54 @@ const flagAd = async (req, res) => {
   }
 };
 
+//Flag a Ad
+const getAds = async (req, res) => {
+  const userID = getUserID(req, res);
+
+  if (userID !== undefined) {
+    const deactive = await deActiveStatusInner(userID);
+    if (!deactive) {
+      try {
+        let ad = await Ad.find();
+        if (ad.length > 0) {
+          ad = ad.sort(function (a, b) {
+            return new Date(b.updatedAt) - new Date(a.updatedAt);
+          });
+          const result = {
+            status_code: 200,
+            status_msg: `Ad fetched`,
+            data: ad,
+          };
+          res.status(200).json(result);
+        } else {
+          const result = {
+            status_code: 200,
+            status_msg: `No ads exist`,
+          };
+          res.status(200).json(result);
+        }
+      } catch (err) {
+        const result = {
+          status_code: 500,
+          status_msg: `Something went wrong :${err}`,
+        };
+
+        res.status(500).json(result);
+      }
+    } else {
+      const result = {
+        status_code: 403,
+        status_msg: `Please active your account`,
+      };
+      return res.status(403).send(result);
+    }
+  }
+};
+
 module.exports = {
   create_a_ad,
   updateAd,
   deleteAd,
   flagAd,
+  getAds,
 };
