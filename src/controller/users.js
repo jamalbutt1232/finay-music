@@ -954,6 +954,7 @@ const relatedUsers = async (req, res) => {
                   const result = {
                     status_code: 200,
                     status_msg: `No list`,
+                    data: [],
                   };
                   res.status(200).send(result);
                 }
