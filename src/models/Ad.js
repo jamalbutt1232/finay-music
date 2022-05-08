@@ -9,7 +9,6 @@ const AdSchema = new mongoose.Schema(
     desc: {
       type: String,
       max: 1500,
-      required: true,
     },
     subject: {
       type: String,
