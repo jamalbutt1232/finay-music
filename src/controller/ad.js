@@ -259,8 +259,7 @@ const getAds = async (req, res) => {
             if (!userData.deactive) {
               userDetails.user_name = userData.name;
               userDetails.user_email = userData.email;
-              userDetails.user_img = userData.profilePicture;
-
+              userDetails.user_img = userData.profilePicture || "";
               userDetails.ad_type = userData.type || "";
 
               t_userAdsv2 = {
@@ -285,8 +284,6 @@ const getAds = async (req, res) => {
           };
           res.status(200).json(result);
         } else {
-          // var allposts = list_of_posts;
-
           const result = {
             status_code: 200,
             status_msg: `No ads exist`,
