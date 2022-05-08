@@ -487,7 +487,7 @@ const allPost = async (req, res) => {
             };
             const friendID = friendPosts[i].userId;
             const friendData = await User.findById(friendID);
-            console.log(friendData.email);
+            //console.log(friendData.email);
             if (!friendData.deactive) {
               friendDetails.user_name = friendData.name;
               friendDetails.user_email = friendData.email;

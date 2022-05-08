@@ -19,6 +19,10 @@ const AdSchema = new mongoose.Schema(
     file: {
       type: String,
     },
+    type: {
+      type: String,
+      required: true,
+    },
     flag: {
       type: Array,
       default: [],
