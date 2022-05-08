@@ -287,6 +287,7 @@ const getAds = async (req, res) => {
           const result = {
             status_code: 200,
             status_msg: `No ads exist`,
+            data: [],
           };
           res.status(200).json(result);
         }

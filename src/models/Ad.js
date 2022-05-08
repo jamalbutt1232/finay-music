@@ -9,7 +9,6 @@ const AdSchema = new mongoose.Schema(
     desc: {
       type: String,
       max: 1500,
-      required: true,
     },
     subject: {
       type: String,
@@ -18,6 +17,10 @@ const AdSchema = new mongoose.Schema(
     },
     file: {
       type: String,
+    },
+    type: {
+      type: String,
+      required: true,
     },
     flag: {
       type: Array,
