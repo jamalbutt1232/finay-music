@@ -1,5 +1,11 @@
 const router = require("express").Router();
-const { create_a_ad, updateAd, deleteAd, flagAd, getAds } = require("../controller/Ad");
+const {
+  create_a_ad,
+  updateAd,
+  deleteAd,
+  flagAd,
+  getAds,
+} = require("../controller/ad");
 const verifyToken = require("../private/privateRoute");
 
 router.post("/", verifyToken, create_a_ad);
