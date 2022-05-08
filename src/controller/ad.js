@@ -240,7 +240,41 @@ const getAds = async (req, res) => {
     if (!deactive) {
       try {
         let ad = await Ad.find();
+        var t_userAdsv2 = {};
+        var t_userAds = [];
+
+        let index = 0;
+
         if (ad.length > 0) {
+          for (i = 0; i < ad.length; i++) {
+            var userDetails = {
+              user_name: "",
+              user_email: "",
+              user_img: "",
+              ad_type: "",
+            };
+            const friendID = ad[i].userId;
+            const userData = await User.findById(friendID);
+
+            if (!userData.deactive) {
+              userDetails.user_name = userData.name;
+              userDetails.user_email = userData.email;
+              userDetails.user_img = userData.profilePicture;
+
+              userDetails.ad_type = userData.type || "";
+
+              t_userAdsv2 = {
+                ...ad[i]._doc,
+                user: userDetails,
+              };
+
+              t_userAds[index] = t_userAdsv2;
+              index = index + 1;
+            }
+          }
+
+          ad = t_userAds;
+
           ad = ad.sort(function (a, b) {
             return new Date(b.updatedAt) - new Date(a.updatedAt);
           });
@@ -251,6 +285,8 @@ const getAds = async (req, res) => {
           };
           res.status(200).json(result);
         } else {
+          // var allposts = list_of_posts;
+
           const result = {
             status_code: 200,
             status_msg: `No ads exist`,
