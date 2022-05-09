@@ -56,6 +56,7 @@ const create_a_comment = async (req, res) => {
         };
         if (taggedUsers != undefined) {
           taggedUsers.map((user_id) => {
+// Come back jb
             var userDetails = {
               currentId: userID,
               otherId: user_id,
@@ -83,6 +84,7 @@ const create_a_comment = async (req, res) => {
           });
           await newNotification.save();
         }
+        console.log("taggedList : " ,taggedList)
         //
         if (taggedList.length > 0) {
           Notification.insertMany(taggedList)
