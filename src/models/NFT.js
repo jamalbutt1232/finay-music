@@ -65,9 +65,9 @@ const NFTSchema = new mongoose.Schema(
     eventType: {
       type: String,
     },
-    eventLocation: {
-      type: String,
-    },
+    // eventLocation: {
+    //   type: String,
+    // },
     likes: {
       type: Array,
       default: [],
