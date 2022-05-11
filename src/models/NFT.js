@@ -30,6 +30,9 @@ const NFTSchema = new mongoose.Schema(
     album: {
       type: String,
     },
+    song: {
+      type: String,
+    },
     artist: {
       type: String,
       required: true,
@@ -58,6 +61,12 @@ const NFTSchema = new mongoose.Schema(
     },
     eventTime: {
       type: Date,
+    },
+    eventType: {
+      type: String,
+    },
+    eventLocation: {
+      type: String,
     },
     likes: {
       type: Array,

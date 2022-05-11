@@ -32,6 +32,9 @@ const CartSchema = new mongoose.Schema(
         audioFile: {
           type: String,
         },
+        category: {
+          type: String,
+        },
       },
     ],
     bill: {

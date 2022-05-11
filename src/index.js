@@ -16,6 +16,7 @@ const wishlistRoute = require("./routes/wishlist");
 const otpRoute = require("./routes/otp");
 const receiptRoute = require("./routes/receipt");
 const songRoute = require("./routes/song");
+const eventRoute = require("./routes/event");
 const passRoute = require("./routes/pass");
 
 const conversationRoute = require("./routes/conversations");
@@ -76,6 +77,7 @@ app.use("/api/calendar", calendarRoute);
 app.use("/api/notification", notificationRoute);
 app.use("/api/iap", receiptRoute);
 app.use("/api/songs", songRoute);
+app.use("/api/events", eventRoute);
 app.use("/api/pass", passRoute);
 app.use("/api/ad", adRoute);
 

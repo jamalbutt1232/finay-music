@@ -49,9 +49,19 @@ const createCart = async (req, res) => {
           const album = item.album;
           const imgFile = item.imgFile;
           const audioFile = item.audioFile;
-          const productID = item.productID
+          const productID = item.productID;
+          const category = item.category;
           if (cart) {
-            cart.items.push({ itemId: _id, artist, album, price, imgFile, audioFile, productID });
+            cart.items.push({
+              itemId: _id,
+              artist,
+              album,
+              price,
+              imgFile,
+              audioFile,
+              productID,
+              category,
+            });
             cart.bill = cart.items.reduce((acc, curr) => {
               return acc + curr.price;
             }, 0);
@@ -64,7 +74,18 @@ const createCart = async (req, res) => {
           } else {
             const newCart = await Cart.create({
               ownerID: userID,
-              items: [{ itemId: _id, artist, album, price, imgFile, audioFile, productID }],
+              items: [
+                {
+                  itemId: _id,
+                  artist,
+                  album,
+                  price,
+                  imgFile,
+                  audioFile,
+                  productID,
+                  category,
+                },
+              ],
               bill: price,
             });
             result = {
@@ -109,7 +130,7 @@ const deleteCartItem = async (req, res) => {
     try {
       const user = await User.findById(userID);
       await user.updateOne({ $pull: { cartNFT: itemId } });
- 
+
       let cart = await Cart.findOne({ ownerID: userID });
       const itemIndex = cart.items.findIndex((item) => item.itemId == itemId);
       if (itemIndex > -1) {

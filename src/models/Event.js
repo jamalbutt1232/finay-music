@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const ObjectID = mongoose.Schema.Types.ObjectId;
-const SongsSchema = new mongoose.Schema(
+const EventsSchema = new mongoose.Schema(
   {
     ownerId: {
       type: ObjectID,
@@ -17,10 +17,6 @@ const SongsSchema = new mongoose.Schema(
       ref: "NFT",
       required: true,
     },
-    album: {
-      type: String,
-      required: true,
-    },
     artist: {
       type: String,
       required: true,
@@ -29,9 +25,14 @@ const SongsSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    audioFile: {
+    eventTime: {
+      type: Date,
+    },
+    eventType: {
       type: String,
-      required: true,
+    },
+    eventLocation: {
+      type: String,
     },
     genre: {
       type: String,
@@ -40,4 +41,4 @@ const SongsSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model("Songs", SongsSchema);
+module.exports = mongoose.model("Events", EventsSchema);
