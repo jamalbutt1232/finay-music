@@ -180,7 +180,7 @@ const flagAd = async (req, res) => {
         if (!user.deactive) {
           if (t_user._id != userID) {
             if (!ad.flag.includes(userID)) {
-              await Ad.updateOne({ $push: { flag: userID } });
+              await ad.updateOne({ $push: { flag: userID } });
               const t_ad = await Ad.findById(req.body.id);
               const result = {
                 status_code: 200,
