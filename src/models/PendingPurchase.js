@@ -1,31 +1,25 @@
 const mongoose = require("mongoose");
 const ObjectID = mongoose.Schema.Types.ObjectId;
-const NFTSchema = new mongoose.Schema(
+const PendingSchema = new mongoose.Schema(
   {
-    ownerId: {
+    buyerID: {
       type: ObjectID,
-      required: true,
       ref: "User",
+      required: true,
     },
-    holders: {
-      type: Array,
-      default: [],
+    itemId: {
+      type: ObjectID,
+      ref: "NFT",
+      required: true,
     },
     price: {
       type: Number,
-      required: true,
     },
     productID: {
       type: String,
     },
     genre: {
       type: String,
-    },
-    totalQuantity: {
-      type: Number,
-    },
-    availableQuantity: {
-      type: Number,
     },
     album: {
       type: String,
@@ -35,29 +29,19 @@ const NFTSchema = new mongoose.Schema(
     },
     artist: {
       type: String,
-      required: true,
     },
     desc: {
       type: String,
-      max: 500,
-      required: true,
     },
     imgFile: {
       type: String,
-      required: true,
     },
     audioFile: {
       type: String,
     },
-    type: {
-      // Access or Regular
-      type: String,
-      required: true,
-    },
     category: {
       // Song or Event
       type: String,
-      required: true,
     },
     eventTime: {
       type: Date,
@@ -65,15 +49,8 @@ const NFTSchema = new mongoose.Schema(
     eventType: {
       type: String,
     },
-    // eventLocation: {
-    //   type: String,
-    // },
-    likes: {
-      type: Array,
-      default: [],
-    },
   },
   { timestamps: true }
 );
 
-module.exports = mongoose.model("NFT", NFTSchema);
+module.exports = mongoose.model("Pending", PendingSchema);

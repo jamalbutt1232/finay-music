@@ -31,9 +31,9 @@ const EventsSchema = new mongoose.Schema(
     eventType: {
       type: String,
     },
-    eventLocation: {
-      type: String,
-    },
+    // eventLocation: {
+    //   type: String,
+    // },
     genre: {
       type: String,
     },

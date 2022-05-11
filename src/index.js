@@ -17,6 +17,7 @@ const otpRoute = require("./routes/otp");
 const receiptRoute = require("./routes/receipt");
 const songRoute = require("./routes/song");
 const eventRoute = require("./routes/event");
+const pendingRoute = require("./routes/pendingPurchase");
 const passRoute = require("./routes/pass");
 
 const conversationRoute = require("./routes/conversations");
@@ -78,6 +79,7 @@ app.use("/api/notification", notificationRoute);
 app.use("/api/iap", receiptRoute);
 app.use("/api/songs", songRoute);
 app.use("/api/events", eventRoute);
+app.use("/api/pending", pendingRoute);
 app.use("/api/pass", passRoute);
 app.use("/api/ad", adRoute);
 

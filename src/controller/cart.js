@@ -47,20 +47,30 @@ const createCart = async (req, res) => {
           const price = item.price;
           const artist = item.artist;
           const album = item.album;
+          const song = item.song;
+          const desc = item.desc;
+          const genre = item.genre;
           const imgFile = item.imgFile;
           const audioFile = item.audioFile;
           const productID = item.productID;
           const category = item.category;
+          const eventTime = item.eventTime;
+          const eventType = item.eventType;
           if (cart) {
             cart.items.push({
               itemId: _id,
               artist,
               album,
+              song,
+              desc,
+              genre,
               price,
               imgFile,
               audioFile,
               productID,
               category,
+              eventTime,
+              eventType,
             });
             cart.bill = cart.items.reduce((acc, curr) => {
               return acc + curr.price;
@@ -79,11 +89,16 @@ const createCart = async (req, res) => {
                   itemId: _id,
                   artist,
                   album,
+                  song,
+                  desc,
+                  genre,
                   price,
                   imgFile,
                   audioFile,
                   productID,
                   category,
+                  eventTime,
+                  eventType,
                 },
               ],
               bill: price,

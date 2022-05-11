@@ -20,6 +20,15 @@ const CartSchema = new mongoose.Schema(
         album: {
           type: String,
         },
+        song: {
+          type: String,
+        },
+        desc: {
+          type: String,
+        },
+        genre: {
+          type: String,
+        },
         price: {
           type: Number,
         },
@@ -33,6 +42,12 @@ const CartSchema = new mongoose.Schema(
           type: String,
         },
         category: {
+          type: String,
+        },
+        eventTime: {
+          type: Date,
+        },
+        eventType: {
           type: String,
         },
       },
