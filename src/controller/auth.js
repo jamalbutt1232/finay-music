@@ -391,13 +391,13 @@ const googleAuth = async (req, res) => {
     const ticket = await googleClient.verifyIdToken({
       idToken: token,
       audience:
-        "440544890779-qv3d23gv8cmg99se14de5d3vh69r047b.apps.googleusercontent.com", // Specify the CLIENT_ID of the app that accesses the backend
+        "440544890779-t01qtuodv65oblka5c54l282d6pklqqq.apps.googleusercontent.com", // Specify the CLIENT_ID of the app that accesses the backend
     });
     const { sub, aud, azp, email, name, picture } = ticket.getPayload();
     if (
       sub === user &&
       aud ===
-        "440544890779-qv3d23gv8cmg99se14de5d3vh69r047b.apps.googleusercontent.com" &&
+        "440544890779-t01qtuodv65oblka5c54l282d6pklqqq.apps.googleusercontent.com" &&
       azp ===
         "440544890779-k3jhi3pjg5g9jiv479dmk1nrldc4jhps.apps.googleusercontent.com"
     ) {
