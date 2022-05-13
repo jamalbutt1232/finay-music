@@ -331,6 +331,7 @@ const getUserAccessSongNFT = async (req, res) => {
         const result = {
           status_code: 200,
           status_msg: `You need to subscribe to the user`,
+          data: [],
         };
 
         res.status(200).json(result);
@@ -378,6 +379,7 @@ const getUserAccessEventNFT = async (req, res) => {
         const result = {
           status_code: 200,
           status_msg: `You need to subscribe to the user`,
+          data: [],
         };
 
         res.status(200).json(result);
