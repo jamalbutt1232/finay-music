@@ -560,6 +560,48 @@ const getFollowers = async (req, res) => {
   }
 };
 
+// get all subscribers
+const getSubscribers = async (req, res) => {
+  const userID = getUserID(req, res);
+  if (userID !== undefined) {
+    const deactive = await deActiveStatusInner(userID);
+    if (!deactive) {
+      try {
+        let subsList = await User.find({ _id: req.params.id });
+        subsList = subsList[0].subscribers;
+
+        let usersList = await User.find({ _id: { $in: subsList } });
+        if (usersList.length != 0) {
+          const result = {
+            status_code: 200,
+            status_msg: `All subscribers fetched successfully`,
+            data: usersList,
+          };
+          res.status(200).send(result);
+        } else {
+          const result = {
+            status_code: 404,
+            status_msg: `No subscribers found`,
+          };
+          res.status(404).send(result);
+        }
+      } catch (err) {
+        const result = {
+          status_code: 500,
+          status_msg: `Something went wrong : ${err}`,
+        };
+        return res.status(500).send(result);
+      }
+    } else {
+      const result = {
+        status_code: 403,
+        status_msg: `Please active your account`,
+      };
+      return res.status(403).send(result);
+    }
+  }
+};
+
 // get all followings
 const getFollowings = async (req, res) => {
   const userID = getUserID(req, res);
@@ -1043,9 +1085,8 @@ module.exports = {
   deActive,
   deActiveStatus,
   active2f,
-
   sendSMS,
-
+  getSubscribers,
   verifySMS,
   verifyTokenWeb,
   updatePassword,
