@@ -22,6 +22,7 @@ const {
   subscribeUser,
   relatedUsers,
   getSubscribers,
+  getSubscribees,
 } = require("../controller/users");
 const router = require("express").Router();
 const verifyToken = require("../private/privateRoute");
@@ -146,6 +147,7 @@ router.get("/search", verifyToken, search);
 router.get("/getfollowers/:id", verifyToken, getFollowers);
 router.get("/getfollowings/:id", verifyToken, getFollowings);
 router.get("/getsubscribers/:id", verifyToken, getSubscribers);
+router.get("/getsubscribees/:id", verifyToken, getSubscribees);
 router.put("/deactive", verifyToken, deActive);
 router.get("/deactivestatus", verifyToken, deActiveStatus);
 router.put("/twofactor", verifyToken, active2f);
