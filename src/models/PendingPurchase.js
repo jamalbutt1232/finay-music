@@ -10,7 +10,6 @@ const PendingSchema = new mongoose.Schema(
     itemId: {
       type: ObjectID,
       ref: "NFT",
-      required: true,
     },
     price: {
       type: Number,
@@ -40,7 +39,7 @@ const PendingSchema = new mongoose.Schema(
       type: String,
     },
     category: {
-      // Song or Event
+      // Song or Event or subscriber
       type: String,
     },
     eventTime: {
@@ -48,6 +47,10 @@ const PendingSchema = new mongoose.Schema(
     },
     eventType: {
       type: String,
+    },
+    subscribeID: {
+      type: ObjectID,
+      ref: "User",
     },
   },
   { timestamps: true }

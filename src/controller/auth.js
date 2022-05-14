@@ -391,13 +391,13 @@ const googleAuth = async (req, res) => {
     const ticket = await googleClient.verifyIdToken({
       idToken: token,
       audience:
-        "440544890779-qv3d23gv8cmg99se14de5d3vh69r047b.apps.googleusercontent.com", // Specify the CLIENT_ID of the app that accesses the backend
+        "440544890779-t01qtuodv65oblka5c54l282d6pklqqq.apps.googleusercontent.com", // Specify the CLIENT_ID of the app that accesses the backend
     });
     const { sub, aud, azp, email, name, picture } = ticket.getPayload();
     if (
       sub === user &&
       aud ===
-        "440544890779-qv3d23gv8cmg99se14de5d3vh69r047b.apps.googleusercontent.com" &&
+        "440544890779-t01qtuodv65oblka5c54l282d6pklqqq.apps.googleusercontent.com" &&
       azp ===
         "440544890779-k3jhi3pjg5g9jiv479dmk1nrldc4jhps.apps.googleusercontent.com"
     ) {
@@ -434,7 +434,7 @@ const googleAuth = async (req, res) => {
         const result = {
           token: auth_token,
           status_code: 200,
-          status_msg: "User created in successfully",
+          status_msg: "User created successfully",
         };
         res.status(200).send(result);
       }
@@ -458,7 +458,7 @@ function getAppleSigningKeys(kid) {
   return new Promise((resolve) => {
     client.getSigningKey(kid, (err, key) => {
       if (err) {
-        console.log(error);
+        console.log(err);
         resolve(null);
       }
       const signingKey = key.getPublicKey();
@@ -478,10 +478,10 @@ function verifyJWT(json, publicKey) {
   });
 }
 const appleAuth = async (req, res) => {
-  const { response } = req.body;
+  const { token, user } = req.body;
   try {
-    const { identityToken, user } = response;
-    const json = jwt.decode(identityToken, { complete: true });
+    //const { token, user } = response;
+    const json = jwt.decode(token, { complete: true });
     const kid = json?.header?.kid;
 
     const appleKey = await getAppleSigningKeys(kid);
@@ -489,22 +489,62 @@ const appleAuth = async (req, res) => {
       console.log("Something went wrong");
       return;
     }
-    const payload = await verifyJWT(identityToken, appleKey);
+    const payload = await verifyJWT(token, appleKey);
     if (!payload) {
       console.log("Something went wrong");
       return;
     }
 
-    console.log("Sign in with apple suceeded!", payload);
+    console.log("Sign in with apple succeeded!", payload);
 
     if (
       payload.sub === user &&
       payload.aud === "org.reactjs.native.example.social-media"
     ) {
-      return res.status(200).json("User Authenticated");
+      const user = await User.findOne({ email: payload.email });
+      if (user) {
+        // user exists
+        let auth_token = jwt.sign({ _id: user._id }, ENV.TOKEN_SECRET);
+
+        if (!user.twofactor) {
+          // token field, message and status code
+          const result = {
+            token: auth_token,
+            status_code: 200,
+            twofactor: false,
+            status_msg: "User logged in successfully",
+          };
+
+          res.status(200).send(result);
+        } else {
+          sendSMS(user.number, user.email, res);
+        }
+      } else {
+        // create new user
+        const newUser = new User({
+          email: payload.email,
+        });
+
+        // save user and responsd
+        await newUser.save();
+        let auth_token = jwt.sign({ _id: newUser._id }, ENV.TOKEN_SECRET);
+
+        const result = {
+          token: auth_token,
+          status_code: 200,
+          status_msg: "User created successfully",
+        };
+        res.status(200).send(result);
+      }
     }
-  } catch (err) {
-    return res.status(500).json({ message: err.message || err });
+  } catch (error) {
+    console.log("APPLE ERROR", error);
+    const result = {
+      status_code: 500,
+      status_msg: "Something went wrong",
+    };
+
+    return res.status(500).send(result);
   }
 };
 module.exports = {
