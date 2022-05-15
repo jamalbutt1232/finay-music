@@ -371,22 +371,12 @@ const login = async (req, res) => {
 
 // Google Signin
 const googleClient = new OAuth2Client(
-  "440544890779-qv3d23gv8cmg99se14de5d3vh69r047b.apps.googleusercontent.com"
+  // "440544890779-qv3d23gv8cmg99se14de5d3vh69r047b.apps.googleusercontent.com"
+  "440544890779-t01qtuodv65oblka5c54l282d6pklqqq.apps.googleusercontent.com"
 );
-async function verify(token) {
-  const ticket = await googleClient.verifyIdToken({
-    idToken: token,
-    audience:
-      "440544890779-qv3d23gv8cmg99se14de5d3vh69r047b.apps.googleusercontent.com", // Specify the CLIENT_ID of the app that accesses the backend
-  });
-  const payload = ticket.getPayload();
-  const userid = payload["sub"];
-  console.log("userid", userid, "payload", payload);
-  // If request specified a G Suite domain:
-  // const domain = payload['hd'];
-}
 const googleAuth = async (req, res) => {
   const { token, user } = req.body;
+  console.log("GOOGLE AUTH API", token, user);
   try {
     const ticket = await googleClient.verifyIdToken({
       idToken: token,
