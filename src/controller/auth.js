@@ -376,7 +376,6 @@ const googleClient = new OAuth2Client(
 );
 const googleAuth = async (req, res) => {
   const { token, user } = req.body;
-  console.log("GOOGLE AUTH API", token, user);
   try {
     const ticket = await googleClient.verifyIdToken({
       idToken: token,
@@ -389,9 +388,7 @@ const googleAuth = async (req, res) => {
     if (
       sub === user &&
       aud ===
-        "440544890779-t01qtuodv65oblka5c54l282d6pklqqq.apps.googleusercontent.com" &&
-      azp ===
-        "440544890779-k3jhi3pjg5g9jiv479dmk1nrldc4jhps.apps.googleusercontent.com"
+        "440544890779-t01qtuodv65oblka5c54l282d6pklqqq.apps.googleusercontent.com"
     ) {
       
       const user = await User.findOne({ email: email });
@@ -431,6 +428,13 @@ const googleAuth = async (req, res) => {
         };
         res.status(200).send(result);
       }
+    } else {
+      const result = {
+        status_code: 500,
+        status_msg: "Something went wrong",
+      };
+
+      return res.status(500).send(result);
     }
   } catch (err) {
     console.log("GOOGLE ERROR", err);
