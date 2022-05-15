@@ -385,7 +385,7 @@ const googleAuth = async (req, res) => {
     });
     
     const { sub, aud, azp, email, name, picture } = ticket.getPayload();
-    console.log("CHECK TICKET", sub, user, aud);
+    console.log("CHECK TICKET", sub, user, aud, azp);
     if (
       sub === user &&
       aud ===
