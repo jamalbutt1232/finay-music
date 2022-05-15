@@ -385,6 +385,7 @@ const googleAuth = async (req, res) => {
     });
     
     const { sub, aud, azp, email, name, picture } = ticket.getPayload();
+    console.log("CHECK TICKET", sub, user, aud);
     if (
       sub === user &&
       aud ===
@@ -392,7 +393,7 @@ const googleAuth = async (req, res) => {
       azp ===
         "440544890779-k3jhi3pjg5g9jiv479dmk1nrldc4jhps.apps.googleusercontent.com"
     ) {
-      console.log("CHECK TICKET", sub, email, name);
+      
       const user = await User.findOne({ email: email });
       if (user) {
         // user exists
