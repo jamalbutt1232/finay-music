@@ -383,6 +383,7 @@ const googleAuth = async (req, res) => {
       audience:
         "440544890779-t01qtuodv65oblka5c54l282d6pklqqq.apps.googleusercontent.com", // Specify the CLIENT_ID of the app that accesses the backend
     });
+    console.log("CHECK TICKET", ticket);
     const { sub, aud, azp, email, name, picture } = ticket.getPayload();
     if (
       sub === user &&
