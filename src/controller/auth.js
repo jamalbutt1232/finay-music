@@ -383,7 +383,7 @@ const googleAuth = async (req, res) => {
       audience:
         "440544890779-t01qtuodv65oblka5c54l282d6pklqqq.apps.googleusercontent.com", // Specify the CLIENT_ID of the app that accesses the backend
     });
-    console.log("CHECK TICKET", ticket);
+    
     const { sub, aud, azp, email, name, picture } = ticket.getPayload();
     if (
       sub === user &&
@@ -392,6 +392,7 @@ const googleAuth = async (req, res) => {
       azp ===
         "440544890779-k3jhi3pjg5g9jiv479dmk1nrldc4jhps.apps.googleusercontent.com"
     ) {
+      console.log("CHECK TICKET", sub, email, name);
       const user = await User.findOne({ email: email });
       if (user) {
         // user exists
