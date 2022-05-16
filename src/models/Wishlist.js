@@ -20,16 +20,34 @@ const WishlistSchema = new mongoose.Schema(
         album: {
           type: String,
         },
-        productID: {
+        song: {
+          type: String,
+        },
+        desc: {
+          type: String,
+        },
+        genre: {
           type: String,
         },
         price: {
           type: Number,
         },
+        productID: {
+          type: String,
+        },
         imgFile: {
           type: String,
         },
         audioFile: {
+          type: String,
+        },
+        category: {
+          type: String,
+        },
+        eventTime: {
+          type: Date,
+        },
+        eventType: {
           type: String,
         },
       },

@@ -22,8 +22,8 @@ exports = function (changeEvent) {
 
   const doc = changeEvent.fullDocument;
   const collection = context.services
-    .get("Cluster0")
-    .db("Cluster0")
+    .get("FinayApp")
+    .db("myFirstDatabase")
     .collection("users");
   collection
     .findOne({ _id: new BSON.ObjectId(doc.reciever) })
@@ -35,9 +35,6 @@ exports = function (changeEvent) {
           body: doc.text,
         },
       };
-      await sendNotification(
-        "feWbRz7zzk4ilVtwCDe0Gc:APA91bHx1NMqOHRSq1lohVlD7eEt4OQ3ONcLsGYK33z9HxtKIZ0Yk9K1_SoGXqvn2nUSwe--5Jo3Uakka6pITTS9Ii3JnXD271UrZfIHG6UiEgG26TkF7hOOCEKKElz4XfdiOdCfYDNZ",
-        message_notification
-      );
+      await sendNotification(item.pushToken, message_notification);
     });
 };
