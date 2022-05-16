@@ -48,18 +48,30 @@ const addtoWishlist = async (req, res) => {
           const price = item.price;
           const artist = item.artist;
           const album = item.album;
+          const song = item.song;
+          const desc = item.desc;
+          const genre = item.genre;
           const imgFile = item.imgFile;
           const audioFile = item.audioFile;
           const productID = item.productID;
+          const category = item.category;
+          const eventTime = item.eventTime;
+          const eventType = item.eventType;
           if (wishlist) {
             wishlist.items.push({
               itemId: _id,
               artist,
               album,
+              song,
+              desc,
+              genre,
               price,
               imgFile,
               audioFile,
               productID,
+              category,
+              eventTime,
+              eventType,
             });
             await wishlist.save();
             result = {
@@ -75,13 +87,19 @@ const addtoWishlist = async (req, res) => {
                   itemId: _id,
                   artist,
                   album,
+                  song,
+                  desc,
+                  genre,
                   price,
                   imgFile,
                   audioFile,
                   productID,
+                  category,
+                  eventTime,
+                  eventType,
                 },
               ],
-              bill: price,
+              //bill: price,
             });
             result = {
               status_code: 200,
