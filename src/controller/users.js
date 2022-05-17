@@ -450,12 +450,21 @@ const search = async (req, res) => {
             $ne: true,
           },
         });
+        const currentUser = await User.findById(userID);
+        let blockedUsers = currentUser.blocked;
 
         if (user.length != 0) {
+          var usersList = [];
+          user.forEach((singleUser) => {
+            if (!blockedUsers.includes(singleUser._id, 0)) {
+              usersList.push(singleUser);
+            }
+          });
+
           const result = {
             status_code: 200,
             status_msg: `Successfuly fetched users`,
-            data: user,
+            data: usersList,
           };
           res.status(200).send(result);
         } else {
