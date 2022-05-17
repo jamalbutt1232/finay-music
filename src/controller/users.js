@@ -158,6 +158,8 @@ const singleUser = async (req, res) => {
   if (userID !== undefined) {
     const deactive = await deActiveStatusInner(userID);
     if (!deactive) {
+      const currentUser = await User.findById(userID);
+
       const type = await getUserBioType(req.params.id);
 
       try {
@@ -374,12 +376,14 @@ const allUser = async (req, res) => {
       try {
         // getting followings list so they can be excluded
         let followingsList = await User.find({ _id: userID });
+        blockedUsers = followingsList[0].blocked;
         followingsList = followingsList[0].followings;
+
         followingsList[followingsList.length] = userID;
 
         // Get all users except of you and the one you followed
         const user = await User.find({
-          _id: { $nin: followingsList },
+          _id: { $nin: followingsList, $nin: blockedUsers },
         });
         const result = {
           status_code: 200,
@@ -1113,6 +1117,74 @@ const verifyTokenWeb = async (req, res) => {
   }
 };
 
+// Block user
+const blockUser = async (req, res) => {
+  const userID = getUserID(req, res);
+  const currentUser = await User.findById(userID);
+  if (userID !== undefined) {
+    const deactive = await deActiveStatusInner(userID);
+    if (!deactive) {
+      if (userID !== req.body.id) {
+        try {
+          const user = await User.findById(userID);
+          if (!user.deactive) {
+            if (!user.blocked.includes(req.body.id)) {
+              await user.updateOne({
+                $push: {
+                  blocked: req.body.id,
+                },
+              });
+              user.blocked.push(req.body.id);
+              const result = {
+                status_code: 200,
+                status_msg: `You blocked the user`,
+                data: user,
+              };
+              res.status(200).send(result);
+            } else {
+              await user.updateOne({
+                $pull: {
+                  blocked: req.body.id,
+                },
+              });
+              user.blocked.pull(req.body.id);
+              const result = {
+                status_code: 200,
+                status_msg: `You un-blocked the user`,
+                data: user,
+              };
+              res.status(200).send(result);
+            }
+          } else {
+            const result = {
+              status_code: 403,
+              status_msg: `You cannot block an unactivated user`,
+            };
+            res.status(403).send(result);
+          }
+        } catch (err) {
+          const result = {
+            status_code: 500,
+            status_msg: `Something went wrong :${err}`,
+          };
+          res.status(500).send(result);
+        }
+      } else {
+        const result = {
+          status_code: 403,
+          status_msg: `You cant block yourself`,
+        };
+        res.status(403).send(result);
+      }
+    } else {
+      const result = {
+        status_code: 403,
+        status_msg: `Please active your account`,
+      };
+      return res.status(403).send(result);
+    }
+  }
+};
 module.exports = {
   updateUser,
   deleteUser,
@@ -1135,4 +1207,5 @@ module.exports = {
   subscribeUser,
   relatedUsers,
   getSubscribees,
+  blockUser,
 };
