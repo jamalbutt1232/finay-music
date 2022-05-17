@@ -1185,6 +1185,47 @@ const blockUser = async (req, res) => {
     }
   }
 };
+// get all blocked users
+const getBlockUsers = async (req, res) => {
+  const userID = getUserID(req, res);
+  if (userID !== undefined) {
+    const deactive = await deActiveStatusInner(userID);
+    if (!deactive) {
+      try {
+        let blockedUsers = await User.find({ _id: userID });
+        blockedUsers = blockedUsers[0].blocked;
+
+        let usersList = await User.find({ _id: { $in: blockedUsers } });
+        if (usersList.length != 0) {
+          const result = {
+            status_code: 200,
+            status_msg: `All blocked users fetched successfully`,
+            data: usersList,
+          };
+          res.status(200).send(result);
+        } else {
+          const result = {
+            status_code: 404,
+            status_msg: `No blocked users found`,
+          };
+          res.status(404).send(result);
+        }
+      } catch (err) {
+        const result = {
+          status_code: 500,
+          status_msg: `Something went wrong : ${err}`,
+        };
+        return res.status(500).send(result);
+      }
+    } else {
+      const result = {
+        status_code: 403,
+        status_msg: `Please active your account`,
+      };
+      return res.status(403).send(result);
+    }
+  }
+};
 module.exports = {
   updateUser,
   deleteUser,
@@ -1208,4 +1249,5 @@ module.exports = {
   relatedUsers,
   getSubscribees,
   blockUser,
+  getBlockUsers,
 };
