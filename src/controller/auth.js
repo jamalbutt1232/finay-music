@@ -371,20 +371,9 @@ const login = async (req, res) => {
 
 // Google Signin
 const googleClient = new OAuth2Client(
-  "440544890779-qv3d23gv8cmg99se14de5d3vh69r047b.apps.googleusercontent.com"
+  // "440544890779-qv3d23gv8cmg99se14de5d3vh69r047b.apps.googleusercontent.com"
+  "440544890779-t01qtuodv65oblka5c54l282d6pklqqq.apps.googleusercontent.com"
 );
-async function verify(token) {
-  const ticket = await googleClient.verifyIdToken({
-    idToken: token,
-    audience:
-      "440544890779-qv3d23gv8cmg99se14de5d3vh69r047b.apps.googleusercontent.com", // Specify the CLIENT_ID of the app that accesses the backend
-  });
-  const payload = ticket.getPayload();
-  const userid = payload["sub"];
-  console.log("userid", userid, "payload", payload);
-  // If request specified a G Suite domain:
-  // const domain = payload['hd'];
-}
 const googleAuth = async (req, res) => {
   const { token, user } = req.body;
   try {
@@ -393,14 +382,15 @@ const googleAuth = async (req, res) => {
       audience:
         "440544890779-t01qtuodv65oblka5c54l282d6pklqqq.apps.googleusercontent.com", // Specify the CLIENT_ID of the app that accesses the backend
     });
+    
     const { sub, aud, azp, email, name, picture } = ticket.getPayload();
+    console.log("CHECK TICKET", sub, user, aud, azp);
     if (
       sub === user &&
       aud ===
-        "440544890779-t01qtuodv65oblka5c54l282d6pklqqq.apps.googleusercontent.com" &&
-      azp ===
-        "440544890779-k3jhi3pjg5g9jiv479dmk1nrldc4jhps.apps.googleusercontent.com"
+        "440544890779-t01qtuodv65oblka5c54l282d6pklqqq.apps.googleusercontent.com"
     ) {
+      
       const user = await User.findOne({ email: email });
       if (user) {
         // user exists
@@ -438,6 +428,13 @@ const googleAuth = async (req, res) => {
         };
         res.status(200).send(result);
       }
+    } else {
+      const result = {
+        status_code: 500,
+        status_msg: "Something went wrong",
+      };
+
+      return res.status(500).send(result);
     }
   } catch (err) {
     console.log("GOOGLE ERROR", err);

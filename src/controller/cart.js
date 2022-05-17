@@ -42,6 +42,7 @@ const createCart = async (req, res) => {
         const user = await User.findById(userID);
         const cart = await Cart.findOne({ ownerID: userID });
         const item = await NFT.findOne({ _id });
+        console.log("NFT ITEM", item, _id);
         if (!user.cartNFT.includes(_id)) {
           await user.updateOne({ $push: { cartNFT: _id } });
           const price = item.price;

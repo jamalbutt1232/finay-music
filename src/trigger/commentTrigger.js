@@ -1,4 +1,4 @@
-exports = function (changeEvent) {
+exports = async function (changeEvent) {
   const admin = context.functions.execute("firebase_config");
   const notification_options = {
     priority: "high",
@@ -22,29 +22,27 @@ exports = function (changeEvent) {
 
   const doc = changeEvent.fullDocument;
   const posts = context.services
-    .get("Cluster0")
-    .db("Cluster0")
+    .get("FinayApp")
+    .db("myFirstDatabase")
     .collection("posts");
   const users = context.services
-    .get("Cluster0")
-    .db("Cluster0")
+    .get("FinayApp")
+    .db("myFirstDatabase")
     .collection("users");
+  const otherUser = await users.findOne({
+    _id: new BSON.ObjectId(doc.userId),
+  });
   posts.findOne({ _id: new BSON.ObjectId(doc.postId) }).then((postItem) => {
-    console.log("POST", postItem.userId);
     users
       .findOne({ _id: new BSON.ObjectId(postItem.userId) })
       .then(async (userItem) => {
-        console.log("REAL PUSH TOKEN", JSON.stringify(userItem.pushToken));
         const message_notification = {
           notification: {
             title: "Comment Notification",
-            body: userItem.name + " commented on your post",
+            body: otherUser.name + " commented on your post: \n" + doc.desc,
           },
         };
-        await sendNotification(
-          "feWbRz7zzk4ilVtwCDe0Gc:APA91bHx1NMqOHRSq1lohVlD7eEt4OQ3ONcLsGYK33z9HxtKIZ0Yk9K1_SoGXqvn2nUSwe--5Jo3Uakka6pITTS9Ii3JnXD271UrZfIHG6UiEgG26TkF7hOOCEKKElz4XfdiOdCfYDNZ",
-          message_notification
-        );
+        await sendNotification(userItem.pushToken, message_notification);
       });
   });
 };
