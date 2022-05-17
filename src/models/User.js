@@ -55,6 +55,10 @@ const UserSchema = new mongoose.Schema(
       type: Array,
       default: [],
     },
+    blocked: {
+      type: Array,
+      default: [],
+    },
     subscribees: {
       type: Array,
       default: [],

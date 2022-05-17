@@ -23,6 +23,7 @@ const {
   relatedUsers,
   getSubscribers,
   getSubscribees,
+  blockUser,
 } = require("../controller/users");
 const router = require("express").Router();
 const verifyToken = require("../private/privateRoute");
@@ -155,4 +156,5 @@ router.post("/sendsms", verifyToken, sendSMS);
 router.get("/verifysms/:code", verifyToken, verifySMS);
 router.put("/subscribe", verifyToken, subscribeUser);
 router.get("/relatedusers", verifyToken, relatedUsers);
+router.put("/block", verifyToken, blockUser);
 module.exports = router;
