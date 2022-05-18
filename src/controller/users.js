@@ -1129,54 +1129,65 @@ const verifyTokenWeb = async (req, res) => {
 // Block user
 const blockUser = async (req, res) => {
   const userID = getUserID(req, res);
+
   const currentUser = await User.findById(userID);
   if (userID !== undefined) {
     const deactive = await deActiveStatusInner(userID);
     if (!deactive) {
-      if (userID !== req.body.id) {
-        try {
-          const user = await User.findById(userID);
-          if (!user.deactive) {
-            if (!user.blocked.includes(req.body.id)) {
-              await user.updateOne({
-                $push: {
-                  blocked: req.body.id,
-                },
-              });
-              user.blocked.push(req.body.id);
-              const result = {
-                status_code: 200,
-                status_msg: `You blocked the user`,
-                data: user,
-              };
-              res.status(200).send(result);
+      var otherUserId = req.body.id;
+      console.log("otherUserId :" ,otherUserId)
+      if (otherUserId !== undefined) {
+        if (userID !== req.body.id) {
+          try {
+            const user = await User.findById(userID);
+            if (!user.deactive) {
+              if (!user.blocked.includes(otherUserId)) {
+                await user.updateOne({
+                  $push: {
+                    blocked: otherUserId,
+                  },
+                });
+                user.blocked.push(otherUserId);
+                const result = {
+                  status_code: 200,
+                  status_msg: `You blocked the user`,
+                  data: user,
+                };
+                res.status(200).send(result);
+              } else {
+                const result = {
+                  status_code: 200,
+                  status_msg: `You already blocked the user`,
+                };
+                res.status(200).send(result);
+              }
             } else {
               const result = {
-                status_code: 200,
-                status_msg: `You already blocked the user`,
+                status_code: 403,
+                status_msg: `You cannot block an unactivated user`,
               };
-              res.status(200).send(result);
+              res.status(403).send(result);
             }
-          } else {
+          } catch (err) {
             const result = {
-              status_code: 403,
-              status_msg: `You cannot block an unactivated user`,
+              status_code: 500,
+              status_msg: `Something went wrong :${err}`,
             };
-            res.status(403).send(result);
+            res.status(500).send(result);
           }
-        } catch (err) {
+        } else {
           const result = {
-            status_code: 500,
-            status_msg: `Something went wrong :${err}`,
+            status_code: 403,
+            status_msg: `You cant block yourself`,
           };
-          res.status(500).send(result);
+          res.status(403).send(result);
         }
       } else {
         const result = {
-          status_code: 403,
-          status_msg: `You cant block yourself`,
+          status_code: 404,
+          status_msg: `Please provide user id to block`,
         };
-        res.status(403).send(result);
+        return res.status(404).send(result);
       }
     } else {
       const result = {
