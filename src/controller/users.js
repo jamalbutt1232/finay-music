@@ -1151,16 +1151,9 @@ const blockUser = async (req, res) => {
               };
               res.status(200).send(result);
             } else {
-              await user.updateOne({
-                $pull: {
-                  blocked: req.body.id,
-                },
-              });
-              user.blocked.pull(req.body.id);
               const result = {
                 status_code: 200,
-                status_msg: `You un-blocked the user`,
-                data: user,
+                status_msg: `You already blocked the user`,
               };
               res.status(200).send(result);
             }
