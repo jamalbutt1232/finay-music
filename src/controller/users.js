@@ -1135,7 +1135,7 @@ const blockUser = async (req, res) => {
     const deactive = await deActiveStatusInner(userID);
     if (!deactive) {
       var otherUserId = req.body.id;
-      console.log("otherUserId :" ,otherUserId)
+
       if (otherUserId !== undefined) {
         if (userID !== req.body.id) {
           try {
