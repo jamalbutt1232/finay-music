@@ -65,7 +65,7 @@ const getRoyaltyDetails = async (req, res) => {
     const deactive = await deActiveStatusInner(userID);
     if (!deactive) {
       try {
-        const royaltyDetails = await Royalty.findById(req.params.id);
+        const royaltyDetails = await Royalty.find({ nft_id: req.params.id });
 
         if (royaltyDetails.length != 0) {
           const result = {
