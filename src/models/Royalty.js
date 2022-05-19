@@ -23,7 +23,6 @@ const RoyaltySchema = new mongoose.Schema(
     },
     subsq_sales_per: {
       type: String,
-      required: true,
     },
     royalties: [
       {
