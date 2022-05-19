@@ -14,7 +14,7 @@ const RoyaltySchema = new mongoose.Schema(
       ref: "User",
     },
     price: {
-      type: String,
+      type: Number,
       required: true,
     },
     type: {
