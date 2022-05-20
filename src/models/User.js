@@ -176,7 +176,7 @@ const UserSchema = new mongoose.Schema(
       default: [],
     },
     lastNotificationRead: {
-      type: String,
+      type: Date,
     },
   },
   { timestamps: true }
