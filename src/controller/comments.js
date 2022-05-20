@@ -81,6 +81,7 @@ const create_a_comment = async (req, res) => {
             otherId: post.userId,
             postId: post._id,
             message: `${currentUser.name} commented on your post`,
+            type: "comment",
           });
           await newNotification.save();
         }
