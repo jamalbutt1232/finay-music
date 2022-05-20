@@ -50,7 +50,8 @@ const create_a_post = async (req, res) => {
 
   if (userID !== undefined) {
     const deactive = await deActiveStatusInner(userID);
-    if (!deactive) {
+    const _user = await User.findById(userID);
+    if (!_user.deactive) {
       const taggedUsers = req.body.taggedUsers;
 
       const newPost = new Post(req.body);
@@ -117,8 +118,8 @@ const create_a_post = async (req, res) => {
 const uploadPost = async (req, res) => {
   const userID = getUserID(req, res);
   if (userID !== undefined) {
-    const deactive = await deActiveStatusInner(userID);
-    if (!deactive) {
+    const _user = await User.findById(userID);
+    if (!_user.deactive) {
       ///////////////////////////////////////////////////////////////////
 
       AWS_ID = ENV.AWS_ID;
@@ -855,10 +856,11 @@ const sharePost = async (req, res) => {
     if (!deactive) {
       try {
         const post = await Post.findById(req.body.postId);
-        const user = deActiveStatusInner(post.userId);
 
-        if (!user.deactive) {
-          if (user._id != userID) {
+        const _user = await User.findById(post.userId);
+
+        if (!_user.deactive) {
+          if (_user._id != userID) {
             if (!post.shared.includes(userID)) {
               const newPost = new Post({
                 desc: post.desc,
@@ -877,17 +879,6 @@ const sharePost = async (req, res) => {
               };
               res.status(200).json(result);
             }
-            // else {
-            //   await post.updateOne({ $pull: { flag: userID } });
-            //   const t_post = await Post.findById(req.body.id);
-            //   const result = {
-            //     status_code: 200,
-            //     status_msg: `Post has been un-flagged`,
-            //     data: t_post,
-            //   };
-
-            //   res.status(200).json(result);
-            // }
           } else {
             const result = {
               status_code: 500,
@@ -898,7 +889,7 @@ const sharePost = async (req, res) => {
         } else {
           const result = {
             status_code: 403,
-            status_msg: `You cannot flag the post of an unactivated user`,
+            status_msg: `You cannot share the post of an unactivated user`,
           };
           res.status(403).send(result);
         }
