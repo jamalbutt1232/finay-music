@@ -247,7 +247,7 @@ const sendSMS = async (number, email, res) => {
       .then(async function (data) {
         var otpExist = await OTP.find({ email: email });
 
-        if (otpExist.length == 0) {
+        if (otpExist.length === 0) {
           const newOTP = new OTP();
           newOTP.code = random;
           newOTP.email = email;
@@ -280,10 +280,12 @@ const sendSMS = async (number, email, res) => {
 };
 const verifySMSLoggedUser = async (req, res) => {
   try {
+    console.log("first", req.body.email, req.body.code);
     let otp = await OTP.find({
       email: req.body.email,
       code: req.body.code,
     });
+
     if (otp.length != 0) {
       const user = await User.findOne({
         email: req.body.email,
@@ -382,7 +384,7 @@ const googleAuth = async (req, res) => {
       audience:
         "440544890779-t01qtuodv65oblka5c54l282d6pklqqq.apps.googleusercontent.com", // Specify the CLIENT_ID of the app that accesses the backend
     });
-    
+
     const { sub, aud, azp, email, name, picture } = ticket.getPayload();
     console.log("CHECK TICKET", sub, user, aud, azp);
     if (
@@ -390,7 +392,6 @@ const googleAuth = async (req, res) => {
       aud ===
         "440544890779-t01qtuodv65oblka5c54l282d6pklqqq.apps.googleusercontent.com"
     ) {
-      
       const user = await User.findOne({ email: email });
       if (user) {
         // user exists
