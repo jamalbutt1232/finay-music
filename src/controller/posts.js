@@ -373,6 +373,7 @@ const likePost = async (req, res) => {
                 otherId: post.userId,
                 postId: post._id,
                 message: `${currentUser.name} liked your post`,
+                type: "likepost",
               });
               await newNotification.save();
             }

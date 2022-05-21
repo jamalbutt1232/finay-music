@@ -240,6 +240,7 @@ const followUser = async (req, res) => {
                   otherId: req.body.id,
                   postId: "",
                   message: `${currentUser.name} supports you`,
+                  type: "follow",
                 });
                 await newNotification.save();
               }
@@ -927,6 +928,7 @@ const subscribeUser = async (req, res) => {
                   otherId: req.body.id,
                   postId: "",
                   message: `${currentUser.name} subscribed you`,
+                  type: "subscribe",
                 });
                 await newNotification.save();
               }
