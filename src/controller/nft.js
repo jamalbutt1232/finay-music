@@ -2,6 +2,7 @@ const NFT = require("../models/NFT");
 const User = require("../models/User");
 const jwt = require("jsonwebtoken");
 const ENV = require("../env");
+const Calendar = require("../models/Calendar");
 
 // GET USER ID
 const getUserID = (req, res) => {
@@ -29,6 +30,7 @@ const deActiveStatusInner = async (uid) => {
     return `deActiveStatusInner Issue : ${err}`;
   }
 };
+// calendae ki dates aur create asset ko set krna
 const createAsset = async (req, res) => {
   const userID = getUserID(req, res);
 
@@ -40,6 +42,18 @@ const createAsset = async (req, res) => {
         ownerId: userID,
       });
       try {
+        if (req.body.category == "event") {
+          let date_time = req.body.eventTime;
+          var _date = date_time.split("T")[0];
+          var _time = date_time.split("T")[1].split(".")[0].substring(0, 5);
+          var _events = { description: req.body.type, time: _time };
+          const cal = new Calendar({
+            date: _date,
+            events: _events,
+            userId: userID,
+          });
+          const c = await cal.save();
+        }
         const savedNFT = await newNFT.save();
         const result = {
           status_code: 200,
