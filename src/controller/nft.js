@@ -202,13 +202,22 @@ const getAccessSongNFT = async (req, res) => {
         ],
       });
 
-      const result = {
-        status_code: 200,
-        status_msg: `Access Song NFTs fetched`,
-        data: accessSongNFT,
-      };
+      if (accessSongNFT.length != 0) {
+        const result = {
+          status_code: 200,
+          status_msg: `Access Song NFTs fetched`,
+          data: accessSongNFT,
+        };
 
-      res.status(200).json(result);
+        res.status(200).json(result);
+      } else {
+        const result = {
+          status_code: 404,
+          status_msg: `No access song exist`,
+        };
+
+        res.status(404).json(result);
+      }
     } catch (err) {
       const result = {
         status_code: 500,
