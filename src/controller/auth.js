@@ -245,27 +245,17 @@ const sendSMS = async (number, email, res) => {
 
     publishTextPromise
       .then(async function (data) {
-        var otpExist = await OTP.find({ email: email });
+        const newOTP = new OTP();
+        newOTP.code = random;
+        newOTP.email = email;
+        await newOTP.save();
 
-        if (otpExist.length == 0) {
-          const newOTP = new OTP();
-          newOTP.code = random;
-          newOTP.email = email;
-          await newOTP.save();
-
-          const result = {
-            status_code: 200,
-            twofactor: true,
-            status_msg: `Message sent : ${random}`,
-          };
-          return res.status(200).json(result);
-        } else {
-          const result = {
-            status_code: 403,
-            status_msg: `Message already sent,if not receieved, please wait 2 minutes and send back request`,
-          };
-          return res.status(403).json(result);
-        }
+        const result = {
+          status_code: 200,
+          twofactor: true,
+          status_msg: `Message sent : ${random}`,
+        };
+        return res.status(200).json(result);
       })
       .catch(function (err) {
         res.end(JSON.stringify({ Error: err }));
@@ -382,7 +372,7 @@ const googleAuth = async (req, res) => {
       audience:
         "440544890779-t01qtuodv65oblka5c54l282d6pklqqq.apps.googleusercontent.com", // Specify the CLIENT_ID of the app that accesses the backend
     });
-    
+
     const { sub, aud, azp, email, name, picture } = ticket.getPayload();
     console.log("CHECK TICKET", sub, user, aud, azp);
     if (
@@ -390,7 +380,6 @@ const googleAuth = async (req, res) => {
       aud ===
         "440544890779-t01qtuodv65oblka5c54l282d6pklqqq.apps.googleusercontent.com"
     ) {
-      
       const user = await User.findOne({ email: email });
       if (user) {
         // user exists
