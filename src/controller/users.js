@@ -1132,7 +1132,7 @@ const verifyTokenWeb = async (req, res) => {
 const blockUser = async (req, res) => {
   const userID = getUserID(req, res);
 
-  const currentUser = await User.findById(userID);
+
   if (userID !== undefined) {
     const deactive = await deActiveStatusInner(userID);
     if (!deactive) {
@@ -1153,13 +1153,11 @@ const blockUser = async (req, res) => {
                 await otherUser.updateOne({
                   $pull: {
                     followers: userID,
-                    subscribers: userID,
                   },
                 });
                 await user.updateOne({
                   $pull: {
                     followings: otherUserId,
-                    subscribees: otherUserId,
                   },
                 });
                 user.followings.pull(otherUserId);
