@@ -1142,6 +1142,7 @@ const blockUser = async (req, res) => {
         if (userID !== req.body.id) {
           try {
             const user = await User.findById(userID);
+            const otherUser = await User.findById(otherUserId);
             if (!user.deactive) {
               if (!user.blocked.includes(otherUserId)) {
                 await user.updateOne({
@@ -1149,6 +1150,19 @@ const blockUser = async (req, res) => {
                     blocked: otherUserId,
                   },
                 });
+                await otherUser.updateOne({
+                  $pull: {
+                    followers: userID,
+                    subscribers: userID,
+                  },
+                });
+                await user.updateOne({
+                  $pull: {
+                    followings: otherUserId,
+                    subscribees: otherUserId,
+                  },
+                });
+                user.followings.pull(otherUserId);
                 user.blocked.push(otherUserId);
                 const result = {
                   status_code: 200,
