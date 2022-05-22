@@ -585,6 +585,7 @@ const allPost = async (req, res) => {
     }
   }
 };
+
 //get a post
 const singlePost = async (req, res) => {
   const userID = getUserID(req, res);
@@ -594,19 +595,30 @@ const singlePost = async (req, res) => {
     if (!deactive) {
       try {
         const post = await Post.findById(req.body.id);
-        if (!post.flag.includes(userID)) {
-          const result = {
-            status_code: 200,
-            status_msg: `Single post fetched`,
-            data: post,
-          };
-          res.status(200).json(result);
+        const user = await User.findById(post.userId);
+        const blockedUser = user.blocked;
+
+        if (!blockedUser.includes(userID)) {
+          if (!post.flag.includes(userID)) {
+            const result = {
+              status_code: 200,
+              status_msg: `Single post fetched`,
+              data: post,
+            };
+            res.status(200).json(result);
+          } else {
+            const result = {
+              status_code: 500,
+              status_msg: `Flagged post cannot be fetched`,
+            };
+            res.status(500).json(result);
+          }
         } else {
           const result = {
-            status_code: 500,
-            status_msg: `Flagged post cannot be fetched`,
+            status_code: 404,
+            status_msg: `You cant view post of a blocked user`,
           };
-          res.status(500).json(result);
+          res.status(404).json(result);
         }
       } catch (err) {
         const result = {
