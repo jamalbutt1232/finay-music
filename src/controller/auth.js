@@ -280,7 +280,6 @@ const sendSMS = async (number, email, res) => {
 };
 const verifySMSLoggedUser = async (req, res) => {
   try {
-    console.log("first", req.body.email, req.body.code);
     let otp = await OTP.find({
       email: req.body.email,
       code: req.body.code,
