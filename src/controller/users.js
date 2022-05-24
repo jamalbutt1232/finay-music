@@ -381,10 +381,11 @@ const allUser = async (req, res) => {
         followingsList = followingsList[0].followings;
 
         followingsList[followingsList.length] = userID;
-
+        followingsList =followingsList.concat(blockedUsers);
+        console.log(followingsList);
         // Get all users except of you and the one you followed
         const user = await User.find({
-          _id: { $nin: followingsList, $nin: blockedUsers },
+          _id: { $nin: followingsList },
         });
         const result = {
           status_code: 200,
@@ -1131,7 +1132,6 @@ const verifyTokenWeb = async (req, res) => {
 // Block user
 const blockUser = async (req, res) => {
   const userID = getUserID(req, res);
-
 
   if (userID !== undefined) {
     const deactive = await deActiveStatusInner(userID);
