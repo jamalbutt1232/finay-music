@@ -381,10 +381,11 @@ const allUser = async (req, res) => {
         followingsList = followingsList[0].followings;
 
         followingsList[followingsList.length] = userID;
-
+        followingsList =followingsList.concat(blockedUsers);
+        console.log(followingsList);
         // Get all users except of you and the one you followed
         const user = await User.find({
-          _id: { $nin: followingsList, $nin: blockedUsers },
+          _id: { $nin: followingsList },
         });
         const result = {
           status_code: 200,
@@ -1132,7 +1133,6 @@ const verifyTokenWeb = async (req, res) => {
 const blockUser = async (req, res) => {
   const userID = getUserID(req, res);
 
-  const currentUser = await User.findById(userID);
   if (userID !== undefined) {
     const deactive = await deActiveStatusInner(userID);
     if (!deactive) {
@@ -1142,6 +1142,7 @@ const blockUser = async (req, res) => {
         if (userID !== req.body.id) {
           try {
             const user = await User.findById(userID);
+            const otherUser = await User.findById(otherUserId);
             if (!user.deactive) {
               if (!user.blocked.includes(otherUserId)) {
                 await user.updateOne({
@@ -1149,6 +1150,17 @@ const blockUser = async (req, res) => {
                     blocked: otherUserId,
                   },
                 });
+                await otherUser.updateOne({
+                  $pull: {
+                    followers: userID,
+                  },
+                });
+                await user.updateOne({
+                  $pull: {
+                    followings: otherUserId,
+                  },
+                });
+                user.followings.pull(otherUserId);
                 user.blocked.push(otherUserId);
                 const result = {
                   status_code: 200,

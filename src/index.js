@@ -85,7 +85,6 @@ app.use("/api/pass", passRoute);
 app.use("/api/ad", adRoute);
 app.use("/api/royalty", royaltyRoute);
 
-
 app.get("/test", (req, res) => {
   res.json("tester");
 });
