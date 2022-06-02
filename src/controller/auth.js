@@ -16,11 +16,14 @@ const sendMail = (email) => {
   try {
     var Transport = nodemailer.createTransport({
       service: "Gmail",
+      port: 587,
+      secure: false, // true for 465, false for other ports
       auth: {
         user: "iamalexbakerdev@gmail.com",
         pass: "OJIoji217",
       },
     });
+
     var mailOptions;
     let sender = "JB";
     mailOptions = {
@@ -358,6 +361,106 @@ const login = async (req, res) => {
     return res.status(500).send(result);
   }
 };
+const forgotPasswordMail = async (req, res) => {
+  const email = req.body.email;
+  try {
+    const user = await User.findOne({ email: email });
+    if (user) {
+      // send mail again
+      min = 1000;
+      max = 9999;
+      const random_sequence = Math.floor(Math.random() * (max - min) + min);
+
+      try {
+        var Transport = nodemailer.createTransport({
+          service: "Gmail",
+          port: 587,
+          secure: false, // true for 465, false for other ports
+          auth: {
+            user: "iamalexbakerdev@gmail.com",
+            pass: "OJIoji217",
+          },
+        });
+        var mailOptions;
+        let sender = "JB";
+        mailOptions = {
+          from: sender,
+          to: email,
+          subject: "Forgot password",
+          html: `Please use the following code to verify account : ${random_sequence}`,
+        };
+
+        Transport.sendMail(mailOptions, function (err, response) {
+          if (err) {
+            console.log("Sending mail error :", err);
+          } else {
+            console.log("Message sent");
+          }
+        });
+        const updatedUser = await User.findByIdAndUpdate(
+          user._id,
+          {
+            $set: { uniqueCode: random_sequence },
+          },
+          { new: true }
+        );
+        const result = {
+          status_code: 200,
+          status_msg: "Forgot password code sent",
+          data: updatedUser,
+        };
+        res.status(200).send(result);
+      } catch (err) {
+        console.log("ERROR while sending mail. Details: ", err);
+      }
+    } else {
+      const result = {
+        status_code: 404,
+        status_msg: "Please register",
+      };
+      res.status(404).send(result);
+    }
+  } catch (err) {
+    const result = {
+      status_code: 500,
+      status_msg: "Something went wrong",
+    };
+    res.status(500).send(result);
+  }
+};
+// Update pswd
+const updateForgotPassword = async (req, res) => {
+  const user = await User.find({ email: req.body.email });
+
+  if (user) {
+    try {
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(req.body.password, salt);
+
+      const user = await User.findOneAndUpdate(
+        { email: req.body.email },
+        {
+          password: hashedPassword,
+        },
+        { new: true }
+      );
+      const result = {
+        status_code: 200,
+        status_msg: `Password has been updated`,
+        data: user,
+      };
+      res.status(200).send(result);
+    } catch (err) {
+      const result = {
+        status_code: 500,
+        status_msg: `Something went wrong ${err}`,
+      };
+      return res.status(500).send(result);
+    }
+  } else {
+    return res.status(403).json("You can update only your account");
+  }
+};
 
 // Google Signin
 const googleClient = new OAuth2Client(
@@ -541,4 +644,6 @@ module.exports = {
   appleAuth,
   verifySMSLoggedUser,
   googleAuth,
+  forgotPasswordMail,
+  updateForgotPassword,
 };
