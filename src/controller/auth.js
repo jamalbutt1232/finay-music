@@ -668,11 +668,11 @@ const appleAuthWeb = async (req, res) => {
         twofactor: false,
         status_msg: "User logged in successfully",
       };
-      res.redirect(
-        303,
-        `https://www.finay.com/app?user=${JSON.stringify(result)}`
-      );
-      // res.status(200).send(result);
+      // res.redirect(
+      //   303,
+      //   `https://www.finay.com/app?user=${JSON.stringify(result)}`
+      // );
+      res.status(200).send(`https://www.finay.com/app?user=${JSON.stringify(result)}`);
       // if (!user.twofactor) {
       // } else {
       //   sendSMS(user.number, user.email, res);
@@ -692,11 +692,11 @@ const appleAuthWeb = async (req, res) => {
         status_code: 200,
         status_msg: "User created successfully",
       };
-      // res.status(200).send(result);
-      res.redirect(
-        303,
-        `https://www.finay.com/app?user=${JSON.stringify(result)}`
-      );
+      res.status(200).send(`https://www.finay.com/app?user=${JSON.stringify(result)}`);
+      // res.redirect(
+      //   303,
+      //   `https://www.finay.com/app?user=${JSON.stringify(result)}`
+      // );
     }
   } catch (error) {
     console.log("APPLE ERROR", error);
@@ -705,11 +705,11 @@ const appleAuthWeb = async (req, res) => {
       status_msg: "Something went wrong",
     };
 
-    // return res.status(500).send(result);
-    res.redirect(
-      500,
-      `https://www.finay.com/app?user=${JSON.stringify(result)}`
-    );
+    return res.status(500).send(`https://www.finay.com/app?user=${JSON.stringify(result)}`);
+    // res.redirect(
+    //   500,
+    //   `https://www.finay.com/app?user=${JSON.stringify(result)}`
+    // );
   }
 };
 module.exports = {
