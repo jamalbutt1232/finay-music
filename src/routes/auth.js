@@ -6,10 +6,9 @@ const {
   verifyMAIL,
   sendMailAgain,
   appleAuth,
+  appleAuthWeb,
   googleAuth,
   verifySMSLoggedUser,
-  forgotPasswordMail,
-  updateForgotPassword,
 } = require("../controller/auth");
 
 /**
@@ -97,11 +96,10 @@ router.post("/register", register);
 
 router.post("/login", login);
 router.post("/appleAuth", appleAuth);
+router.post("/appleAuthWeb", appleAuthWeb);
 router.post("/googleAuth", googleAuth);
 router.post("/verifymail", verifyMAIL);
 router.post("/verifysmsuser", verifySMSLoggedUser);
 router.put("/sendmailagain", sendMailAgain);
-router.put("/forgotpasswordmail", forgotPasswordMail);
-router.put("/updateforgotpassword", updateForgotPassword);
 
 module.exports = router;
