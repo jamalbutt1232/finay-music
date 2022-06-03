@@ -465,9 +465,8 @@ function verifyJWT(json, publicKey) {
   });
 }
 const appleAuth = async (req, res) => {
-  const { token, user } = req.body;
+  const { token } = req.body;
   try {
-    //const { token, user } = response;
     const json = jwt.decode(token, { complete: true });
     const kid = json?.header?.kid;
 
@@ -483,11 +482,8 @@ const appleAuth = async (req, res) => {
     }
 
     console.log("Sign in with apple succeeded!", payload);
-
-    if (
-      payload.sub === user &&
-      payload.aud === "org.reactjs.native.example.social-media"
-    ) {
+    // payload.sub === user &&
+    if (payload.aud === "org.reactjs.native.example.social-media") {
       const user = await User.findOne({ email: payload.email });
       if (user) {
         // user exists
@@ -534,6 +530,9 @@ const appleAuth = async (req, res) => {
     return res.status(500).send(result);
   }
 };
+
+// Web handling for apple auth
+
 module.exports = {
   register,
   login,
