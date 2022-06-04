@@ -704,7 +704,7 @@ const appleAuthWeb = async (req, res) => {
       status_code: 500,
       status_msg: "Something went wrong",
     };
-    res.status(500).send(`https://www.finay.com/app?user=${JSON.stringify(result)}`);
+    res.status(500).send(`asdasdsa`);
     return ;
     // res.redirect(
     //   500,
