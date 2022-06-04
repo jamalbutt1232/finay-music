@@ -68,7 +68,7 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.use("/api/users", userRoute);
 app.use("/api/auth", authRoute);
-app.use("/api/auth/appleAuthWeb", appleAuthWeb);
+// app.use("/api/auth/appleAuthWeb", appleAuthWeb);
 app.use("/api/posts", postRoute);
 app.use("/api/conversations", conversationRoute);
 app.use("/api/messages", messageRoute);

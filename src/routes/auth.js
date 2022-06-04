@@ -96,7 +96,7 @@ router.post("/register", register);
 
 router.post("/login", login);
 router.post("/appleAuth", appleAuth);
-// router.post("/appleAuthWeb", appleAuthWeb);
+router.get("/appleAuthWeb", appleAuthWeb);
 router.post("/googleAuth", googleAuth);
 router.post("/verifymail", verifyMAIL);
 router.post("/verifysmsuser", verifySMSLoggedUser);
