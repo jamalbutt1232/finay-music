@@ -277,6 +277,7 @@ const verifySMSLoggedUser = async (req, res) => {
       email: req.body.email,
       code: req.body.code,
     });
+
     if (otp.length != 0) {
       const user = await User.findOne({
         email: req.body.email,
@@ -567,9 +568,8 @@ function verifyJWT(json, publicKey) {
   });
 }
 const appleAuth = async (req, res) => {
-  const { token, user } = req.body;
+  const { token } = req.body;
   try {
-    //const { token, user } = response;
     const json = jwt.decode(token, { complete: true });
     const kid = json?.header?.kid;
 
@@ -585,46 +585,43 @@ const appleAuth = async (req, res) => {
     }
 
     console.log("Sign in with apple succeeded!", payload);
+    // payload.sub === user &&
+    // if (payload.aud === "org.reactjs.native.example.social-media") {
+    // }
+    const user = await User.findOne({ email: payload.email });
+    if (user) {
+      // user exists
+      let auth_token = jwt.sign({ _id: user._id }, ENV.TOKEN_SECRET);
 
-    if (
-      payload.sub === user &&
-      payload.aud === "org.reactjs.native.example.social-media"
-    ) {
-      const user = await User.findOne({ email: payload.email });
-      if (user) {
-        // user exists
-        let auth_token = jwt.sign({ _id: user._id }, ENV.TOKEN_SECRET);
-
-        if (!user.twofactor) {
-          // token field, message and status code
-          const result = {
-            token: auth_token,
-            status_code: 200,
-            twofactor: false,
-            status_msg: "User logged in successfully",
-          };
-
-          res.status(200).send(result);
-        } else {
-          sendSMS(user.number, user.email, res);
-        }
-      } else {
-        // create new user
-        const newUser = new User({
-          email: payload.email,
-        });
-
-        // save user and responsd
-        await newUser.save();
-        let auth_token = jwt.sign({ _id: newUser._id }, ENV.TOKEN_SECRET);
-
+      if (!user.twofactor) {
+        // token field, message and status code
         const result = {
           token: auth_token,
           status_code: 200,
-          status_msg: "User created successfully",
+          twofactor: false,
+          status_msg: "User logged in successfully",
         };
+
         res.status(200).send(result);
+      } else {
+        sendSMS(user.number, user.email, res);
       }
+    } else {
+      // create new user
+      const newUser = new User({
+        email: payload.email,
+      });
+
+      // save user and responsd
+      await newUser.save();
+      let auth_token = jwt.sign({ _id: newUser._id }, ENV.TOKEN_SECRET);
+
+      const result = {
+        token: auth_token,
+        status_code: 200,
+        status_msg: "User created successfully",
+      };
+      res.status(200).send(result);
     }
   } catch (error) {
     console.log("APPLE ERROR", error);
@@ -636,12 +633,90 @@ const appleAuth = async (req, res) => {
     return res.status(500).send(result);
   }
 };
+
+// Web handling for apple auth
+const appleAuthWeb = async (req, res) => {
+  res.status(200).send("Working");
+  const { id_token } = req.body;
+  try {
+    const json = jwt.decode(id_token, { complete: true });
+    const kid = json?.header?.kid;
+
+    const appleKey = await getAppleSigningKeys(kid);
+    if (!appleKey) {
+      res.status(500).send("Something went wrong. No Apple key");
+    }
+    const payload = await verifyJWT(id_token, appleKey);
+    if (!payload) {
+      res.status(500).send("Something went wrong");
+    }
+
+    console.log("Sign in with apple succeeded!", payload);
+    // payload.sub === user &&
+    // if (payload.aud === "org.reactjs.native.example.social-media") {
+    // }
+    const user = await User.findOne({ email: payload.email });
+    if (user) {
+      // user exists
+      let auth_token = jwt.sign({ _id: user._id }, ENV.TOKEN_SECRET);
+
+      // token field, message and status code
+      const result = {
+        token: auth_token,
+        status_code: 200,
+        twofactor: false,
+        status_msg: "User logged in successfully",
+      };
+      // res.redirect(
+      //   303,
+      //   `https://www.finay.com/app?user=${JSON.stringify(result)}`
+      // );
+      res.status(200).send(`https://www.finay.com/app?user=${JSON.stringify(result)}`);
+      // if (!user.twofactor) {
+      // } else {
+      //   sendSMS(user.number, user.email, res);
+      // }
+    } else {
+      // create new user
+      const newUser = new User({
+        email: payload.email,
+      });
+
+      // save user and responsd
+      await newUser.save();
+      let auth_token = jwt.sign({ _id: newUser._id }, ENV.TOKEN_SECRET);
+
+      const result = {
+        token: auth_token,
+        status_code: 200,
+        status_msg: "User created successfully",
+      };
+      res.status(200).send(`https://www.finay.com/app?user=${JSON.stringify(result)}`);
+      // res.redirect(
+      //   303,
+      //   `https://www.finay.com/app?user=${JSON.stringify(result)}`
+      // );
+    }
+  } catch (error) {
+    console.log("APPLE ERROR", error);
+    const result = {
+      status_code: 500,
+      status_msg: "Something went wrong",
+    };
+    res.status(500).send(`https://www.finay.com/app?user=${JSON.stringify(result)}`);
+    // res.redirect(
+    //   500,
+    //   `https://www.finay.com/app?user=${JSON.stringify(result)}`
+    // );
+  }
+};
 module.exports = {
   register,
   login,
   verifyMAIL,
   sendMailAgain,
   appleAuth,
+  appleAuthWeb,
   verifySMSLoggedUser,
   googleAuth,
   forgotPasswordMail,

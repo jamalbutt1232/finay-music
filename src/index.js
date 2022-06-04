@@ -6,6 +6,7 @@ const helmet = require("helmet");
 const morgan = require("morgan");
 const cors = require("cors");
 
+const { appleAuthWeb } = require("./controller/auth");
 const userRoute = require("./routes/users");
 const authRoute = require("./routes/auth");
 const postRoute = require("./routes/posts");
@@ -67,6 +68,7 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.use("/api/users", userRoute);
 app.use("/api/auth", authRoute);
+// app.use("/api/auth/appleAuthWeb", appleAuthWeb);
 app.use("/api/posts", postRoute);
 app.use("/api/conversations", conversationRoute);
 app.use("/api/messages", messageRoute);
@@ -92,26 +94,6 @@ app.get("/", (req, res) => {
   res.json("hi");
 });
 
-// Notification API
-const notification_options = {
-  priority: "high",
-  timeToLive: 60 * 60 * 24,
-};
-app.post("/api/firebase/notification", (req, res) => {
-  const registrationToken = req.body.registrationToken;
-  const message = req.body.message;
-  const options = notification_options;
-
-  admin
-    .messaging()
-    .sendToDevice(registrationToken, message, options)
-    .then((response) => {
-      res.status(200).send("Notification sent successfully");
-    })
-    .catch((error) => {
-      console.log(error);
-    });
-});
 const PORT = ENV.PORT || 8800;
 const server = app.listen(PORT, () => {
   console.log("Backend server started");
