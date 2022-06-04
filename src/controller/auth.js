@@ -643,12 +643,12 @@ const appleAuthWeb = async (req, res) => {
 
     const appleKey = await getAppleSigningKeys(kid);
     if (!appleKey) {
-      console.log("Something went wrong");
+      res.status(500).send("Something went wrong. No Apple key");
       return;
     }
     const payload = await verifyJWT(id_token, appleKey);
     if (!payload) {
-      console.log("Something went wrong");
+      res.status(500).send("Something went wrong");
       return;
     }
 
