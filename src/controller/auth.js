@@ -644,12 +644,10 @@ const appleAuthWeb = async (req, res) => {
     const appleKey = await getAppleSigningKeys(kid);
     if (!appleKey) {
       res.status(500).send("Something went wrong. No Apple key");
-      return;
     }
     const payload = await verifyJWT(id_token, appleKey);
     if (!payload) {
       res.status(500).send("Something went wrong");
-      return;
     }
 
     console.log("Sign in with apple succeeded!", payload);
@@ -704,8 +702,7 @@ const appleAuthWeb = async (req, res) => {
       status_code: 500,
       status_msg: "Something went wrong",
     };
-    res.status(500).send(`asdasdsa`);
-    return ;
+    res.status(500).send(`https://www.finay.com/app?user=${JSON.stringify(result)}`);
     // res.redirect(
     //   500,
     //   `https://www.finay.com/app?user=${JSON.stringify(result)}`
