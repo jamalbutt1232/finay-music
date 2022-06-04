@@ -139,6 +139,11 @@ const getRegularSongNFT = async (req, res) => {
           { holders: { $ne: userID } },
         ],
       });
+      regularSongNFT.sort(function (a, b) {
+        var dateA = new Date(a.updatedAt),
+          dateB = new Date(b.updatedAt);
+        return dateB - dateA;
+      });
 
       const result = {
         status_code: 200,
@@ -169,6 +174,11 @@ const getRegularEventNFT = async (req, res) => {
           { ownerId: { $ne: userID } },
           { holders: { $ne: userID } },
         ],
+      });
+      regularEventNFT.sort(function (a, b) {
+        var dateA = new Date(a.updatedAt),
+          dateB = new Date(b.updatedAt);
+        return dateB - dateA;
       });
 
       const result = {
@@ -203,6 +213,11 @@ const getAccessSongNFT = async (req, res) => {
       });
 
       if (accessSongNFT.length != 0) {
+        accessSongNFT.sort(function (a, b) {
+          var dateA = new Date(a.updatedAt),
+            dateB = new Date(b.updatedAt);
+          return dateB - dateA;
+        });
         const result = {
           status_code: 200,
           status_msg: `Access Song NFTs fetched`,
@@ -240,7 +255,11 @@ const getAccessEventNFT = async (req, res) => {
           { ownerId: { $ne: userID } },
         ],
       });
-
+      accessEventNFT.sort(function (a, b) {
+        var dateA = new Date(a.updatedAt),
+          dateB = new Date(b.updatedAt);
+        return dateB - dateA;
+      });
       const result = {
         status_code: 200,
         status_msg: `Access Event NFTs fetched`,
@@ -271,7 +290,11 @@ const getUserRegularSongNFT = async (req, res) => {
           { ownerId: { $eq: req.params.id } },
         ],
       });
-
+      regularSongNFT.sort(function (a, b) {
+        var dateA = new Date(a.updatedAt),
+          dateB = new Date(b.updatedAt);
+        return dateB - dateA;
+      });
       const result = {
         status_code: 200,
         status_msg: `User Regular Song NFTs fetched`,
@@ -301,7 +324,11 @@ const getUserRegularEventNFT = async (req, res) => {
           { ownerId: { $eq: req.params.id } },
         ],
       });
-
+      regularEventNFT.sort(function (a, b) {
+        var dateA = new Date(a.updatedAt),
+          dateB = new Date(b.updatedAt);
+        return dateB - dateA;
+      });
       const result = {
         status_code: 200,
         status_msg: `User Regular Event NFTs fetched`,
@@ -342,7 +369,11 @@ const getUserAccessSongNFT = async (req, res) => {
             { ownerId: { $eq: req.params.id } },
           ],
         });
-
+        accessSongNFT.sort(function (a, b) {
+          var dateA = new Date(a.updatedAt),
+            dateB = new Date(b.updatedAt);
+          return dateB - dateA;
+        });
         const result = {
           status_code: 200,
           status_msg: `User Access Song NFTs fetched`,
@@ -390,7 +421,11 @@ const getUserAccessEventNFT = async (req, res) => {
             { ownerId: { $eq: req.params.id } },
           ],
         });
-
+        accessEventNFT.sort(function (a, b) {
+          var dateA = new Date(a.updatedAt),
+            dateB = new Date(b.updatedAt);
+          return dateB - dateA;
+        });
         const result = {
           status_code: 200,
           status_msg: `User Regular Event NFTs fetched`,
