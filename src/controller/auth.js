@@ -636,8 +636,6 @@ const appleAuth = async (req, res) => {
 
 // Web handling for apple auth
 const appleAuthWeb = async (req, res) => {
-  res.status(200).send("success");
-  return;
   const { id_token } = req.body;
   try {
     const json = jwt.decode(id_token, { complete: true });
