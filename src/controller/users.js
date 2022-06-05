@@ -381,17 +381,25 @@ const allUser = async (req, res) => {
         followingsList = followingsList[0].followings;
 
         followingsList[followingsList.length] = userID;
-        followingsList =followingsList.concat(blockedUsers);
+        followingsList = followingsList.concat(blockedUsers);
         console.log(followingsList);
         // Get all users except of you and the one you followed
         const user = await User.find({
           _id: { $nin: followingsList },
         });
+        // Sort to ascending (as per updated date sorted by latest date on top)
+        user.sort(function (a, b) {
+          var dateA = new Date(a.updatedAt),
+            dateB = new Date(b.updatedAt);
+          return dateB - dateA;
+        });
+
         const result = {
           status_code: 200,
           status_msg: `All users successfully fetched`,
           data: user,
         };
+
         res.status(200).send(result);
       } catch (err) {
         const result = {
