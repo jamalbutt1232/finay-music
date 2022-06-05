@@ -58,7 +58,7 @@ const sendMailAgain = async (req, res) => {
 
       try {
         var Transport = nodemailer.createTransport({
-          service: "Gmail",
+          host: 'smtp.gmail.com',
           auth: {
             user: "iamalexbakerdev@gmail.com",
             pass: "OJIoji217",
@@ -374,7 +374,8 @@ const forgotPasswordMail = async (req, res) => {
 
       try {
         var Transport = nodemailer.createTransport({
-          host: "smtp.gmail.com",
+          host: 'smtp.gmail.com',
+
           port: 587,
           secure: false, // true for 465, false for other ports
           auth: {
