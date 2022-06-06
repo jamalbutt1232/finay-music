@@ -58,7 +58,7 @@ const sendMailAgain = async (req, res) => {
 
       try {
         var Transport = nodemailer.createTransport({
-          host: 'smtp.gmail.com',
+          host: "smtp.gmail.com",
           auth: {
             user: "iamalexbakerdev@gmail.com",
             pass: "OJIoji217",
@@ -175,13 +175,13 @@ const register = async (req, res) => {
           //   generate new password
           const salt = await bcrypt.genSalt(10);
           const hashedPassword = await bcrypt.hash(req.body.password, salt);
-          let code = sendMail(email);
+          // let code = sendMail(email);
           // create new user
           const newUser = new User({
             name: req.body.name,
             email: email,
             password: hashedPassword,
-            uniqueCode: code,
+            uniqueCode: "code",
           });
 
           // save user and responsd
@@ -374,7 +374,7 @@ const forgotPasswordMail = async (req, res) => {
 
       try {
         var Transport = nodemailer.createTransport({
-          host: 'smtp.gmail.com',
+          host: "smtp.gmail.com",
 
           port: 587,
           secure: false, // true for 465, false for other ports
@@ -672,7 +672,9 @@ const appleAuthWeb = async (req, res) => {
       //   303,
       //   `https://www.finay.com/app?user=${JSON.stringify(result)}`
       // );
-      res.status(200).send(`https://www.finay.com/app?user=${JSON.stringify(result)}`);
+      res
+        .status(200)
+        .send(`https://www.finay.com/app?user=${JSON.stringify(result)}`);
       // if (!user.twofactor) {
       // } else {
       //   sendSMS(user.number, user.email, res);
@@ -692,7 +694,9 @@ const appleAuthWeb = async (req, res) => {
         status_code: 200,
         status_msg: "User created successfully",
       };
-      res.status(200).send(`https://www.finay.com/app?user=${JSON.stringify(result)}`);
+      res
+        .status(200)
+        .send(`https://www.finay.com/app?user=${JSON.stringify(result)}`);
       // res.redirect(
       //   303,
       //   `https://www.finay.com/app?user=${JSON.stringify(result)}`
@@ -704,7 +708,9 @@ const appleAuthWeb = async (req, res) => {
       status_code: 500,
       status_msg: "Something went wrong",
     };
-    res.status(500).send(`https://www.finay.com/app?user=${JSON.stringify(result)}`);
+    res
+      .status(500)
+      .send(`https://www.finay.com/app?user=${JSON.stringify(result)}`);
     // res.redirect(
     //   500,
     //   `https://www.finay.com/app?user=${JSON.stringify(result)}`
