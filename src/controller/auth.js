@@ -637,19 +637,21 @@ const appleAuth = async (req, res) => {
 
 // Web handling for apple auth
 const appleAuthWeb = async (req, res) => {
-  res.status(200).send("Working");
+  // res.status(200).send("Working");
+  console.log(">>> body: ", req.body);
   const { id_token } = req.body;
+
   try {
     const json = jwt.decode(id_token, { complete: true });
     const kid = json?.header?.kid;
 
     const appleKey = await getAppleSigningKeys(kid);
     if (!appleKey) {
-      res.status(500).send("Something went wrong. No Apple key");
+      res.status(400).send("Something went wrong. No Apple key");
     }
     const payload = await verifyJWT(id_token, appleKey);
     if (!payload) {
-      res.status(500).send("Something went wrong");
+      res.status(400).send("Something went wrong");
     }
 
     console.log("Sign in with apple succeeded!", payload);
@@ -668,13 +670,13 @@ const appleAuthWeb = async (req, res) => {
         twofactor: false,
         status_msg: "User logged in successfully",
       };
-      // res.redirect(
-      //   303,
-      //   `https://www.finay.com/app?user=${JSON.stringify(result)}`
-      // );
-      res
-        .status(200)
-        .send(`https://www.finay.com/app?user=${JSON.stringify(result)}`);
+      res.redirect(
+        303,
+        `https://www.finay.com/verify-apple?user=${JSON.stringify(auth_token)}`
+      );
+      // res
+      //   .status(200)
+      //   .send(`https://www.finay.com/app?user=${JSON.stringify(auth_token)}`);
       // if (!user.twofactor) {
       // } else {
       //   sendSMS(user.number, user.email, res);
@@ -694,9 +696,15 @@ const appleAuthWeb = async (req, res) => {
         status_code: 200,
         status_msg: "User created successfully",
       };
-      res
-        .status(200)
-        .send(`https://www.finay.com/app?user=${JSON.stringify(result)}`);
+
+      res.redirect(
+        303,
+        `https://www.finay.com/verify-apple?user=${JSON.stringify(auth_token)}`
+      );
+
+      // res
+      //   .status(200)
+      //   .send(`https://www.finay.com/app?user=${JSON.stringify(auth_token)}`);
       // res.redirect(
       //   303,
       //   `https://www.finay.com/app?user=${JSON.stringify(result)}`
@@ -705,18 +713,19 @@ const appleAuthWeb = async (req, res) => {
   } catch (error) {
     console.log("APPLE ERROR", error);
     const result = {
-      status_code: 500,
+      status_code: 400,
       status_msg: "Something went wrong",
     };
-    res
-      .status(500)
-      .send(`https://www.finay.com/app?user=${JSON.stringify(result)}`);
-    // res.redirect(
-    //   500,
-    //   `https://www.finay.com/app?user=${JSON.stringify(result)}`
-    // );
+    // res
+    //   .status(500)
+    //   .send(`https://www.finay.com?user=${JSON.stringify(result)}`);
+    res.redirect(
+      400,
+      `https://www.finay.com/verify-apple?user=${JSON.stringify(result)}`
+    );
   }
 };
+
 module.exports = {
   register,
   login,
