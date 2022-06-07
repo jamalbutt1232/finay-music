@@ -645,6 +645,8 @@ const appleAuthWeb = async (req, res) => {
     const json = jwt.decode(id_token, { complete: true });
     const kid = json?.header?.kid;
 
+    console.log("json: ", json);
+
     const appleKey = await getAppleSigningKeys(kid);
     if (!appleKey) {
       res.status(400).send("Something went wrong. No Apple key");
@@ -672,7 +674,7 @@ const appleAuthWeb = async (req, res) => {
       };
       res.redirect(
         303,
-        `https://www.finay.com/verify-apple?user=${auth_token}`
+        `https://www.finay.com/verify-apple?email=${payload.email}&token=${auth_token}`
       );
       // res
       //   .status(200)
@@ -699,7 +701,7 @@ const appleAuthWeb = async (req, res) => {
 
       res.redirect(
         303,
-        `https://www.finay.com/verify-apple?user=${auth_token}`
+        `https://www.finay.com/verify-apple?email=${payload.email}&token=${auth_token}`
       );
 
       // res
@@ -721,7 +723,7 @@ const appleAuthWeb = async (req, res) => {
     //   .send(`https://www.finay.com?user=${JSON.stringify(result)}`);
     res.redirect(
       400,
-      `https://www.finay.com/verify-apple?user=${JSON.stringify(result)}`
+      `https://www.finay.com/verify-apple?results=${JSON.stringify(result)}`
     );
   }
 };
