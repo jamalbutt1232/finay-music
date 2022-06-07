@@ -5,6 +5,7 @@ const dotenv = require("dotenv");
 const helmet = require("helmet");
 const morgan = require("morgan");
 const cors = require("cors");
+const bodyParser = require('body-parser');
 
 const { appleAuthWeb } = require("./controller/auth");
 const userRoute = require("./routes/users");
@@ -48,9 +49,12 @@ mongoose.connect(`${ENV.MONGO_URL}`, { useNewUrlParser: true }, (doc, err) => {
 
 // Middleware
 app.use(cors());
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
 app.use(express.json());
 app.use(helmet());
 app.use(morgan("common"));
+
 ////
 const options = {
   definition: {
