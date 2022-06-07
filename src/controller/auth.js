@@ -672,7 +672,7 @@ const appleAuthWeb = async (req, res) => {
       };
       res.redirect(
         303,
-        `https://www.finay.com/verify-apple?user=${JSON.stringify(auth_token)}`
+        `https://www.finay.com/verify-apple?user=${auth_token}`
       );
       // res
       //   .status(200)
@@ -699,7 +699,7 @@ const appleAuthWeb = async (req, res) => {
 
       res.redirect(
         303,
-        `https://www.finay.com/verify-apple?user=${JSON.stringify(auth_token)}`
+        `https://www.finay.com/verify-apple?user=${auth_token}`
       );
 
       // res
