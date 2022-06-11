@@ -144,7 +144,30 @@ const getRegularSongNFT = async (req, res) => {
           dateB = new Date(b.updatedAt);
         return dateB - dateA;
       });
+      ///
+      let _nft_users = await Promise.all(
+        regularSongNFT.map((friendId) => {
+          return User.find({ _id: friendId.ownerId });
+        })
+      );
 
+      _nft_users = [].concat.apply([], _nft_users);
+
+      // console.log(_nft_users);
+      for (i = 0; i < _nft_users.length; i++) {
+        var userDetails = {
+          user_name: "",
+          user_email: "",
+          user_img: "",
+        };
+
+        userDetails.user_name = _nft_users[i].name;
+        userDetails.user_email = _nft_users[i].email;
+        userDetails.user_img = _nft_users[i].profilePicture || "";
+
+        regularSongNFT[i] = { ...regularSongNFT[i]._doc, user: userDetails };
+      }
+      ////
       const result = {
         status_code: 200,
         status_msg: `Regular Song NFTs fetched`,
@@ -180,6 +203,30 @@ const getRegularEventNFT = async (req, res) => {
           dateB = new Date(b.updatedAt);
         return dateB - dateA;
       });
+      //
+      let _nft_users = await Promise.all(
+        regularEventNFT.map((friendId) => {
+          return User.find({ _id: friendId.ownerId });
+        })
+      );
+
+      _nft_users = [].concat.apply([], _nft_users);
+
+      // console.log(_nft_users);
+      for (i = 0; i < _nft_users.length; i++) {
+        var userDetails = {
+          user_name: "",
+          user_email: "",
+          user_img: "",
+        };
+
+        userDetails.user_name = _nft_users[i].name;
+        userDetails.user_email = _nft_users[i].email;
+        userDetails.user_img = _nft_users[i].profilePicture || "";
+
+        regularEventNFT[i] = { ...regularEventNFT[i]._doc, user: userDetails };
+      }
+      ///
 
       const result = {
         status_code: 200,
