@@ -15,12 +15,13 @@ const sendMail = (email) => {
 
   try {
     var Transport = nodemailer.createTransport({
-      service: "smtp.gmail.com",
+      host: "smtp.gmail.com",
+      domain: "gmail.com",
       port: 587,
       secure: false, // true for 465, false for other ports
       auth: {
-        user: "iamalexbakerdev@gmail.com",
-        pass: "OJIoji217",
+        user: ENV.EMAIL,
+        pass: ENV.PASSWORD,
       },
     });
 
@@ -59,9 +60,12 @@ const sendMailAgain = async (req, res) => {
       try {
         var Transport = nodemailer.createTransport({
           host: "smtp.gmail.com",
+          domain: "gmail.com",
+          port: 587,
+          secure: false, // true for 465, false for other ports
           auth: {
-            user: "iamalexbakerdev@gmail.com",
-            pass: "OJIoji217",
+            user: ENV.EMAIL,
+            pass: ENV.PASSWORD,
           },
         });
         var mailOptions;
@@ -125,7 +129,6 @@ const verifyMAIL = async (req, res) => {
         { new: true }
       );
 
-      console.log("updatedUser :", updatedUser);
       if (updatedUser != null) {
         if (updatedUser.length != 0) {
           const result = {
@@ -375,12 +378,12 @@ const forgotPasswordMail = async (req, res) => {
       try {
         var Transport = nodemailer.createTransport({
           host: "smtp.gmail.com",
-
+          domain: "gmail.com",
           port: 587,
           secure: false, // true for 465, false for other ports
           auth: {
-            user: "iamalexbakerdev@gmail.com",
-            pass: "OJIoji217",
+            user: ENV.EMAIL,
+            pass: ENV.PASSWORD,
           },
         });
         var mailOptions;

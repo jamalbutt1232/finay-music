@@ -10,6 +10,8 @@ const AWS_BUCKET_NAME = process.env.AWS_BUCKET_NAME;
 const ACCOUNT_SID = process.env.ACCOUNT_SID;
 const AUTH_TOKEN = process.env.AUTH_TOKEN;
 const SENDER = process.env.SENDER;
+const EMAIL = process.env.EMAIL;
+const PASSWORD = process.env.PASSWORD;
 
 module.exports = {
   PORT,
@@ -21,4 +23,6 @@ module.exports = {
   ACCOUNT_SID,
   AUTH_TOKEN,
   SENDER,
+  EMAIL,
+  PASSWORD,
 };
