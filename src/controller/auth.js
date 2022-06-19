@@ -178,13 +178,13 @@ const register = async (req, res) => {
           //   generate new password
           const salt = await bcrypt.genSalt(10);
           const hashedPassword = await bcrypt.hash(req.body.password, salt);
-          // let code = sendMail(email);
+          let code = sendMail(email);
           // create new user
           const newUser = new User({
             name: req.body.name,
             email: email,
             password: hashedPassword,
-            uniqueCode: "code",
+            uniqueCode: code,
           });
 
           // save user and responsd

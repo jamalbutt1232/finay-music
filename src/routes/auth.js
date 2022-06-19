@@ -11,6 +11,7 @@ const {
   verifySMSLoggedUser,
   forgotPasswordMail,
   updateForgotPassword,
+
 } = require("../controller/auth");
 
 /**
@@ -105,4 +106,5 @@ router.post("/verifysmsuser", verifySMSLoggedUser);
 router.put("/sendmailagain", sendMailAgain);
 router.put("/forgotpasswordmail", forgotPasswordMail);
 router.put("/updateforgotpassword", updateForgotPassword);
+
 module.exports = router;
