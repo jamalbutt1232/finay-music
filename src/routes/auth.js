@@ -1,5 +1,5 @@
 const router = require("express").Router();
-
+const verifyToken = require("../private/privateRoute");
 const {
   register,
   login,
@@ -11,8 +11,8 @@ const {
   verifySMSLoggedUser,
   forgotPasswordMail,
   updateForgotPassword,
-
 } = require("../controller/auth");
+const User = require("../models/User");
 
 /**
  * @swagger
@@ -97,7 +97,23 @@ router.post("/register", register);
  *         description: Some server error
  */
 
-router.post("/login", login);
+const verifyValidMails = async (req, res, next) => {
+  const email = req.body.email.toLowerCase();
+  console.log("email :", email);
+  const user = await User.findOne({ email: email });
+  const isValid = user.isValid;
+  console.log("usr :: ", user);
+  if (!isValid) {
+    const result = {
+      status_code: 500,
+      status_msg: `Please verify your email first`,
+    };
+    res.status(500).json(result);
+  } else {
+    next();
+  }
+};
+router.post("/login", verifyValidMails, login);
 router.post("/appleAuth", appleAuth);
 router.post("/appleAuthWeb", appleAuthWeb);
 router.post("/googleAuth", googleAuth);
