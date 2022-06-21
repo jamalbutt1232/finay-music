@@ -182,6 +182,9 @@ const UserSchema = new mongoose.Schema(
     lastNotificationRead: {
       type: Date,
     },
+    paypalId: {
+      type: String,
+    },
   },
   { timestamps: true }
 );

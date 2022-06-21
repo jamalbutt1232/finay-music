@@ -251,6 +251,7 @@ const getAds = async (req, res) => {
               user_name: "",
               user_email: "",
               user_img: "",
+              user_paypal: "",
             };
             const friendID = ad[i].userId;
             const userData = await User.findById(friendID);
@@ -259,6 +260,7 @@ const getAds = async (req, res) => {
               userDetails.user_name = userData.name;
               userDetails.user_email = userData.email;
               userDetails.user_img = userData.profilePicture || "";
+              userDetails.user_paypal = userData.paypalId || "";
 
               t_userAdsv2 = {
                 ...ad[i]._doc,
