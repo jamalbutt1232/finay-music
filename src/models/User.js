@@ -51,6 +51,10 @@ const UserSchema = new mongoose.Schema(
       type: Array,
       default: [],
     },
+    reports: {
+      type: Array,
+      default: [],
+    },
     subscribers: {
       type: Array,
       default: [],
