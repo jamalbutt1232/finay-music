@@ -22,6 +22,10 @@ const AdSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    price: {
+      type: Number,
+      required: false,
+    },
     flag: {
       type: Array,
       default: [],
