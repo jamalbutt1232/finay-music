@@ -221,15 +221,15 @@ const getRegularEventNFT = async (req, res) => {
           user_name: "",
           user_email: "",
           user_img: "",
-          // paypal_id: "",
-          // paypal_email: ""
+          paypal_id: "",
+          paypal_email: ""
         };
 
         userDetails.user_name = _nft_users[i].name;
         userDetails.user_email = _nft_users[i].email;
         userDetails.user_img = _nft_users[i].profilePicture || "";
-        // userDetails.paypal_id = nft_users[i].paypalId || "";
-        // userDetails.paypal_email = nft_users[i].paypalEmail || "";
+        userDetails.paypal_id = _nft_users[i].paypalId || "";
+        userDetails.paypal_email = _nft_users[i].paypalEmail || "";
 
         regularEventNFT[i] = { ...regularEventNFT[i]._doc, user: userDetails };
       }
