@@ -185,6 +185,9 @@ const UserSchema = new mongoose.Schema(
     paypalId: {
       type: String,
     },
+    paypalEmail: {
+      type: String,
+    }
   },
   { timestamps: true }
 );
