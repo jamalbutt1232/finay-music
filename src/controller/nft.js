@@ -167,7 +167,7 @@ const getRegularSongNFT = async (req, res) => {
         userDetails.user_email = _nft_users[i].email;
         userDetails.user_img = _nft_users[i].profilePicture || "";
         userDetails.paypal_id = nft_users[i].paypalId || "";
-        userDetauls.paypal_email = nft_users[i].paypalEmail || "";
+        userDetails.paypal_email = nft_users[i].paypalEmail || "";
 
         regularSongNFT[i] = { ...regularSongNFT[i]._doc, user: userDetails };
       }
@@ -230,7 +230,7 @@ const getRegularEventNFT = async (req, res) => {
         userDetails.user_email = _nft_users[i].email;
         userDetails.user_img = _nft_users[i].profilePicture || "";
         userDetails.paypal_id = nft_users[i].paypalId || "";
-        userDetauls.paypal_email = nft_users[i].paypalEmail || "";
+        userDetails.paypal_email = nft_users[i].paypalEmail || "";
 
         regularEventNFT[i] = { ...regularEventNFT[i]._doc, user: userDetails };
       }
