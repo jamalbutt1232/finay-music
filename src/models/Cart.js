@@ -50,6 +50,9 @@ const CartSchema = new mongoose.Schema(
         eventType: {
           type: String,
         },
+        paypalMerchant: {
+          type: String,
+        }
       },
     ],
     bill: {
