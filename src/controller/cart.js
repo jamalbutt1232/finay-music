@@ -57,6 +57,7 @@ const createCart = async (req, res) => {
           const category = item.category;
           const eventTime = item.eventTime;
           const eventType = item.eventType;
+          const paypalMerchant = user?.paypalId || "";
           if (cart) {
             cart.items.push({
               itemId: _id,
@@ -72,6 +73,7 @@ const createCart = async (req, res) => {
               category,
               eventTime,
               eventType,
+              paypalMerchant,
             });
             cart.bill = cart.items.reduce((acc, curr) => {
               return acc + curr.price;
@@ -100,6 +102,7 @@ const createCart = async (req, res) => {
                   category,
                   eventTime,
                   eventType,
+                  paypalMerchant,
                 },
               ],
               bill: price,
