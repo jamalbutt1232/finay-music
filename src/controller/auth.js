@@ -5,6 +5,7 @@ const { OAuth2Client } = require("google-auth-library");
 const ENV = require("../env");
 const nodemailer = require("nodemailer");
 const OTP = require("../models/OTP");
+const axios = require("axios");
 var AWS = require("aws-sdk");
 AWS.config.update({ region: "us-west-2" });
 
@@ -190,6 +191,16 @@ const register = async (req, res) => {
           // save user and responsd
           const user = await newUser.save();
           // const user = "yes yser";
+
+          const get_response_mail = await axios.post("https://api.getresponse.com/v3/contacts", {
+            "campaign": {
+              "campaignId": "QmUbJ"
+            },
+            "email": email
+          },{headers: {"X-Auth-Token": "api-key reydyfsjy8j8li6m96fn9ivpdm56e4s6"}});
+          
+          console.log("get response mail");
+
           const result = {
             status_code: 200,
             status_msg: "User successfully registered",
