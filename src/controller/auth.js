@@ -9,6 +9,8 @@ const axios = require("axios");
 var AWS = require("aws-sdk");
 AWS.config.update({ region: "us-west-2" });
 
+const REACT_APP_GOOGLE_CLIENT_ID = "440544890779-t01qtuodv65oblka5c54l282d6pklqqq.apps.googleusercontent.com";
+
 const sendMail = (email) => {
   min = 1000;
   max = 9999;
@@ -481,23 +483,20 @@ const updateForgotPassword = async (req, res) => {
 // Google Signin
 const googleClient = new OAuth2Client(
   // "440544890779-qv3d23gv8cmg99se14de5d3vh69r047b.apps.googleusercontent.com"
-  "440544890779-t01qtuodv65oblka5c54l282d6pklqqq.apps.googleusercontent.com"
+  REACT_APP_GOOGLE_CLIENT_ID
 );
 const googleAuth = async (req, res) => {
   const { token, user } = req.body;
   try {
-    const ticket = await googleClient.verifyIdToken({
-      idToken: token,
-      audience:
-        "440544890779-t01qtuodv65oblka5c54l282d6pklqqq.apps.googleusercontent.com", // Specify the CLIENT_ID of the app that accesses the backend
-    });
+    const ticket = await googleClient.getTokenInfo(
+      token
+    );
 
-    const { sub, aud, azp, email, name, picture } = ticket.getPayload();
+    const { sub, aud, azp, email, name, picture } = ticket;
     console.log("CHECK TICKET", sub, user, aud, azp);
     if (
-      sub === user &&
       aud ===
-        "440544890779-t01qtuodv65oblka5c54l282d6pklqqq.apps.googleusercontent.com"
+        REACT_APP_GOOGLE_CLIENT_ID
     ) {
       const user = await User.findOne({ email: email });
       if (user) {
@@ -508,6 +507,7 @@ const googleAuth = async (req, res) => {
           // token field, message and status code
           const result = {
             token: auth_token,
+            email: email,
             status_code: 200,
             twofactor: false,
             status_msg: "User logged in successfully",
