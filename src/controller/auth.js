@@ -5,8 +5,11 @@ const { OAuth2Client } = require("google-auth-library");
 const ENV = require("../env");
 const nodemailer = require("nodemailer");
 const OTP = require("../models/OTP");
+const axios = require("axios");
 var AWS = require("aws-sdk");
 AWS.config.update({ region: "us-west-2" });
+
+const REACT_APP_GOOGLE_CLIENT_ID = "440544890779-t01qtuodv65oblka5c54l282d6pklqqq.apps.googleusercontent.com";
 
 const sendMail = (email) => {
   min = 1000;
@@ -190,6 +193,16 @@ const register = async (req, res) => {
           // save user and responsd
           const user = await newUser.save();
           // const user = "yes yser";
+
+          const get_response_mail = await axios.post("https://api.getresponse.com/v3/contacts", {
+            "campaign": {
+              "campaignId": "QmUbJ"
+            },
+            "email": email
+          },{headers: {"X-Auth-Token": "api-key reydyfsjy8j8li6m96fn9ivpdm56e4s6"}});
+          
+          console.log("get response mail");
+
           const result = {
             status_code: 200,
             status_msg: "User successfully registered",
@@ -470,23 +483,20 @@ const updateForgotPassword = async (req, res) => {
 // Google Signin
 const googleClient = new OAuth2Client(
   // "440544890779-qv3d23gv8cmg99se14de5d3vh69r047b.apps.googleusercontent.com"
-  "440544890779-t01qtuodv65oblka5c54l282d6pklqqq.apps.googleusercontent.com"
+  REACT_APP_GOOGLE_CLIENT_ID
 );
 const googleAuth = async (req, res) => {
   const { token, user } = req.body;
   try {
-    const ticket = await googleClient.verifyIdToken({
-      idToken: token,
-      audience:
-        "440544890779-t01qtuodv65oblka5c54l282d6pklqqq.apps.googleusercontent.com", // Specify the CLIENT_ID of the app that accesses the backend
-    });
+    const ticket = await googleClient.getTokenInfo(
+      token
+    );
 
-    const { sub, aud, azp, email, name, picture } = ticket.getPayload();
+    const { sub, aud, azp, email, name, picture } = ticket;
     console.log("CHECK TICKET", sub, user, aud, azp);
     if (
-      sub === user &&
       aud ===
-        "440544890779-t01qtuodv65oblka5c54l282d6pklqqq.apps.googleusercontent.com"
+        REACT_APP_GOOGLE_CLIENT_ID
     ) {
       const user = await User.findOne({ email: email });
       if (user) {
@@ -497,6 +507,7 @@ const googleAuth = async (req, res) => {
           // token field, message and status code
           const result = {
             token: auth_token,
+            email: email,
             status_code: 200,
             twofactor: false,
             status_msg: "User logged in successfully",

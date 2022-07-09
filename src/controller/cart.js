@@ -42,7 +42,7 @@ const createCart = async (req, res) => {
         const user = await User.findById(userID);
         const cart = await Cart.findOne({ ownerID: userID });
         const item = await NFT.findOne({ _id });
-        console.log("NFT ITEM", item, _id);
+        const nft_user = await User.findById(item.ownerId);
         if (!user.cartNFT.includes(_id)) {
           await user.updateOne({ $push: { cartNFT: _id } });
           const price = item.price;
@@ -57,6 +57,8 @@ const createCart = async (req, res) => {
           const category = item.category;
           const eventTime = item.eventTime;
           const eventType = item.eventType;
+          const paypalMerchant = nft_user?.paypalId || "";
+         
           if (cart) {
             cart.items.push({
               itemId: _id,
@@ -72,6 +74,7 @@ const createCart = async (req, res) => {
               category,
               eventTime,
               eventType,
+              paypalMerchant,
             });
             cart.bill = cart.items.reduce((acc, curr) => {
               return acc + curr.price;
@@ -100,6 +103,7 @@ const createCart = async (req, res) => {
                   category,
                   eventTime,
                   eventType,
+                  paypalMerchant,
                 },
               ],
               bill: price,
