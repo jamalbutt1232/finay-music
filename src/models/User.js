@@ -182,6 +182,10 @@ const UserSchema = new mongoose.Schema(
     lastNotificationRead: {
       type: Date,
     },
+    reports: {
+      type: Array,
+      default: [],
+    },
   },
   { timestamps: true }
 );

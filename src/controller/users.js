@@ -1007,6 +1007,70 @@ const subscribeUser = async (req, res) => {
   }
 };
 
+// Report user
+const reportUser = async (req, res) => {
+  const userID = getUserID(req, res);
+  const currentUser = await User.findById(userID);
+  if (userID !== undefined) {
+    const deactive = await deActiveStatusInner(userID);
+    if (!deactive) {
+      if (userID !== req.body.id) {
+        try {
+          const user = await User.findById(req.body.id);
+          if (!user.deactive) {
+            if (!currentUser.reports.includes(req.body.id)) {
+              // await nft.updateOne({ $push: { likes: userID } }, { new: true });
+              await currentUser.updateOne({
+                $push: {
+                  reports: req.body.id,
+                },
+              });
+
+              const t_user = await User.findById(userID);
+              const result = {
+                status_code: 200,
+                status_msg: `You have reported the user`,
+                data: t_user,
+              };
+              res.status(200).send(result);
+            } else {
+              const result = {
+                status_code: 500,
+                status_msg: `You already reported the user`,
+              };
+              res.status(500).send(result);
+            }
+          } else {
+            const result = {
+              status_code: 403,
+              status_msg: `You cannot report an unactivated use`,
+            };
+            res.status(403).send(result);
+          }
+        } catch (err) {
+          const result = {
+            status_code: 500,
+            status_msg: `Something went wrong :${err}`,
+          };
+          res.status(500).send(result);
+        }
+      } else {
+        const result = {
+          status_code: 403,
+          status_msg: `You cant report yourself`,
+        };
+        res.status(403).send(result);
+      }
+    } else {
+      const result = {
+        status_code: 403,
+        status_msg: `Please active your account`,
+      };
+      return res.status(403).send(result);
+    }
+  }
+};
+
 // All related users
 const relatedUsers = async (req, res) => {
   const userID = getUserID(req, res);
@@ -1285,4 +1349,5 @@ module.exports = {
   getSubscribees,
   blockUser,
   getBlockUsers,
+  reportUser,
 };

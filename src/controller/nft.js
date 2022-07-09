@@ -178,7 +178,7 @@ const getRegularSongNFT = async (req, res) => {
     } catch (err) {
       const result = {
         status_code: 500,
-        status_msg: `Something went wrong`,
+        status_msg: `Something went wrong ${err}`,
       };
 
       res.status(500).json(result);
@@ -687,10 +687,63 @@ const likeNFT = async (req, res) => {
     }
   }
 };
+
+const reportNFT = async (req, res) => {
+  const userID = getUserID(req, res);
+
+  if (userID !== undefined) {
+    const deactive = await deActiveStatusInner(userID);
+    if (!deactive) {
+      try {
+        const nft = await NFT.findById(req.body.id);
+        const user = await deActiveStatusInner(nft.userId);
+
+        if (!user.deactive) {
+          if (!nft.reports.includes(userID)) {
+            await nft.updateOne({ $push: { reports: userID } }, { new: true });
+            const t_nft = await NFT.findById(req.body.id);
+            const result = {
+              status_code: 200,
+              status_msg: `NFT has been reported`,
+              data: t_nft,
+            };
+            res.status(200).json(result);
+          } else {
+            const result = {
+              status_code: 500,
+              status_msg: `You already reported this NFT`,
+            };
+            res.status(500).json(result);
+          }
+        } else {
+          const result = {
+            status_code: 403,
+            status_msg: `You cannot report the nft of an unactivated user`,
+          };
+          res.status(403).send(result);
+        }
+      } catch (err) {
+        const result = {
+          status_code: 500,
+          status_msg: `Something went wrong :${err}`,
+        };
+
+        res.status(500).json(result);
+      }
+    } else {
+      const result = {
+        status_code: 403,
+        status_msg: `Please active your account`,
+      };
+      return res.status(403).send(result);
+    }
+  }
+};
 module.exports = {
   createAsset,
   updateAsset,
   likeNFT,
+  reportNFT,
   //
   getRegularSongNFT,
   getAccessSongNFT,

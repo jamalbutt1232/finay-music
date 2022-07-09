@@ -14,12 +14,15 @@ const {
   getAccessEventNFT,
   getUserRegularEventNFT,
   getUserAccessEventNFT,
+  reportNFT,
 } = require("../controller/nft");
 const verifyToken = require("../private/privateRoute");
 
 router.post("/create_asset", verifyToken, createAsset);
 router.put("/update_nft", verifyToken, updateAsset);
 router.put("/likenft", verifyToken, likeNFT);
+router.put("/reportnft", verifyToken, reportNFT);
+
 //
 // regular_song_nft : user individual uploaded. Retrieve all songs except the user whos calling it
 router.get("/regular_song_nft", verifyToken, getRegularSongNFT);

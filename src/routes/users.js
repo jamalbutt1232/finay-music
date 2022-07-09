@@ -25,6 +25,7 @@ const {
   getSubscribees,
   blockUser,
   getBlockUsers,
+  reportUser,
 } = require("../controller/users");
 const router = require("express").Router();
 const verifyToken = require("../private/privateRoute");
@@ -156,6 +157,7 @@ router.put("/twofactor", verifyToken, active2f);
 router.post("/sendsms", verifyToken, sendSMS);
 router.get("/verifysms/:code", verifyToken, verifySMS);
 router.put("/subscribe", verifyToken, subscribeUser);
+router.put("/reportuser", verifyToken, reportUser);
 router.get("/relatedusers", verifyToken, relatedUsers);
 router.put("/block", verifyToken, blockUser);
 router.get("/getblockedusers", verifyToken, getBlockUsers);
